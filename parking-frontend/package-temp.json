@@ -1,5 +1,5 @@
 {
-  "name": "parking-frontend",
+  "name": "temp-project",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,24 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@paypal/react-paypal-js": "^8.8.3",
-    "@reduxjs/toolkit": "^2.8.2",
-    "@tailwindcss/vite": "^4.1.11",
-    "axios": "^1.10.0",
-    "dayjs": "^1.11.13",
-    "jwt-decode": "^4.0.0",
-    "leaflet": "^1.9.4",
-    "qrcode": "^1.5.4",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "react-hook-form": "^7.60.0",
-    "react-hot-toast": "^2.5.2",
-    "react-leaflet": "^5.0.0",
-    "react-redux": "^9.2.0",
-    "react-router-dom": "^7.7.0",
-    "recharts": "^3.1.0",
-    "socket.io-client": "^4.8.1",
-    "tailwindcss": "^4.1.11"
+    "react-dom": "^19.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.30.1",
