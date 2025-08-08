@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
 
 .input {
     @apply w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400;

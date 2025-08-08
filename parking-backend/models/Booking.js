@@ -121,6 +121,7 @@ const bookingSchema = new mongoose.Schema(
     // QR code for entry/exit
     qrCode: {
       type: String,
+      sparse: true, // Allow null values but enforce uniqueness for non-null values
     },
     // Extension and modifications
     extensions: [
@@ -222,7 +223,7 @@ bookingSchema.index({ userId: 1, createdAt: -1 });
 bookingSchema.index({ locationId: 1, startTime: 1 });
 bookingSchema.index({ status: 1 });
 bookingSchema.index({ startTime: 1, endTime: 1 });
-bookingSchema.index({ qrCode: 1 }, { sparse: true, unique: true });
+bookingSchema.index({ qrCode: 1 }, { unique: true, sparse: true });
 bookingSchema.index({ paymentStatus: 1 });
 
 // Compound indexes for common queries
