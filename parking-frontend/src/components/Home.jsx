@@ -7,7 +7,8 @@ import ParkingList from './ParkingList';
 import AuthModal from './auth/AuthModal';
 import BookingModal from './booking/BookingModal';
 import BookingConfirmation from './booking/BookingConfirmation';
-import { kathmanduParkingData, calculateDistance, kathmanduAreas } from '../data/kathmanduParkingData';
+import { calculateDistance, kathmanduAreas } from '../data/kathmanduParkingData';
+import kathmanduRealParkingDataExport from '../data/kathmanduRealParkingData';
 
 function Home() {
   const { isAuthenticated } = useAuth();
@@ -67,7 +68,7 @@ function Home() {
     }
     
     // Calculate distances and filter by radius
-    const parkingWithDistances = kathmanduParkingData.map(parking => ({
+    const parkingWithDistances = kathmanduRealParkingDataExport.map(parking => ({
       ...parking,
       distance: calculateDistance(searchLat, searchLng, parking.coordinates.lat, parking.coordinates.lng)
     }));
@@ -85,7 +86,7 @@ function Home() {
     
     if (searchResults.length > 0 && searchLocation) {
       // Recalculate with new radius
-      const parkingWithDistances = kathmanduParkingData.map(parking => ({
+      const parkingWithDistances = kathmanduRealParkingDataExport.map(parking => ({
         ...parking,
         distance: calculateDistance(searchLocation.lat, searchLocation.lng, parking.coordinates.lat, parking.coordinates.lng)
       }));
@@ -127,48 +128,80 @@ function Home() {
   };
 
   return (
-    <div>
-      <SearchSection 
-        onSearch={handleSearch}
-        onRadiusChange={handleRadiusChange}
-        radius={searchRadius}
-      />
+    <div className="relative min-h-screen overflow-hidden bg-gray-50">
+      {/* Animated overlay when auth modal is open */}
+      <div className={`absolute inset-0 bg-gradient-to-r from-transparent via-gray-900/10 to-gray-900/20 z-10 transition-opacity duration-700 ${
+        isLoginModalOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+      }`} />
+      
+      {/* Floating message when content is minimized */}
+      <div className={`absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 transition-all duration-700 ${
+        isLoginModalOpen 
+          ? 'opacity-100 translate-y-0' 
+          : 'opacity-0 translate-y-4 pointer-events-none'
+      }`}>
+        <div className="bg-white rounded-xl shadow-xl p-4 max-w-xs border border-blue-200">
+          <div className="text-center">
+            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <h3 className="font-medium text-gray-800 mb-1">Sign In Required</h3>
+            <p className="text-xs text-gray-600">
+              Complete authentication to book parking
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      {/* Main Content Container with smooth animation */}
+      <div className={`relative z-0 transition-all duration-700 ease-in-out transform origin-center ${
+        isLoginModalOpen 
+          ? 'scale-90 opacity-30 blur-sm pointer-events-none' 
+          : 'scale-100 opacity-100 pointer-events-auto'
+      }`}>
+        <SearchSection 
+          onSearch={handleSearch}
+          onRadiusChange={handleRadiusChange}
+          radius={searchRadius}
+        />
 
-      {isSearched && (
-        <div className="container mx-auto px-4 py-8">
-          {searchResults.length > 0 ? (
-            <>
-              <div className="mb-6 text-center">
-                <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                  Parking Options Near You
-                </h2>
-                <p className="text-gray-600">
-                  Found {searchResults.length} parking locations within {searchRadius}km
-                </p>
-              </div>
+        {isSearched && (
+          <div className="container mx-auto px-4 py-8">
+            {searchResults.length > 0 ? (
+              <>
+                <div className="mb-6 text-center">
+                  <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                    Parking Options Near You
+                  </h2>
+                  <p className="text-gray-600">
+                    Found {searchResults.length} parking locations within {searchRadius}km
+                  </p>
+                </div>
 
-              <div className="grid lg:grid-cols-2 gap-6">
-                <div className="lg:order-1">
-                  <MapView 
-                    parkingSpots={searchResults}
-                    radius={searchRadius}
-                    center={searchLocation}
-                    onSpotSelect={handleSpotSelect}
-                    onBooking={handleBooking}
-                  />
+                <div className="grid lg:grid-cols-2 gap-6">
+                  <div className="lg:order-1">
+                    <MapView 
+                      parkingSpots={searchResults}
+                      radius={searchRadius}
+                      center={searchLocation}
+                      onSpotSelect={handleSpotSelect}
+                      onBooking={handleBooking}
+                    />
+                  </div>
+                  
+                  <div className="lg:order-2">
+                    <ParkingList 
+                      parkingSpots={searchResults}
+                      onBooking={handleBooking}
+                      selectedSpot={selectedSpot}
+                      onLoginRequired={handleLoginRequired}
+                    />
+                  </div>
                 </div>
-                
-                <div className="lg:order-2">
-                  <ParkingList 
-                    parkingSpots={searchResults}
-                    onBooking={handleBooking}
-                    selectedSpot={selectedSpot}
-                    onLoginRequired={handleLoginRequired}
-                  />
-                </div>
-              </div>
-            </>
-          ) : (
+              </>
+            ) : (
             <div className="text-center py-12">
               <div className="bg-white rounded-lg shadow-md p-8 max-w-md mx-auto">
                 <svg className="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -186,12 +219,12 @@ function Home() {
                 </button>
               </div>
             </div>
-          )}
-        </div>
-      )}
+            )}
+          </div>
+        )}
 
-      {!isSearched && (
-        <div className="container mx-auto px-4 py-12">
+        {!isSearched && (
+          <div className="container mx-auto px-4 py-12">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-800 mb-4">
               Why Choose ParkSmart?
@@ -233,8 +266,10 @@ function Home() {
             </div>
           </div>
         </div>
-      )}
+        )}
+      </div>
 
+      {/* Enhanced AuthModal with slide-in animation */}
       <AuthModal 
         isOpen={isLoginModalOpen} 
         onClose={closeLoginModal} 

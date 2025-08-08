@@ -331,7 +331,7 @@ const MapView = ({ parkingSpots, radius, center, onSpotSelect, onBooking }) => {
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span>Hourly Rate:</span>
-                      <span className="font-semibold text-blue-600">${spot.hourlyRate}/hr</span>
+                      <span className="font-semibold text-blue-600">Rs. {spot.hourlyRate}/hr</span>
                     </div>
                     
                     <div className="flex justify-between">
@@ -384,22 +384,73 @@ const MapView = ({ parkingSpots, radius, center, onSpotSelect, onBooking }) => {
                       </div>
                     )}
                     
+                    {/* Enhanced Parking Information */}
+                    {spot.operator && (
+                      <div className="flex justify-between">
+                        <span>Operator:</span>
+                        <span className="text-xs text-gray-600">{spot.operator}</span>
+                      </div>
+                    )}
+                    
+                    {spot.zone && (
+                      <div className="flex justify-between">
+                        <span>Zone:</span>
+                        <span className="text-xs text-purple-600">{spot.zone}</span>
+                      </div>
+                    )}
+                    
+                    {/* Smart Parking & Local Navigation */}
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {spot.smartParkingEnabled && (
+                        <span className="px-2 py-1 bg-purple-100 text-purple-600 text-xs rounded">
+                          🚀 Smart Parking
+                        </span>
+                      )}
+                      {spot.galliMapsSupported && (
+                        <span className="px-2 py-1 bg-green-100 text-green-600 text-xs rounded">
+                          🇳🇵 Galli Maps
+                        </span>
+                      )}
+                      {spot.baatoMapsSupported && (
+                        <span className="px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded">
+                          🗺️ Baato Maps
+                        </span>
+                      )}
+                      {spot.appSupport && (
+                        <span className="px-2 py-1 bg-orange-100 text-orange-600 text-xs rounded">
+                          📱 {spot.appSupport}
+                        </span>
+                      )}
+                    </div>
+                    
                     {spot.specialOffers && (
                       <div className="mt-2 p-2 bg-green-50 rounded text-green-700 text-xs">
                         🎉 {spot.specialOffers}
                       </div>
                     )}
                     
+                    {/* Status indicator for planned/under construction */}
+                    {spot.status && (
+                      <div className={`mt-2 p-2 rounded text-xs ${
+                        spot.status === 'Under Construction' 
+                          ? 'bg-yellow-50 text-yellow-700'
+                          : 'bg-gray-50 text-gray-700'
+                      }`}>
+                        🚧 {spot.status}
+                        {spot.expectedOpening && ` - Expected ${spot.expectedOpening}`}
+                      </div>
+                    )}
+                    
                     <button 
                       className={`w-full mt-3 px-4 py-2 rounded font-medium text-sm transition ${
-                        spot.availability > 0
+                        spot.availability > 0 && !spot.status
                           ? 'bg-blue-600 text-white hover:bg-blue-700'
                           : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                       }`}
-                      disabled={spot.availability === 0}
+                      disabled={spot.availability === 0 || spot.status}
                       onClick={() => onBooking && onBooking(spot)}
                     >
-                      {spot.availability > 0 ? 'Book Now' : 'Full'}
+                      {spot.status ? 'Not Available' : spot.availability > 0 ? 'Book Now' : 'Full'}
                     </button>
                   </div>
                 </div>
