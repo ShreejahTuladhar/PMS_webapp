@@ -342,29 +342,33 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
             </div>
           </form>
           
-          {/* Popular Locations - Only show when not typing */}
+          {/* Premium Popular Locations */}
           {!showSuggestions && (
-            <div className="mt-6">
-              <h3 className="text-sm font-medium text-gray-700 mb-3">Popular Locations in Kathmandu:</h3>
-              <div className="flex flex-wrap gap-2">
+            <div className="mt-8 pt-6 border-t border-gray-200/50">
+              <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                <div className="w-3 h-3 bg-gradient-primary rounded-full mr-2"></div>
+                🏆 Premium Destinations in Kathmandu
+              </h3>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {popularLocations.map((loc) => (
                   <button
                     key={loc}
                     onClick={() => handleQuickSearch(loc)}
-                    className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm hover:bg-blue-100 transition"
+                    className="relative group px-4 py-3 glass-dark border border-white/10 rounded-xl hover:border-yellow-300/50 transition-all duration-300 hover:transform hover:scale-105"
                   >
-                    {loc}
+                    <span className="text-gray-700 font-semibold group-hover:text-gray-900 transition-colors duration-300">{loc}</span>
+                    <div className="absolute inset-0 bg-gradient-primary opacity-0 group-hover:opacity-5 rounded-xl transition-opacity duration-300"></div>
                   </button>
                 ))}
               </div>
             </div>
           )}
           
-          {/* Search Tips */}
+          {/* Premium Search Tips */}
           {showSuggestions && suggestions.length > 0 && (
-            <div className="mt-4">
-              <p className="text-xs text-gray-500 text-center">
-                Use ↑ ↓ arrow keys to navigate • Press Enter to select • Esc to close
+            <div className="mt-6 p-4 glass-dark border border-yellow-300/30 rounded-xl">
+              <p className="text-sm text-gray-700 text-center font-medium">
+                💡 <span className="text-yellow-600 font-bold">Pro Tip:</span> Use ↑ ↓ arrow keys to navigate • Press Enter to select • Esc to close
               </p>
             </div>
           )}
