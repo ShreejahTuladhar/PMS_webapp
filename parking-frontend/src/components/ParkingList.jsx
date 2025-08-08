@@ -1,7 +1,19 @@
 import { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 
-const ParkingList = ({ parkingSpots, onBooking, selectedSpot }) => {
+const ParkingList = ({ parkingSpots, onBooking, selectedSpot, onLoginRequired }) => {
   const [sortBy, setSortBy] = useState('distance');
+  const { isAuthenticated } = useAuth();
+
+  const handleBookingClick = (spot) => {
+    if (!isAuthenticated) {
+      if (onLoginRequired) {
+        onLoginRequired();
+      }
+      return;
+    }
+    onBooking(spot);
+  };
 
   const sortedSpots = [...parkingSpots].sort((a, b) => {
     switch (sortBy) {
@@ -128,7 +140,7 @@ const ParkingList = ({ parkingSpots, onBooking, selectedSpot }) => {
               </div>
 
               <button
-                onClick={() => onBooking(spot)}
+                onClick={() => handleBookingClick(spot)}
                 disabled={spot.availability === 0}
                 className={`px-4 py-2 rounded font-medium text-sm transition ${
                   spot.availability > 0
@@ -136,7 +148,7 @@ const ParkingList = ({ parkingSpots, onBooking, selectedSpot }) => {
                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 }`}
               >
-                {spot.availability > 0 ? 'Book Now' : 'Full'}
+                {spot.availability > 0 ? (isAuthenticated ? 'Book Now' : 'Sign in to Book') : 'Full'}
               </button>
             </div>
 

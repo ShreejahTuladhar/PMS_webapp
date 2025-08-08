@@ -40,6 +40,57 @@ const createParkingIcon = (availability) => {
   });
 };
 
+// Create custom current location marker
+const createCurrentLocationIcon = () => {
+  const iconHtml = `
+    <div style="position: relative;">
+      <div style="
+        background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+        border: 3px solid white;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+      "></div>
+      <div style="
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 40px;
+        height: 40px;
+        border: 2px solid #3B82F6;
+        border-radius: 50%;
+        background: rgba(59, 130, 246, 0.1);
+        animation: pulse 2s infinite;
+      "></div>
+    </div>
+    <style>
+      @keyframes pulse {
+        0% {
+          opacity: 1;
+          transform: translate(-50%, -50%) scale(1);
+        }
+        50% {
+          opacity: 0.5;
+          transform: translate(-50%, -50%) scale(1.2);
+        }
+        100% {
+          opacity: 1;
+          transform: translate(-50%, -50%) scale(1);
+        }
+      }
+    </style>
+  `;
+  
+  return L.divIcon({
+    html: iconHtml,
+    className: 'current-location-marker',
+    iconSize: [40, 40],
+    iconAnchor: [20, 20],
+  });
+};
+
 // Component to handle map centering
 const MapController = ({ center, zoom }) => {
   const map = useMap();
@@ -53,11 +104,82 @@ const MapController = ({ center, zoom }) => {
   return null;
 };
 
-const MapView = ({ parkingSpots, radius, center, onSpotSelect }) => {
+const MapView = ({ parkingSpots, radius, center, onSpotSelect, onBooking }) => {
   const [selectedSpot, setSelectedSpot] = useState(null);
+  const [currentLocation, setCurrentLocation] = useState(null);
+  const [locationPermission, setLocationPermission] = useState('prompt'); // 'granted', 'denied', 'prompt'
+  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   
   // Default center (you can change this to your city's coordinates)
   const defaultCenter = [27.7172, 85.3240]; // Kathmandu, Nepal
+
+  // Get current location
+  const getCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationPermission('denied');
+      return;
+    }
+
+    setIsLoadingLocation(true);
+    
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setCurrentLocation({
+          lat: latitude,
+          lng: longitude,
+          accuracy: position.coords.accuracy
+        });
+        setLocationPermission('granted');
+        setIsLoadingLocation(false);
+      },
+      (error) => {
+        console.error('Error getting location:', error);
+        setLocationPermission('denied');
+        setIsLoadingLocation(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 300000 // 5 minutes
+      }
+    );
+  };
+
+  // Auto-request location on component mount
+  useEffect(() => {
+    if (navigator.geolocation && locationPermission === 'prompt') {
+      getCurrentLocation();
+    }
+  }, []);
+
+  // Watch position for updates
+  useEffect(() => {
+    if (navigator.geolocation && locationPermission === 'granted') {
+      const watchId = navigator.geolocation.watchPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setCurrentLocation({
+            lat: latitude,
+            lng: longitude,
+            accuracy: position.coords.accuracy
+          });
+        },
+        (error) => {
+          console.error('Error watching location:', error);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 60000 // 1 minute
+        }
+      );
+
+      return () => {
+        navigator.geolocation.clearWatch(watchId);
+      };
+    }
+  }, [locationPermission]);
   
   // Calculate map center and add coordinates to parking spots
   const mapCenter = useMemo(() => {
@@ -67,19 +189,13 @@ const MapView = ({ parkingSpots, radius, center, onSpotSelect }) => {
     return defaultCenter;
   }, [center]);
 
-  // Add realistic coordinates to parking spots based on center
+  // Use actual coordinates from parking data
   const parkingSpotsWithCoords = useMemo(() => {
-    const baseLatitude = mapCenter[0];
-    const baseLongitude = mapCenter[1];
-    
-    return parkingSpots.map((spot, index) => ({
+    return parkingSpots.map((spot) => ({
       ...spot,
-      coordinates: [
-        baseLatitude + (Math.random() - 0.5) * 0.02 * radius, // Random offset within radius
-        baseLongitude + (Math.random() - 0.5) * 0.02 * radius,
-      ],
+      coordinates: [spot.coordinates.lat, spot.coordinates.lng],
     }));
-  }, [parkingSpots, mapCenter, radius]);
+  }, [parkingSpots]);
 
   const handleSpotClick = (spot) => {
     setSelectedSpot(spot);
@@ -93,12 +209,53 @@ const MapView = ({ parkingSpots, radius, center, onSpotSelect }) => {
       <div className="bg-gray-100 px-4 py-3 border-b">
         <div className="flex items-center justify-between">
           <h3 className="font-semibold text-gray-800">Map View</h3>
-          <div className="flex items-center space-x-2 text-sm text-gray-600">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-            <span>Radius: {radius}km</span>
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 text-sm text-gray-600">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <span>Radius: {radius}km</span>
+            </div>
+            
+            {/* Location Status & Button */}
+            <button
+              onClick={getCurrentLocation}
+              disabled={isLoadingLocation}
+              className={`flex items-center space-x-1 px-3 py-1 rounded-full text-xs font-medium transition ${
+                currentLocation 
+                  ? 'bg-green-100 text-green-700 hover:bg-green-200' 
+                  : locationPermission === 'denied'
+                  ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                  : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+              } ${isLoadingLocation ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
+            >
+              {isLoadingLocation ? (
+                <>
+                  <div className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin"></div>
+                  <span>Locating...</span>
+                </>
+              ) : currentLocation ? (
+                <>
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span>Located</span>
+                </>
+              ) : locationPermission === 'denied' ? (
+                <>
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  <span>Enable Location</span>
+                </>
+              ) : (
+                <>
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  </svg>
+                  <span>Locate Me</span>
+                </>
+              )}
+            </button>
           </div>
         </div>
       </div>
@@ -129,6 +286,33 @@ const MapView = ({ parkingSpots, radius, center, onSpotSelect }) => {
             }}
           />
           
+          {/* Current Location Marker */}
+          {currentLocation && (
+            <Marker
+              position={[currentLocation.lat, currentLocation.lng]}
+              icon={createCurrentLocationIcon()}
+            >
+              <Popup>
+                <div className="p-2">
+                  <h4 className="font-semibold mb-2 flex items-center">
+                    <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Your Current Location
+                  </h4>
+                  <div className="space-y-1 text-sm text-gray-600">
+                    <p>Latitude: {currentLocation.lat.toFixed(6)}</p>
+                    <p>Longitude: {currentLocation.lng.toFixed(6)}</p>
+                    {currentLocation.accuracy && (
+                      <p>Accuracy: ±{Math.round(currentLocation.accuracy)}m</p>
+                    )}
+                  </div>
+                </div>
+              </Popup>
+            </Marker>
+          )}
+
           {/* Parking spot markers */}
           {parkingSpotsWithCoords.map((spot) => (
             <Marker
@@ -213,9 +397,7 @@ const MapView = ({ parkingSpots, radius, center, onSpotSelect }) => {
                           : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                       }`}
                       disabled={spot.availability === 0}
-                      onClick={() => {
-                        alert(`Booking initiated for ${spot.name}\nRate: $${spot.hourlyRate}/hr\nAvailability: ${spot.availability} spaces`);
-                      }}
+                      onClick={() => onBooking && onBooking(spot)}
                     >
                       {spot.availability > 0 ? 'Book Now' : 'Full'}
                     </button>
@@ -243,8 +425,21 @@ const MapView = ({ parkingSpots, radius, center, onSpotSelect }) => {
               <div className="w-3 h-3 border-2 border-blue-500 rounded-full bg-blue-100"></div>
               <span>Search Area</span>
             </div>
+            {currentLocation && (
+              <div className="flex items-center space-x-1">
+                <div className="w-3 h-3 bg-blue-600 rounded-full animate-pulse"></div>
+                <span>Your Location</span>
+              </div>
+            )}
           </div>
-          <span>{parkingSpots.length} parking locations found</span>
+          <div className="flex items-center space-x-4">
+            {currentLocation && locationPermission === 'granted' && (
+              <span className="text-green-600 text-xs">
+                📍 Location Active
+              </span>
+            )}
+            <span>{parkingSpots.length} parking locations found</span>
+          </div>
         </div>
       </div>
     </div>
