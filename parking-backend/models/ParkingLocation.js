@@ -224,14 +224,46 @@ const parkingLocationSchema = new mongoose.Schema(
 );
 
 // Indexes for better performance
+// 2dsphere index for geospatial queries
 parkingLocationSchema.index({
-  "coordinates.latitude": 1,
-  "coordinates.longitude": 1,
+  "coordinates": "2dsphere"
 });
+
+// Basic indexes
 parkingLocationSchema.index({ isActive: 1 });
 parkingLocationSchema.index({ currentStatus: 1 });
-parkingLocationSchema.index({ availableSpaces: 1 });
+parkingLocationSchema.index({ availableSpaces: -1 }); // Descending for best availability first
+
+// Compound indexes for common queries
+parkingLocationSchema.index({ isActive: 1, currentStatus: 1 });
+parkingLocationSchema.index({ isActive: 1, availableSpaces: -1 });
+parkingLocationSchema.index({ currentStatus: 1, availableSpaces: -1 });
+
+// Index for searching spaces
+parkingLocationSchema.index({ "spaces.spaceId": 1 });
 parkingLocationSchema.index({ "spaces.status": 1 });
+parkingLocationSchema.index({ "spaces.type": 1 });
+
+// Index for owner management
+parkingLocationSchema.index({ parkingOwnerId: 1 }, { sparse: true });
+
+// Text index for search functionality
+parkingLocationSchema.index({
+  name: 'text',
+  address: 'text',
+  description: 'text'
+}, {
+  weights: {
+    name: 10,
+    address: 5,
+    description: 1
+  },
+  name: 'location_text_index'
+});
+
+// Index for pricing queries
+parkingLocationSchema.index({ hourlyRate: 1 });
+parkingLocationSchema.index({ "rates.rateType": 1, "rates.isActive": 1 });
 
 // Virtual for occupancy percentage
 parkingLocationSchema.virtual("occupancyPercentage").get(function () {
@@ -243,11 +275,13 @@ parkingLocationSchema.virtual("occupancyPercentage").get(function () {
 // Virtual for available space types
 parkingLocationSchema.virtual("availableSpaceTypes").get(function () {
   const availableTypes = {};
-  this.spaces.forEach((space) => {
-    if (space.status === "available") {
-      availableTypes[space.type] = (availableTypes[space.type] || 0) + 1;
-    }
-  });
+  if (this.spaces && this.spaces.length > 0) {
+    this.spaces.forEach((space) => {
+      if (space.status === "available") {
+        availableTypes[space.type] = (availableTypes[space.type] || 0) + 1;
+      }
+    });
+  }
   return availableTypes;
 });
 

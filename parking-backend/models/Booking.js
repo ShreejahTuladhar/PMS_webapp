@@ -121,8 +121,6 @@ const bookingSchema = new mongoose.Schema(
     // QR code for entry/exit
     qrCode: {
       type: String,
-      unique: true,
-      sparse: true, // Allow null values but enforce uniqueness for non-null values
     },
     // Extension and modifications
     extensions: [
@@ -224,8 +222,37 @@ bookingSchema.index({ userId: 1, createdAt: -1 });
 bookingSchema.index({ locationId: 1, startTime: 1 });
 bookingSchema.index({ status: 1 });
 bookingSchema.index({ startTime: 1, endTime: 1 });
-bookingSchema.index({ qrCode: 1 }, { sparse: true });
+bookingSchema.index({ qrCode: 1 }, { sparse: true, unique: true });
 bookingSchema.index({ paymentStatus: 1 });
+
+// Compound indexes for common queries
+bookingSchema.index({ locationId: 1, spaceId: 1, startTime: 1 });
+bookingSchema.index({ userId: 1, status: 1 });
+bookingSchema.index({ status: 1, startTime: 1 });
+bookingSchema.index({ locationId: 1, status: 1 });
+bookingSchema.index({ paymentStatus: 1, createdAt: -1 });
+
+// Index for conflict checking queries
+bookingSchema.index({ 
+  locationId: 1, 
+  spaceId: 1, 
+  status: 1, 
+  startTime: 1, 
+  endTime: 1 
+});
+
+// Index for vehicle plate number searches
+bookingSchema.index({ 'vehicleInfo.plateNumber': 1 });
+
+// Index for payment tracking
+bookingSchema.index({ paymentTransactionId: 1 }, { sparse: true });
+
+// TTL index for expired bookings (optional cleanup)
+bookingSchema.index({ 
+  endTime: 1 
+}, { 
+  expireAfterSeconds: 2592000 // 30 days after endTime
+});
 
 // Virtual for booking duration in hours
 bookingSchema.virtual("durationHours").get(function () {

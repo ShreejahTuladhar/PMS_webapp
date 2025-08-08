@@ -24,12 +24,10 @@ const getLocations = async (req, res) => {
     let filter = { isActive: true };
     let sort = { name: 1 };
 
-    // Search by name or address
+    // Search by name or address using MongoDB text search
     if (search) {
-      filter.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { address: { $regex: search, $options: "i" } },
-      ];
+      filter.$text = { $search: search };
+      sort = { score: { $meta: "textScore" } }; // Sort by relevance
     }
 
     // Filter by availability
@@ -83,7 +81,8 @@ const getLocations = async (req, res) => {
       .sort(sort)
       .skip(skip)
       .limit(parseInt(limit))
-      .populate("parkingOwnerId", "firstName lastName email phoneNumber");
+      .populate("parkingOwnerId", "firstName lastName email phoneNumber")
+      .exec();
 
     // Get total count for pagination
     const total = await ParkingLocation.countDocuments(filter);

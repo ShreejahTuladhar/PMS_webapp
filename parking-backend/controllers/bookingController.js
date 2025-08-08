@@ -151,7 +151,7 @@ const createBooking = async (req, res) => {
     if (paymentMethod === "cash") {
       await location.updateSpaceStatus(spaceId, "reserved");
 
-      // 🔥 REAL-TIME UPDATES
+      //   REAL-TIME UPDATES
       emitSpaceUpdate(locationId, {
         spaceId,
         newStatus: "reserved",
@@ -164,7 +164,7 @@ const createBooking = async (req, res) => {
       });
     }
 
-    // 🔥 BOOKING NOTIFICATION
+    //   BOOKING NOTIFICATION
     emitBookingUpdate(booking._id, req.user.id, {
       status: booking.status,
       paymentStatus: booking.paymentStatus,
@@ -408,7 +408,7 @@ const updateBookingStatus = async (req, res) => {
       const location = booking.locationId;
       await location.updateSpaceStatus(booking.spaceId, "occupied");
 
-      // 🔥 REAL-TIME UPDATES
+      //   REAL-TIME UPDATES
       emitSpaceUpdate(booking.locationId._id, {
         spaceId: booking.spaceId,
         newStatus: "occupied",
@@ -454,7 +454,7 @@ const updateBookingStatus = async (req, res) => {
       const location = booking.locationId;
       await location.updateSpaceStatus(booking.spaceId, "available");
 
-      // 🔥 REAL-TIME UPDATES
+      //   REAL-TIME UPDATES
       emitSpaceUpdate(booking.locationId._id, {
         spaceId: booking.spaceId,
         newStatus: "available",
@@ -470,7 +470,7 @@ const updateBookingStatus = async (req, res) => {
 
     await booking.save();
 
-    // 🔥 BOOKING STATUS NOTIFICATION
+    //   BOOKING STATUS NOTIFICATION
     emitBookingUpdate(booking._id, booking.userId, {
       status: booking.status,
       action: action,
@@ -596,7 +596,7 @@ const cancelBooking = async (req, res) => {
       if (space && space.status === "reserved") {
         await location.updateSpaceStatus(booking.spaceId, "available");
 
-        // 🔥 REAL-TIME UPDATES
+        //   REAL-TIME UPDATES
         emitSpaceUpdate(booking.locationId._id, {
           spaceId: booking.spaceId,
           newStatus: "available",
@@ -611,7 +611,7 @@ const cancelBooking = async (req, res) => {
       }
     }
 
-    // 🔥 CANCELLATION NOTIFICATION
+    //   CANCELLATION NOTIFICATION
     emitBookingUpdate(booking._id, booking.userId, {
       status: "cancelled",
       action: "cancelled",
@@ -732,7 +732,7 @@ const extendBooking = async (req, res) => {
 
     await booking.save();
 
-    // 🔥 EXTENSION NOTIFICATION
+    //   EXTENSION NOTIFICATION
     emitBookingUpdate(booking._id, booking.userId, {
       action: "extended",
       newEndTime: newEnd,
