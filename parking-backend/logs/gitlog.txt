@@ -1,0 +1,42 @@
+Your branch is up to date with 'origin/main'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+        modified:   parking-backend/config/database.js
+        modified:   parking-backend/controllers/bookingController.js
+        modified:   parking-backend/controllers/locationController.js
+        modified:   parking-backend/middleware/auth.js
+        modified:   parking-backend/middleware/errorHandler.js
+        modified:   parking-backend/models/Booking.js
+        modified:   parking-backend/models/ParkingLocation.js
+        modified:   parking-backend/models/User.js
+        modified:   parking-backend/package-lock.json
+        modified:   parking-backend/package.json
+        modified:   parking-backend/server.js
+        modified:   parking-backend/utils/seedDatabase.js
+        modified:   parking-frontend/package-lock.json
+        modified:   parking-frontend/package.json
+        modified:   parking-frontend/src/App.jsx
+        modified:   parking-frontend/src/index.css
+        modified:   parking-frontend/src/main.jsx
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        .claude/
+        nul
+        parking-backend/.env.example
+        parking-backend/middleware/rateLimiter.js
+        parking-backend/middleware/requestLogger.js
+        parking-backend/routes/health.js
+        parking-backend/utils/logger.js
+        parking-frontend/.env.example
+        parking-frontend/src/components/
+        parking-frontend/src/pages/
+        parking-frontend/src/redux/
+        parking-frontend/src/routes/
+        parking-frontend/src/services/
+        parking-frontend/src/store/
+        parking-frontend/src/utils/
+
+no changes added to commit (use "git add" and/or "git commit -a")

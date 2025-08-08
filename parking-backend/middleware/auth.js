@@ -12,24 +12,25 @@ const generateToken = (userId) => {
 const createSendToken = (user, statusCode, res, message = "Success") => {
   const token = generateToken(user._id);
 
-  // Remove password from output
-  user.password = undefined;
+  // Create user object without password
+  const userObj = user.toObject();
+  delete userObj.password;
 
   res.status(statusCode).json({
     success: true,
     message,
     token,
     user: {
-      id: user._id,
-      username: user.username,
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      fullName: user.fullName,
-      role: user.role,
-      isActive: user.isActive,
-      vehicles: user.vehicles,
-      assignedLocations: user.assignedLocations,
+      id: userObj._id,
+      username: userObj.username,
+      email: userObj.email,
+      firstName: userObj.firstName,
+      lastName: userObj.lastName,
+      fullName: userObj.fullName,
+      role: userObj.role,
+      isActive: userObj.isActive,
+      vehicles: userObj.vehicles,
+      assignedLocations: userObj.assignedLocations,
     },
   });
 };
