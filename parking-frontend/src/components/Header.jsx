@@ -56,10 +56,10 @@ const Header = () => {
               <div className="absolute -inset-1 bg-gradient-to-r from-yellow-200/40 to-blue-200/40 rounded-2xl blur-sm opacity-40 group-hover:opacity-70 transition duration-300"></div>
             </div>
             <div>
-              <h1 className="text-2xl font-extrabold text-gray-700 tracking-tight drop-shadow-sm">
-                Park<span className="text-blue-600">Smart</span>
+              <h1 className="text-2xl font-bold text-gray-700 tracking-tight">
+                <span className="text-green-600">🏠</span> Park<span className="text-orange-600">Sathi</span>
               </h1>
-              <p className="text-xs text-gray-600 font-medium">💡 Warm Parking Solutions</p>
+              <p className="text-xs text-gray-600 font-medium">आफ्नै पार्किङ समाधान • Your Local Parking Helper</p>
             </div>
           </Link>
 

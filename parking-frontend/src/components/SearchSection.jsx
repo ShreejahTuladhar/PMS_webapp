@@ -208,12 +208,13 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
       <div className="container mx-auto px-6 relative z-10">
         <div className="text-center mb-12">
           <div className="animate-fade-in-up">
-            <h2 className="text-5xl md:text-6xl font-extrabold text-white mb-6 tracking-tight">
-              Find <span className="text-gradient-golden">Premium</span> Parking
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight">
+              <span className="text-green-300">🏠</span> Find Parking in Your <span className="text-orange-300">Neighborhood</span>
             </h2>
-            <p className="text-xl text-white/90 max-w-3xl mx-auto leading-relaxed font-medium">
-              Experience luxury parking solutions with <span className="text-yellow-300 font-bold">real-time availability</span>, 
-              smart navigation, and <span className="text-yellow-300 font-bold">competitive rates</span> across Kathmandu Valley
+            <p className="text-lg text-white/90 max-w-3xl mx-auto leading-relaxed">
+              Built by locals, for locals! Our community-driven parking system helps you find 
+              <span className="text-yellow-300 font-semibold"> affordable spots</span> with 
+              <span className="text-yellow-300 font-semibold"> friendly service</span> across Kathmandu Valley
             </p>
           </div>
         </div>
@@ -223,9 +224,9 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
             <div className="flex flex-col md:flex-row gap-6">
               {/* Premium Location Search */}
               <div className="flex-1">
-                <label className="block text-sm font-bold text-gray-800 mb-3 flex items-center">
-                  <div className="w-2 h-2 bg-gradient-primary rounded-full mr-2"></div>
-                  Search Premium Location
+                <label className="block text-sm font-semibold text-gray-800 mb-3 flex items-center">
+                  <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                  🏠 Find Parking Near You
                 </label>
                 <div className="relative" ref={inputRef}>
                   <input
@@ -238,7 +239,7 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
                         setShowSuggestions(true);
                       }
                     }}
-                    placeholder="Type 'Thamel', 'Durbar Square', 'Civil Mall'..."
+                    placeholder="जहाँ जाँदै हुनुहुन्छ? • Where are you going?"
                     className="input-premium w-full px-6 py-4 pl-14 text-lg font-medium placeholder-gray-400 text-gray-800"
                     autoComplete="off"
                   />
@@ -296,9 +297,9 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
 
               {/* Premium Radius Selection */}
               <div className="md:w-56">
-                <label className="block text-sm font-bold text-gray-800 mb-3 flex items-center">
-                  <div className="w-2 h-2 bg-gradient-primary rounded-full mr-2"></div>
-                  Search Radius
+                <label className="block text-sm font-semibold text-gray-800 mb-3 flex items-center">
+                  <div className="w-2 h-2 bg-orange-500 rounded-full mr-2"></div>
+                  📍 Distance Range
                 </label>
                 <div className="relative">
                   <select 
@@ -306,11 +307,11 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
                     onChange={(e) => onRadiusChange(Number(e.target.value))}
                     className="input-premium w-full px-6 py-4 text-lg font-medium text-gray-800 appearance-none cursor-pointer"
                   >
-                    <option value={1}>🎯 1 km - Precision</option>
-                    <option value={2}>🌟 2 km - Recommended</option>
-                    <option value={3}>🚀 3 km - Extended</option>
-                    <option value={4}>💎 4 km - Premium</option>
-                    <option value={5}>🏆 5 km - Ultimate</option>
+                    <option value={1}>🚶 1 km - नजिकै (Nearby)</option>
+                    <option value={2}>🚗 2 km - सामान्य (Normal)</option>
+                    <option value={3}>🛣️ 3 km - फराकिलो (Wide)</option>
+                    <option value={4}>🌄 4 km - धेरै टाढा (Far)</option>
+                    <option value={5}>🗺️ 5 km - जता पनि (Anywhere)</option>
                   </select>
                   <div className="absolute right-5 top-1/2 transform -translate-y-1/2 pointer-events-none">
                     <div className="p-1 rounded-lg bg-gradient-primary">
@@ -342,7 +343,7 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                       </svg>
                     </div>
-                    <span>Find Premium Parking</span>
+                    <span>🏠 Find Local Parking</span>
                   </>
                 )}
                 <div className="absolute inset-0 bg-gradient-subtle opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -370,7 +371,7 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
             <div className="mt-8 pt-6 border-t border-gray-200/50">
               <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
                 <div className="w-3 h-3 bg-gradient-primary rounded-full mr-2"></div>
-                🏆 Premium Destinations in Kathmandu
+                🏠 Popular Places in Kathmandu
               </h3>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {popularLocations.map((loc) => (

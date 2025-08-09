@@ -175,10 +175,10 @@ function Home() {
               <>
                 <div className="mb-6 text-center">
                   <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                    Parking Options Near You
+                    <span className="text-green-600">🅿️</span> Parking Spots Near You • नजिकैको पार्किङ
                   </h2>
                   <p className="text-gray-600">
-                    Found {searchResults.length} parking locations within {searchRadius}km
+                    Found {searchResults.length} friendly parking spots within {searchRadius}km of where you want to go
                   </p>
                 </div>
 
@@ -235,10 +235,10 @@ function Home() {
                 <div className="relative z-10">
                   <div className="text-6xl mb-4">🚗</div>
                   <h2 className="text-4xl font-bold text-gray-700 mb-4">
-                    Need to Park <span className="text-blue-600">Right Now?</span>
+                    पार्किङ चाहिन्छ? <span className="text-orange-600">आउनुहोस्!</span>
                   </h2>
-                  <p className="text-xl text-gray-600 mb-8">
-                    Skip the search - jump straight into our magical parking experience!
+                  <p className="text-lg text-gray-600 mb-8">
+                    Need Parking? Come on in! • Our friendly, local parking helper makes it super easy!
                   </p>
                   
                   <Link
@@ -271,42 +271,36 @@ function Home() {
 
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-800 mb-4">
-              Why Choose ParkSmart?
+              <span className="text-green-600">🏠</span> Why Choose ParkSathi? <span className="text-orange-600">किन छान्ने?</span>
             </h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              Our smart parking solution makes finding and booking parking spaces effortless with real-time availability and competitive pricing.
+              Made by Nepali neighbors for Nepali neighbors! Our simple, friendly parking helper makes finding and booking spots easy and affordable across our beautiful valley.
             </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
             <div className="text-center p-6">
-              <div className="bg-blue-100 rounded-full p-4 inline-block mb-4">
-                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Smart Search</h3>
-              <p className="text-gray-600">Find parking spaces near your destination with customizable radius and real-time availability.</p>
-            </div>
-
-            <div className="text-center p-6">
               <div className="bg-green-100 rounded-full p-4 inline-block mb-4">
-                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                </svg>
+                <span className="text-2xl">🔍</span>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Best Rates</h3>
-              <p className="text-gray-600">Compare prices across multiple parking locations and choose the most affordable option.</p>
+              <h3 className="text-xl font-semibold mb-2">Easy Finding • सजिलो खोजी</h3>
+              <p className="text-gray-600">Find parking spots near you with our simple search. Just type where you're going and we'll help you find a good spot!</p>
             </div>
 
             <div className="text-center p-6">
-              <div className="bg-purple-100 rounded-full p-4 inline-block mb-4">
-                <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+              <div className="bg-orange-100 rounded-full p-4 inline-block mb-4">
+                <span className="text-2xl">💰</span>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Instant Booking</h3>
-              <p className="text-gray-600">Reserve your parking spot in advance and get guaranteed access with QR code entry.</p>
+              <h3 className="text-xl font-semibold mb-2">Fair Prices • उचित मूल्य</h3>
+              <p className="text-gray-600">No hidden fees, no tricks! We keep prices fair and honest so parking doesn't hurt your wallet.</p>
+            </div>
+
+            <div className="text-center p-6">
+              <div className="bg-blue-100 rounded-full p-4 inline-block mb-4">
+                <span className="text-2xl">🤝</span>
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Friendly Service • मित्रवत् सेवा</h3>
+              <p className="text-gray-600">Real people helping real neighbors! Get your parking ticket quickly with our simple, caring service.</p>
             </div>
           </div>
         </div>
