@@ -7,6 +7,7 @@ import ParkingList from './ParkingList';
 import AuthModal from './auth/AuthModal';
 import BookingModal from './booking/BookingModal';
 import BookingConfirmation from './booking/BookingConfirmation';
+import Footer from './Footer';
 import { calculateDistance, kathmanduAreas } from '../data/kathmanduParkingData';
 import kathmanduRealParkingDataExport from '../data/kathmanduRealParkingData';
 
@@ -286,6 +287,8 @@ function Home() {
         isOpen={isConfirmationModalOpen}
         onClose={closeConfirmationModal}
       />
+      
+      <Footer />
     </div>
   );
 }

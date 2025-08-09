@@ -174,13 +174,36 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
 
   return (
     <section className="relative py-20 overflow-hidden">
-      {/* Dynamic Premium Background */}
-      <div className="absolute inset-0 bg-gradient-hero"></div>
-      <div className="absolute inset-0 opacity-30">
-        <div className="absolute top-0 -left-4 w-96 h-96 bg-yellow-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
-        <div className="absolute top-0 -right-4 w-96 h-96 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse delay-1000"></div>
-        <div className="absolute -bottom-8 left-20 w-96 h-96 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse delay-500"></div>
+      {/* Balanced Evening Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-900 via-slate-800 to-blue-900"></div>
+      
+      {/* Warm street lighting ambience */}
+      <div className="absolute inset-0 opacity-35">
+        <div className="absolute top-10 left-1/4 w-32 h-32 bg-gradient-to-r from-yellow-200 to-blue-200 rounded-full blur-3xl animate-pulse" style={{animationDelay: '0s', animationDuration: '4s'}}></div>
+        <div className="absolute top-32 right-1/3 w-24 h-24 bg-gradient-to-r from-blue-100 to-yellow-100 rounded-full blur-2xl animate-pulse" style={{animationDelay: '2s', animationDuration: '5s'}}></div>
+        <div className="absolute bottom-20 left-1/6 w-28 h-28 bg-gradient-to-r from-yellow-100 to-blue-100 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s', animationDuration: '3.5s'}}></div>
       </div>
+
+      {/* Moving car headlights */}
+      <div className="absolute inset-0">
+        {/* Left to right traffic */}
+        <div className="absolute top-1/3 left-0 w-16 h-4 bg-gradient-to-r from-transparent via-white to-blue-100 blur-sm animate-car-lights-lr opacity-80"></div>
+        <div className="absolute top-1/3 left-0 w-12 h-3 bg-gradient-to-r from-transparent via-yellow-200 to-blue-200 blur-md animate-car-lights-lr-delay opacity-60" style={{animationDelay: '3s'}}></div>
+        
+        {/* Right to left traffic */}
+        <div className="absolute bottom-1/4 right-0 w-16 h-4 bg-gradient-to-l from-transparent via-red-400 to-orange-500 blur-sm animate-car-lights-rl opacity-70"></div>
+        <div className="absolute bottom-1/4 right-0 w-14 h-3 bg-gradient-to-l from-transparent via-red-300 to-yellow-400 blur-md animate-car-lights-rl-delay opacity-50" style={{animationDelay: '4s'}}></div>
+
+        {/* Diagonal traffic flow */}
+        <div className="absolute top-1/2 left-0 w-20 h-3 bg-gradient-to-r from-transparent via-cyan-200 to-white blur-sm animate-car-lights-diagonal opacity-60"></div>
+        
+        {/* Occasional bright headlight flashes */}
+        <div className="absolute top-2/3 left-1/4 w-6 h-2 bg-white blur-sm animate-headlight-flash opacity-90"></div>
+        <div className="absolute top-1/4 right-1/3 w-4 h-2 bg-blue-100 blur-sm animate-headlight-flash-delay opacity-80"></div>
+      </div>
+
+      {/* Urban glow overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-slate-800/20 via-transparent to-blue-900/30"></div>
       
       <div className="container mx-auto px-6 relative z-10">
         <div className="text-center mb-12">
