@@ -1,15 +1,17 @@
-import { useState } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
+import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
+import { useAuth as useAuthContext } from '../../contexts/AuthContext';
 import authService from '../../services/authService';
 
 function Login({ onSwitchToRegister, onClose }) {
-  const { login } = useAuth();
+  const { login } = useAuthContext();
   const [formData, setFormData] = useState({
     username: '',
     password: '',
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -51,18 +53,21 @@ function Login({ onSwitchToRegister, onClose }) {
     }
 
     setLoading(true);
+    setErrors({});
 
     try {
       const result = await authService.login(formData);
       
       if (result.success) {
         login(result.user, result.token);
+        toast.success('Welcome back!');
         onClose();
       } else {
-        setErrors({ general: result.error });
+        setErrors({ general: result.error || 'Login failed' });
       }
     } catch (error) {
-      setErrors({ general: 'An unexpected error occurred' });
+      console.error('Login error:', error);
+      setErrors({ general: 'An unexpected error occurred. Please try again.' });
     } finally {
       setLoading(false);
     }

@@ -1,5 +1,6 @@
 const AuthService = require("../services/authService");
 const { validationResult } = require("express-validator");
+const { ValidationError, AuthenticationError } = require("../utils/errors");
 
 // @desc    Register new user
 // @route   POST /api/auth/register
@@ -34,6 +35,14 @@ const register = async (req, res) => {
     });
   } catch (error) {
     console.error("Registration error:", error);
+
+    // Handle custom validation errors
+    if (error instanceof ValidationError) {
+      return res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
 
     // Handle duplicate key error
     if (error.code === 11000) {
@@ -88,7 +97,8 @@ const login = async (req, res) => {
   } catch (error) {
     console.error("Login error:", error);
     
-    if (error.message === "Invalid credentials" || error.message === "Account deactivated") {
+    // Handle custom authentication errors
+    if (error instanceof AuthenticationError) {
       return res.status(401).json({
         success: false,
         message: error.message,

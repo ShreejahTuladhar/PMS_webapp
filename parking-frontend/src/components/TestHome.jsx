@@ -6,7 +6,7 @@ function TestHome() {
   
   return (
     <div className="p-8">
-      <h1 className="text-4xl font-bold text-blue-600 mb-4">ParkSmart Test Page</h1>
+      <h1 className="text-4xl font-bold text-blue-600 mb-4">ParkSathi Test Page</h1>
       <p className="text-lg text-gray-700 mb-4">{test}</p>
       <button 
         onClick={() => setTest('Button clicked!')}

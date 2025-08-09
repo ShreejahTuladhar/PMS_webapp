@@ -324,135 +324,19 @@ const MapView = ({ parkingSpots, radius, center, onSpotSelect, onBooking }) => {
               }}
             >
               <Popup>
-                <div className="p-2 min-w-48">
-                  <h4 className="font-semibold mb-2">{spot.name}</h4>
-                  <p className="text-gray-600 text-sm mb-2">{spot.address}</p>
-                  
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span>Hourly Rate:</span>
-                      <span className="font-semibold text-blue-600">Rs. {spot.hourlyRate}/hr</span>
-                    </div>
-                    
-                    <div className="flex justify-between">
-                      <span>Availability:</span>
-                      <span className={`px-2 py-1 rounded text-xs ${
-                        spot.availability > 0 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {spot.availability > 0 ? `${spot.availability} available` : 'Full'}
-                      </span>
-                    </div>
-                    
-                    <div className="flex justify-between">
-                      <span>Distance:</span>
-                      <span>{spot.distance < 1 ? `${Math.round(spot.distance * 1000)}m` : `${spot.distance}km`}</span>
-                    </div>
-                    
-                    <div className="flex justify-between">
-                      <span>Rating:</span>
-                      <span className="flex items-center">
-                        <svg className="w-4 h-4 text-yellow-500 mr-1" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                        </svg>
-                        {spot.rating}
-                      </span>
-                    </div>
-                    
-                    {spot.businessHours.isOpen24 ? (
-                      <div className="flex justify-between">
-                        <span>Hours:</span>
-                        <span className="text-green-600">24/7</span>
-                      </div>
-                    ) : (
-                      <div className="flex justify-between">
-                        <span>Hours:</span>
-                        <span>{spot.businessHours.open} - {spot.businessHours.close}</span>
-                      </div>
-                    )}
-                    
-                    {spot.features.length > 0 && (
-                      <div className="mt-2">
-                        <div className="flex flex-wrap gap-1">
-                          {spot.features.map((feature, index) => (
-                            <span key={index} className="px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded">
-                              {feature}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Enhanced Parking Information */}
-                    {spot.operator && (
-                      <div className="flex justify-between">
-                        <span>Operator:</span>
-                        <span className="text-xs text-gray-600">{spot.operator}</span>
-                      </div>
-                    )}
-                    
-                    {spot.zone && (
-                      <div className="flex justify-between">
-                        <span>Zone:</span>
-                        <span className="text-xs text-purple-600">{spot.zone}</span>
-                      </div>
-                    )}
-                    
-                    {/* Smart Parking & Local Navigation */}
-                    <div className="mt-2 flex flex-wrap gap-1">
-                      {spot.smartParkingEnabled && (
-                        <span className="px-2 py-1 bg-purple-100 text-purple-600 text-xs rounded">
-                          🚀 Smart Parking
-                        </span>
-                      )}
-                      {spot.galliMapsSupported && (
-                        <span className="px-2 py-1 bg-green-100 text-green-600 text-xs rounded">
-                          🇳🇵 Galli Maps
-                        </span>
-                      )}
-                      {spot.baatoMapsSupported && (
-                        <span className="px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded">
-                          🗺️ Baato Maps
-                        </span>
-                      )}
-                      {spot.appSupport && (
-                        <span className="px-2 py-1 bg-orange-100 text-orange-600 text-xs rounded">
-                          📱 {spot.appSupport}
-                        </span>
-                      )}
-                    </div>
-                    
-                    {spot.specialOffers && (
-                      <div className="mt-2 p-2 bg-green-50 rounded text-green-700 text-xs">
-                        🎉 {spot.specialOffers}
-                      </div>
-                    )}
-                    
-                    {/* Status indicator for planned/under construction */}
-                    {spot.status && (
-                      <div className={`mt-2 p-2 rounded text-xs ${
-                        spot.status === 'Under Construction' 
-                          ? 'bg-yellow-50 text-yellow-700'
-                          : 'bg-gray-50 text-gray-700'
-                      }`}>
-                        🚧 {spot.status}
-                        {spot.expectedOpening && ` - Expected ${spot.expectedOpening}`}
-                      </div>
-                    )}
-                    
-                    <button 
-                      className={`w-full mt-3 px-4 py-2 rounded font-medium text-sm transition ${
-                        spot.availability > 0 && !spot.status
-                          ? 'bg-blue-600 text-white hover:bg-blue-700'
-                          : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                      }`}
-                      disabled={spot.availability === 0 || spot.status}
-                      onClick={() => onBooking && onBooking(spot)}
-                    >
-                      {spot.status ? 'Not Available' : spot.availability > 0 ? 'Book Now' : 'Full'}
-                    </button>
-                  </div>
+                <div className="p-3 text-center">
+                  <h4 className="font-semibold text-gray-800 mb-2">{spot.name}</h4>
+                  <button 
+                    className={`px-4 py-2 rounded font-medium text-sm transition ${
+                      spot.availability > 0 && !spot.status
+                        ? 'bg-blue-600 text-white hover:bg-blue-700'
+                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    }`}
+                    disabled={spot.availability === 0 || spot.status}
+                    onClick={() => onBooking && onBooking(spot)}
+                  >
+                    {spot.status ? 'Not Available' : spot.availability > 0 ? 'Book Now' : 'Full'}
+                  </button>
                 </div>
               </Popup>
             </Marker>

@@ -121,7 +121,7 @@ const bookingSchema = new mongoose.Schema(
     // QR code for entry/exit
     qrCode: {
       type: String,
-      sparse: true, // Allow null values but enforce uniqueness for non-null values
+      // sparse is handled by the index definition below
     },
     // Extension and modifications
     extensions: [

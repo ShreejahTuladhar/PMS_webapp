@@ -55,7 +55,7 @@ function AuthModal({ isOpen, onClose, defaultTab = 'login' }) {
                   {activeTab === 'login' ? (
                     <>💡 Welcome <span className="text-blue-600">Back!</span></>
                   ) : (
-                    <>💡 Join <span className="text-blue-600">ParkSmart!</span></>
+                    <>💡 Join <span className="text-blue-600">ParkSathi!</span></>
                   )}
                 </h3>
                 <p className="text-gray-600 text-base font-medium">
@@ -135,7 +135,7 @@ function AuthModal({ isOpen, onClose, defaultTab = 'login' }) {
                 💡 Your data is protected with bright enterprise-grade security
               </p>
               <p className="text-xs text-gray-600 font-medium">
-                By continuing, you agree to ParkSmart's <span className="text-orange-600 font-bold">Terms of Service</span> and <span className="text-orange-600 font-bold">Privacy Policy</span>
+                By continuing, you agree to ParkSathi's <span className="text-orange-600 font-bold">Terms of Service</span> and <span className="text-orange-600 font-bold">Privacy Policy</span>
               </p>
             </div>
           </div>

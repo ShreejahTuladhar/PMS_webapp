@@ -10,7 +10,7 @@ import BookingModal from './booking/BookingModal';
 import BookingConfirmation from './booking/BookingConfirmation';
 import Footer from './Footer';
 import { calculateDistance, kathmanduAreas } from '../data/kathmanduParkingData';
-import kathmanduRealParkingDataExport from '../data/kathmanduRealParkingData';
+import { locationService } from '../services';
 
 function Home() {
   const { isAuthenticated } = useAuth();
@@ -25,6 +25,7 @@ function Home() {
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
   const [parkingSpotToBook, setParkingSpotToBook] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   // Watch for booking confirmation
   useEffect(() => {
@@ -69,15 +70,90 @@ function Home() {
       searchLoc = location;
     }
     
-    // Calculate distances and filter by radius
-    const parkingWithDistances = kathmanduRealParkingDataExport.map(parking => ({
-      ...parking,
-      distance: calculateDistance(searchLat, searchLng, parking.coordinates.lat, parking.coordinates.lng)
-    }));
+    setLoading(true);
     
-    const filteredResults = parkingWithDistances.filter(spot => spot.distance <= searchRadius);
+    try {
+      // Fetch all parking locations from the database
+      console.log('📍 Fetching parking locations from database...');
+      const response = await locationService.getAllParkingSpots({ 
+        limit: 50,
+        isActive: true 
+      });
+      
+      if (response.success) {
+        // Transform database format to match expected format
+        const parkingLocations = response.parkingSpots.map(spot => ({
+          id: spot.id,
+          name: spot.name,
+          address: spot.address,
+          coordinates: {
+            lat: spot.coordinates?.latitude || spot.coordinates?.lat || 0,
+            lng: spot.coordinates?.longitude || spot.coordinates?.lng || 0
+          },
+          hourlyRate: spot.hourlyRate,
+          totalSpaces: spot.totalSpaces,
+          availableSpaces: spot.availableSpaces,
+          availability: spot.availableSpaces, // MapView expects 'availability'
+          occupancyPercentage: spot.occupancyPercentage,
+          amenities: spot.amenities || [],
+          operatingHours: spot.operatingHours,
+          isCurrentlyOpen: spot.isCurrentlyOpen,
+          currentStatus: spot.currentStatus,
+          contactNumber: spot.contactNumber,
+          description: spot.description,
+          // Add vehicle types for compatibility
+          vehicleTypes: {
+            car: spot.hourlyRate,
+            motorcycle: Math.round(spot.hourlyRate * 0.7), // 30% discount for motorcycles
+            bicycle: Math.round(spot.hourlyRate * 0.3)     // 70% discount for bicycles
+          },
+          // MapView compatibility properties
+          businessHours: {
+            isOpen24: false, // Default to false, could be derived from operatingHours
+            open: spot.operatingHours?.start || '06:00',
+            close: spot.operatingHours?.end || '22:00'
+          },
+          features: spot.amenities || [],
+          rating: 4.2, // Default rating, could be calculated from reviews
+          operator: 'ParkSathi Network',
+          zone: spot.address?.split(',')[0] || 'Kathmandu',
+          smartParkingEnabled: spot.amenities?.includes('smart_parking') || false,
+          galliMapsSupported: true,
+          baatoMapsSupported: true,
+          appSupport: 'ParkSathi App',
+          specialOffers: null,
+          status: spot.currentStatus === 'maintenance' ? 'Under Maintenance' : null,
+          expectedOpening: null
+        }));
+        
+        console.log(`📊 Fetched ${parkingLocations.length} parking locations`);
+        
+        // Calculate distances and filter by radius
+        const parkingWithDistances = parkingLocations.map(parking => ({
+          ...parking,
+          distance: calculateDistance(searchLat, searchLng, parking.coordinates.lat, parking.coordinates.lng)
+        }));
+        
+        const filteredResults = parkingWithDistances
+          .filter(spot => spot.distance <= searchRadius)
+          .sort((a, b) => a.distance - b.distance); // Sort by distance
+        
+        console.log(`🎯 Found ${filteredResults.length} locations within ${searchRadius}km`);
+        
+        setSearchResults(filteredResults);
+      } else {
+        console.error('Failed to fetch locations:', response.error);
+        // Fallback to empty results
+        setSearchResults([]);
+      }
+    } catch (error) {
+      console.error('Error searching parking locations:', error);
+      // Show error to user
+      setSearchResults([]);
+    } finally {
+      setLoading(false);
+    }
     
-    setSearchResults(filteredResults);
     setSearchLocation(searchLoc);
     setIsSearched(true);
     setSelectedSpot(null);
@@ -86,15 +162,9 @@ function Home() {
   const handleRadiusChange = (newRadius) => {
     setSearchRadius(newRadius);
     
-    if (searchResults.length > 0 && searchLocation) {
-      // Recalculate with new radius
-      const parkingWithDistances = kathmanduRealParkingDataExport.map(parking => ({
-        ...parking,
-        distance: calculateDistance(searchLocation.lat, searchLocation.lng, parking.coordinates.lat, parking.coordinates.lng)
-      }));
-      
-      const filteredResults = parkingWithDistances.filter(spot => spot.distance <= newRadius);
-      setSearchResults(filteredResults);
+    // Re-search with new radius if we have a previous search location
+    if (searchLocation) {
+      handleSearch(searchLocation);
     }
   };
 

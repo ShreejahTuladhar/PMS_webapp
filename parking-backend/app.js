@@ -13,10 +13,36 @@ app.use(
   })
 );
 
+// CORS configuration - allow multiple frontend ports in development
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://localhost:3001", 
+  "http://localhost:5173",
+  "http://localhost:5174",
+  process.env.CLIENT_URL
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      
+      // In development, allow all localhost origins
+      if (process.env.NODE_ENV === 'development' && origin.startsWith('http://localhost:')) {
+        return callback(null, true);
+      }
+      
+      // Check if origin is in allowed list
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      
+      return callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   })
 );
 
@@ -24,13 +50,23 @@ app.use(morgan("combined"));
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
+// Health check endpoint
+app.get("/health", (req, res) => {
+  res.json({
+    status: "OK",
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
 // API routes
 app.get("/api", (req, res) => {
   res.json({
     message: "Parking Management API v1.0",
     endpoints: {
       auth: "/api/auth",
-      users: "/api/users",
+      users: "/api/users", 
       locations: "/api/locations",
       bookings: "/api/bookings",
     },

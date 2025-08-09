@@ -1,112 +1,215 @@
-const API_BASE_URL = 'http://localhost:5000/api';
+import { apiHelpers } from './api';
 
 class AuthService {
   async login(credentials) {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(credentials),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
+      const result = await apiHelpers.post('/auth/login', credentials);
+      
+      if (result.success) {
+        return {
+          success: true,
+          user: result.data.user,
+          token: result.data.token,
+        };
+      } else {
+        return {
+          success: false,
+          error: result.error,
+        };
       }
-
-      return {
-        success: true,
-        user: data.user,
-        token: data.token,
-      };
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: error.message || 'Login failed',
       };
     }
   }
 
   async register(userData) {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(userData),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Registration failed');
+      const result = await apiHelpers.post('/auth/register', userData);
+      
+      if (result.success) {
+        return {
+          success: true,
+          user: result.data.user,
+          token: result.data.token,
+        };
+      } else {
+        return {
+          success: false,
+          error: result.error,
+        };
       }
-
-      return {
-        success: true,
-        user: data.user,
-        token: data.token,
-      };
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: error.message || 'Registration failed',
       };
     }
   }
 
   async getProfile(token) {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/me`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to fetch profile');
+      const result = await apiHelpers.get('/auth/me');
+      
+      if (result.success) {
+        return {
+          success: true,
+          user: result.data.user,
+        };
+      } else {
+        return {
+          success: false,
+          error: result.error,
+        };
       }
-
-      return {
-        success: true,
-        user: data.user,
-      };
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: error.message || 'Failed to fetch profile',
       };
     }
   }
 
   async logout(token) {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/logout`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      const data = await response.json();
-
-      return {
-        success: true,
-        message: data.message,
-      };
+      const result = await apiHelpers.post('/auth/logout');
+      
+      if (result.success) {
+        return {
+          success: true,
+          message: result.data.message || 'Logged out successfully',
+        };
+      } else {
+        return {
+          success: false,
+          error: result.error,
+        };
+      }
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: error.message || 'Logout failed',
+      };
+    }
+  }
+
+  async refreshToken() {
+    try {
+      const result = await apiHelpers.post('/auth/refresh');
+      
+      if (result.success) {
+        return {
+          success: true,
+          token: result.data.token,
+          user: result.data.user,
+        };
+      } else {
+        return {
+          success: false,
+          error: result.error,
+        };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message || 'Token refresh failed',
+      };
+    }
+  }
+
+  async updateProfile(profileData) {
+    try {
+      const result = await apiHelpers.put('/auth/profile', profileData);
+      
+      if (result.success) {
+        return {
+          success: true,
+          user: result.data.user,
+        };
+      } else {
+        return {
+          success: false,
+          error: result.error,
+        };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message || 'Profile update failed',
+      };
+    }
+  }
+
+  async changePassword(passwordData) {
+    try {
+      const result = await apiHelpers.post('/auth/change-password', passwordData);
+      
+      if (result.success) {
+        return {
+          success: true,
+          message: result.data.message || 'Password changed successfully',
+        };
+      } else {
+        return {
+          success: false,
+          error: result.error,
+        };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message || 'Password change failed',
+      };
+    }
+  }
+
+  async forgotPassword(email) {
+    try {
+      const result = await apiHelpers.post('/auth/forgot-password', { email });
+      
+      if (result.success) {
+        return {
+          success: true,
+          message: result.data.message || 'Reset link sent to your email',
+        };
+      } else {
+        return {
+          success: false,
+          error: result.error,
+        };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message || 'Failed to send reset link',
+      };
+    }
+  }
+
+  async resetPassword(token, newPassword) {
+    try {
+      const result = await apiHelpers.post('/auth/reset-password', {
+        token,
+        password: newPassword,
+      });
+      
+      if (result.success) {
+        return {
+          success: true,
+          message: result.data.message || 'Password reset successful',
+        };
+      } else {
+        return {
+          success: false,
+          error: result.error,
+        };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message || 'Password reset failed',
       };
     }
   }

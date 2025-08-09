@@ -318,14 +318,22 @@ const getBookingById = async (req, res) => {
       }
     }
 
-    // Add computed fields
+    // Add computed fields with safe property access
+    let bookingObject;
+    try {
+      bookingObject = booking.toObject();
+    } catch (toObjectError) {
+      console.warn("Error converting booking to object:", toObjectError);
+      bookingObject = booking.toJSON(); // Fallback to toJSON
+    }
+
     const enhancedBooking = {
-      ...booking.toObject(),
-      durationHours: booking.durationHours,
-      actualDurationHours: booking.actualDurationHours,
-      isCurrentlyActive: booking.isCurrentlyActive(),
-      totalPenalties: booking.totalPenalties,
-      finalAmount: booking.finalAmount,
+      ...bookingObject,
+      durationHours: booking.durationHours || 0,
+      actualDurationHours: booking.actualDurationHours || 0,
+      isCurrentlyActive: booking.isCurrentlyActive ? booking.isCurrentlyActive() : false,
+      totalPenalties: booking.totalPenalties || 0,
+      finalAmount: booking.finalAmount || booking.totalAmount,
     };
 
     res.json({

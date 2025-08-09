@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const { ValidationError, AuthenticationError } = require("../utils/errors");
 
 class AuthService {
   static generateToken(userId) {
@@ -16,16 +17,16 @@ class AuthService {
     );
 
     if (!user) {
-      throw new Error("Invalid credentials");
+      throw new AuthenticationError("Invalid credentials");
     }
 
     if (!user.isActive) {
-      throw new Error("Account deactivated");
+      throw new AuthenticationError("Account deactivated");
     }
 
     const isPasswordValid = await user.comparePassword(password);
     if (!isPasswordValid) {
-      throw new Error("Invalid credentials");
+      throw new AuthenticationError("Invalid credentials");
     }
 
     return user;
@@ -40,7 +41,7 @@ class AuthService {
 
     if (existingUser) {
       const field = existingUser.email === email.toLowerCase() ? "email" : "username";
-      throw new Error(`User with this ${field} already exists`);
+      throw new ValidationError(`User with this ${field} already exists`, field);
     }
 
     const user = await User.create({

@@ -243,11 +243,13 @@ parkingLocationSchema.virtual("occupancyPercentage").get(function () {
 // Virtual for available space types
 parkingLocationSchema.virtual("availableSpaceTypes").get(function () {
   const availableTypes = {};
-  this.spaces.forEach((space) => {
-    if (space.status === "available") {
-      availableTypes[space.type] = (availableTypes[space.type] || 0) + 1;
-    }
-  });
+  if (this.spaces && Array.isArray(this.spaces)) {
+    this.spaces.forEach((space) => {
+      if (space.status === "available") {
+        availableTypes[space.type] = (availableTypes[space.type] || 0) + 1;
+      }
+    });
+  }
   return availableTypes;
 });
 
@@ -269,6 +271,10 @@ parkingLocationSchema.methods.updateSpaceStatus = function (
   spaceId,
   newStatus
 ) {
+  if (!this.spaces || !Array.isArray(this.spaces)) {
+    throw new Error("No spaces available");
+  }
+  
   const space = this.spaces.find((s) => s.spaceId === spaceId);
   if (!space) {
     throw new Error("Space not found");

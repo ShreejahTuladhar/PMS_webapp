@@ -1,11 +1,11 @@
-# 🏗️ ParkSmart System Architecture
+# 🏗️ ParkSathi System Architecture
 ## 1Ox4Fox.Inc - Intelligent Parking Management System
 
 ---
 
 ## 🎯 **System Overview**
 
-ParkSmart is a comprehensive digital parking management system that combines real-time data processing, intelligent location services, and user-friendly interfaces to solve urban parking challenges. The system uses a microservices architecture with modern web technologies to deliver a scalable, secure, and efficient parking solution.
+ParkSathi is a comprehensive digital parking management system that combines real-time data processing, intelligent location services, and user-friendly interfaces to solve urban parking challenges. The system uses a microservices architecture with modern web technologies to deliver a scalable, secure, and efficient parking solution.
 
 ---
 
@@ -13,7 +13,7 @@ ParkSmart is a comprehensive digital parking management system that combines rea
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                           ParkSmart System Architecture                  │
+│                           ParkSathi System Architecture                  │
 ├─────────────────────────────────────────────────────────────────────────┤
 │                                                                         │
 │  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐                │
@@ -395,7 +395,7 @@ CMD ["npm", "start"]
 ### **CI/CD Pipeline**
 ```yaml
 # GitHub Actions workflow
-name: Deploy ParkSmart
+name: Deploy ParkSathi
 on:
   push:
     branches: [main, staging]
@@ -500,4 +500,4 @@ jobs:
 
 ---
 
-*This architecture document serves as the technical blueprint for the ParkSmart intelligent parking management system. It provides a comprehensive overview of all system components, technologies, and implementation strategies.*
+*This architecture document serves as the technical blueprint for the ParkSathi intelligent parking management system. It provides a comprehensive overview of all system components, technologies, and implementation strategies.*
