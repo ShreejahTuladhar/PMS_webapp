@@ -97,6 +97,23 @@ const Header = () => {
                 <div className="absolute inset-0 bg-gradient-to-r from-yellow-100/40 via-white/60 to-blue-100/40 rounded-xl"></div>
               )}
             </Link>
+
+            <Link 
+              to="/parking" 
+              className={`relative px-6 py-3 rounded-xl font-medium transition-all duration-300 group overflow-hidden ${
+                isActiveLink('/parking') 
+                  ? 'text-gray-700 bg-white/90 shadow-md border-2 border-blue-300' 
+                  : 'text-gray-700 hover:text-gray-800 gentle-glow-hover'
+              }`}
+            >
+              <span className="relative z-10 flex items-center gap-2">🚗 Park Now</span>
+              {/* Gentle glow effect */}
+              <div className="absolute inset-0 bg-gradient-radial from-white via-yellow-50 to-blue-50 opacity-0 group-hover:opacity-80 transition-opacity duration-300 scale-0 group-hover:scale-150"></div>
+              {/* Active state glow */}
+              {isActiveLink('/parking') && (
+                <div className="absolute inset-0 bg-gradient-to-r from-yellow-100/40 via-white/60 to-blue-100/40 rounded-xl"></div>
+              )}
+            </Link>
             
             {!loading && (
               <>

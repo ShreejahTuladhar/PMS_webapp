@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useBooking } from '../contexts/BookingContext';
 import SearchSection from './SearchSection';
@@ -226,6 +227,48 @@ function Home() {
 
         {!isSearched && (
           <div className="container mx-auto px-4 py-12">
+            {/* Quick Parking CTA */}
+            <div className="text-center mb-16">
+              <div className="bg-gradient-to-r from-blue-100 via-white to-yellow-100 rounded-3xl p-8 shadow-lg border border-blue-200 max-w-4xl mx-auto relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-yellow-100 to-blue-100 rounded-full blur-2xl opacity-50 animate-pulse"></div>
+                
+                <div className="relative z-10">
+                  <div className="text-6xl mb-4">🚗</div>
+                  <h2 className="text-4xl font-bold text-gray-700 mb-4">
+                    Need to Park <span className="text-blue-600">Right Now?</span>
+                  </h2>
+                  <p className="text-xl text-gray-600 mb-8">
+                    Skip the search - jump straight into our magical parking experience!
+                  </p>
+                  
+                  <Link
+                    to="/parking"
+                    className="inline-flex items-center gap-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-12 py-4 rounded-2xl font-bold text-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 relative overflow-hidden group"
+                  >
+                    <span className="relative z-10 flex items-center gap-3">
+                      ✨ Start Parking Journey
+                    </span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  </Link>
+                  
+                  <div className="flex items-center justify-center gap-8 mt-6 text-sm text-gray-600">
+                    <div className="flex items-center gap-2">
+                      <span className="text-green-500">✓</span>
+                      <span>30-second setup</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-green-500">✓</span>
+                      <span>Digital ticket</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-green-500">✓</span>
+                      <span>Instant entry</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-800 mb-4">
               Why Choose ParkSmart?

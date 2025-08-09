@@ -4,6 +4,7 @@ import { BookingProvider } from './contexts/BookingContext';
 import Header from './components/Header';
 import Home from './components/Home';
 import About from './components/About';
+import CustomerJourney from './components/customer/CustomerJourney';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/about" element={<About />} />
+              <Route path="/parking" element={<CustomerJourney />} />
             </Routes>
           </div>
         </Router>
