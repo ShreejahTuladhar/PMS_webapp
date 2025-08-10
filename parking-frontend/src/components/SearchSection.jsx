@@ -1,11 +1,23 @@
 import { useState, useEffect, useRef } from 'react';
-import { kathmanduAreas } from '../data/kathmanduParkingData';
-import kathmanduRealParkingDataExport from '../data/kathmanduRealParkingData';
 
 const popularLocations = [
   'Thamel', 'Durbar Square', 'New Road', 'Ratna Park', 
   'Lazimpat', 'Bouddha', 'Patan', 'Swayambhunath'
 ];
+
+// Kathmandu area coordinates (moved from deleted data file)
+const kathmanduAreas = {
+  ratnapark: { lat: 27.7064, lng: 85.3238 },
+  thamel: { lat: 27.7151, lng: 85.3107 },
+  durbar: { lat: 27.7040, lng: 85.3070 },
+  newroad: { lat: 27.7016, lng: 85.3197 },
+  putalisadak: { lat: 27.7095, lng: 85.3269 },
+  baneshwor: { lat: 27.6893, lng: 85.3436 },
+  koteshwor: { lat: 27.6776, lng: 85.3470 },
+  lagankhel: { lat: 27.6667, lng: 85.3247 },
+  jawalakhel: { lat: 27.6701, lng: 85.3159 },
+  patan: { lat: 27.6648, lng: 85.3188 }
+};
 
 const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
   const [location, setLocation] = useState('');
@@ -20,20 +32,6 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
   const getAllSearchableLocations = () => {
     const locations = new Set();
     
-    // Add parking location names and addresses
-    kathmanduRealParkingDataExport.forEach(parking => {
-      locations.add(parking.name);
-      locations.add(parking.address);
-      // Extract area names from addresses
-      const addressParts = parking.address.split(',');
-      addressParts.forEach(part => {
-        const cleanPart = part.trim();
-        if (cleanPart && cleanPart.length > 2) {
-          locations.add(cleanPart);
-        }
-      });
-    });
-    
     // Add known area names
     Object.keys(kathmanduAreas).forEach(area => {
       locations.add(area.charAt(0).toUpperCase() + area.slice(1));
@@ -41,6 +39,20 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
     
     // Add popular locations
     popularLocations.forEach(loc => locations.add(loc));
+    
+    // Add more common Kathmandu locations
+    const commonLocations = [
+      'Kamaladi', 'Anamnagar', 'Dillibazar', 'Maharajgunj', 'Baluwatar',
+      'Sundhara', 'Bagbazar', 'Ason', 'Indrachowk', 'Basantapur',
+      'Tripureshwor', 'Kalimati', 'Thankot', 'Balaju', 'Tokha',
+      'Budhanilkantha', 'Gongabu', 'Chabahil', 'Jorpati', 'Boudha',
+      'Pashupatinath', 'Gaushala', 'Sinamangal', 'Tinkune', 'Koteshwor',
+      'Thimi', 'Bhaktapur', 'Sano Thimi', 'Katunje', 'Lokanthali',
+      'Imadol', 'Satdobato', 'Lagankhel', 'Pulchowk', 'Kupondole',
+      'Sanepa', 'Jawalakhel', 'Patan Dhoka', 'Mangal Bazaar'
+    ];
+    
+    commonLocations.forEach(loc => locations.add(loc));
     
     return Array.from(locations).filter(loc => loc.length > 2);
   };

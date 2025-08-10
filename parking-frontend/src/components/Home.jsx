@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useBooking } from '../contexts/BookingContext';
 import SearchSection from './SearchSection';
@@ -9,12 +9,12 @@ import AuthModal from './auth/AuthModal';
 import BookingModal from './booking/BookingModal';
 import BookingConfirmation from './booking/BookingConfirmation';
 import Footer from './Footer';
-import { calculateDistance, kathmanduAreas } from '../data/kathmanduParkingData';
 import { locationService } from '../services';
 
 function Home() {
   const { isAuthenticated } = useAuth();
   const { currentBooking, bookingStep } = useBooking();
+  const location = useLocation();
   
   const [searchResults, setSearchResults] = useState([]);
   const [selectedSpot, setSelectedSpot] = useState(null);
@@ -25,7 +25,7 @@ function Home() {
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
   const [parkingSpotToBook, setParkingSpotToBook] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [_loading, setLoading] = useState(false);
 
   // Watch for booking confirmation
   useEffect(() => {
@@ -33,6 +33,42 @@ function Home() {
       setIsConfirmationModalOpen(true);
     }
   }, [bookingStep, currentBooking]);
+
+  // Handle redirect from ProtectedRoute to open login modal
+  useEffect(() => {
+    if (location.state?.openLogin) {
+      setIsLoginModalOpen(true);
+      // Clear the state to prevent reopening on refresh
+      window.history.replaceState(null, '', window.location.pathname);
+    }
+  }, [location.state?.openLogin]);
+
+  // Helper function to calculate distance between two coordinates
+  const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 6371; // Radius of the Earth in kilometers
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c; // Distance in kilometers
+  };
+
+  // Kathmandu area coordinates
+  const kathmanduAreas = {
+    ratnapark: { lat: 27.7064, lng: 85.3238 },
+    thamel: { lat: 27.7151, lng: 85.3107 },
+    durbar: { lat: 27.7040, lng: 85.3070 },
+    newroad: { lat: 27.7016, lng: 85.3197 },
+    putalisadak: { lat: 27.7095, lng: 85.3269 },
+    baneshwor: { lat: 27.6893, lng: 85.3436 },
+    koteshwor: { lat: 27.6776, lng: 85.3470 },
+    lagankhel: { lat: 27.6667, lng: 85.3247 },
+    jawalakhel: { lat: 27.6701, lng: 85.3159 },
+    patan: { lat: 27.6648, lng: 85.3188 }
+  };
 
   const handleSearch = async (location) => {
     console.log('Searching for parking near:', location);

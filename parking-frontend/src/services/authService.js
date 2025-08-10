@@ -3,6 +3,27 @@ import { apiHelpers } from './api';
 class AuthService {
   async login(credentials) {
     try {
+      // For development - create mock users for testing
+      if (credentials.username === 'demo' || credentials.username === 'client') {
+        const mockUser = {
+          id: credentials.username === 'client' ? '2' : '1',
+          username: credentials.username,
+          firstName: credentials.username === 'client' ? 'John' : 'Jane',
+          lastName: credentials.username === 'client' ? 'Owner' : 'Customer',
+          email: credentials.username === 'client' ? 'owner@parksathi.com' : 'customer@parksathi.com',
+          role: credentials.role || (credentials.username === 'client' ? 'client' : 'user'),
+          phoneNumber: credentials.username === 'client' ? '+977-1234567890' : '+977-0987654321'
+        };
+        
+        const mockToken = 'mock_token_' + Date.now();
+        
+        return {
+          success: true,
+          user: mockUser,
+          token: mockToken,
+        };
+      }
+      
       const result = await apiHelpers.post('/auth/login', credentials);
       
       if (result.success) {

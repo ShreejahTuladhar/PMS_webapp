@@ -115,6 +115,28 @@ const Header = () => {
               )}
             </Link>
             
+            {/* Dashboard Link - Show only when authenticated */}
+            {isAuthenticated && (
+              <Link 
+                to={user?.role === 'client' || user?.role === 'parking_owner' ? '/client-dashboard' : '/dashboard'}
+                className={`relative px-6 py-3 rounded-xl font-medium transition-all duration-300 group overflow-hidden ${
+                  isActiveLink('/dashboard') || isActiveLink('/client-dashboard')
+                    ? 'text-gray-700 bg-white/90 shadow-md border-2 border-blue-300' 
+                    : 'text-gray-700 hover:text-gray-800 gentle-glow-hover'
+                }`}
+              >
+                <span className="relative z-10 flex items-center gap-2">
+                  📊 Dashboard
+                </span>
+                {/* Gentle glow effect */}
+                <div className="absolute inset-0 bg-gradient-radial from-white via-yellow-50 to-blue-50 opacity-0 group-hover:opacity-80 transition-opacity duration-300 scale-0 group-hover:scale-150"></div>
+                {/* Active state glow */}
+                {(isActiveLink('/dashboard') || isActiveLink('/client-dashboard')) && (
+                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-100/40 via-white/60 to-blue-100/40 rounded-xl"></div>
+                )}
+              </Link>
+            )}
+            
             {!loading && (
               <>
                 {isAuthenticated ? (
@@ -200,6 +222,33 @@ const Header = () => {
               >
                 About
               </Link>
+              
+              <Link 
+                to="/parking" 
+                onClick={() => setIsMenuOpen(false)}
+                className={`px-4 py-3 rounded-xl font-medium transition-all duration-300 ${
+                  isActiveLink('/parking') 
+                    ? 'text-yellow-300 bg-white/10 shadow-lg' 
+                    : 'text-white/90 hover:text-yellow-300 hover:bg-white/5'
+                }`}
+              >
+                🚗 Park Now
+              </Link>
+              
+              {/* Dashboard Link in Mobile Menu */}
+              {isAuthenticated && (
+                <Link 
+                  to={user?.role === 'client' || user?.role === 'parking_owner' ? '/client-dashboard' : '/dashboard'}
+                  onClick={() => setIsMenuOpen(false)}
+                  className={`px-4 py-3 rounded-xl font-medium transition-all duration-300 ${
+                    isActiveLink('/dashboard') || isActiveLink('/client-dashboard')
+                      ? 'text-yellow-300 bg-white/10 shadow-lg' 
+                      : 'text-white/90 hover:text-yellow-300 hover:bg-white/5'
+                  }`}
+                >
+                  📊 Dashboard
+                </Link>
+              )}
               
               {!loading && (
                 <>

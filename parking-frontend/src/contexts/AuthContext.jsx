@@ -66,13 +66,21 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  const login = (user, token) => {
+  const login = (user, token, navigate) => {
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(user));
     dispatch({
       type: 'LOGIN_SUCCESS',
       payload: { user, token }
     });
+
+    // Redirect to appropriate dashboard based on user role
+    if (navigate) {
+      const dashboardPath = user.role === 'client' || user.role === 'parking_owner' 
+        ? '/client-dashboard' 
+        : '/dashboard';
+      navigate(dashboardPath);
+    }
   };
 
   const logout = () => {

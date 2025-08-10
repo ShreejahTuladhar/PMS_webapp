@@ -6,6 +6,9 @@ import Header from './components/Header';
 import Home from './components/Home';
 import About from './components/About';
 import CustomerJourney from './components/customer/CustomerJourney';
+import UserDashboard from './components/dashboard/user/UserDashboard';
+import ClientDashboard from './components/dashboard/client/ClientDashboard';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
@@ -19,6 +22,22 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/parking" element={<CustomerJourney />} />
+                <Route 
+                  path="/dashboard" 
+                  element={
+                    <ProtectedRoute allowedRoles={['customer', 'user']}>
+                      <UserDashboard />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/client-dashboard" 
+                  element={
+                    <ProtectedRoute allowedRoles={['client', 'parking_owner']}>
+                      <ClientDashboard />
+                    </ProtectedRoute>
+                  } 
+                />
               </Routes>
             </div>
           </Router>

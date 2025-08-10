@@ -105,13 +105,13 @@ const MapController = ({ center, zoom }) => {
 };
 
 const MapView = ({ parkingSpots, radius, center, onSpotSelect, onBooking }) => {
-  const [selectedSpot, setSelectedSpot] = useState(null);
+  const [_selectedSpot, setSelectedSpot] = useState(null);
   const [currentLocation, setCurrentLocation] = useState(null);
   const [locationPermission, setLocationPermission] = useState('prompt'); // 'granted', 'denied', 'prompt'
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   
   // Default center (you can change this to your city's coordinates)
-  const defaultCenter = [27.7172, 85.3240]; // Kathmandu, Nepal
+  const defaultCenter = useMemo(() => [27.7172, 85.3240], []); // Kathmandu, Nepal
 
   // Get current location
   const getCurrentLocation = () => {
@@ -151,7 +151,7 @@ const MapView = ({ parkingSpots, radius, center, onSpotSelect, onBooking }) => {
     if (navigator.geolocation && locationPermission === 'prompt') {
       getCurrentLocation();
     }
-  }, []);
+  }, [locationPermission]);
 
   // Watch position for updates
   useEffect(() => {

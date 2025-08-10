@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import authService from '../../services/authService';
 
 function Register({ onSwitchToLogin, onClose }) {
   const { login } = useAuth();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -12,6 +14,7 @@ function Register({ onSwitchToLogin, onClose }) {
     firstName: '',
     lastName: '',
     phoneNumber: '',
+    role: 'user', // Default to user
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -70,7 +73,7 @@ function Register({ onSwitchToLogin, onClose }) {
 
     if (!formData.phoneNumber.trim()) {
       newErrors.phoneNumber = 'Phone number is required';
-    } else if (!/^[\d\s\-\+\(\)]+$/.test(formData.phoneNumber)) {
+    } else if (!/^[\d\s\-+()]+$/.test(formData.phoneNumber)) {
       newErrors.phoneNumber = 'Please enter a valid phone number';
     }
 
@@ -88,16 +91,16 @@ function Register({ onSwitchToLogin, onClose }) {
     setLoading(true);
 
     try {
-      const { confirmPassword, ...registerData } = formData;
+      const { confirmPassword: _confirmPassword, ...registerData } = formData;
       const result = await authService.register(registerData);
       
       if (result.success) {
-        login(result.user, result.token);
+        login(result.user, result.token, navigate);
         onClose();
       } else {
         setErrors({ general: result.error });
       }
-    } catch (error) {
+    } catch {
       setErrors({ general: 'An unexpected error occurred' });
     } finally {
       setLoading(false);
@@ -258,6 +261,45 @@ function Register({ onSwitchToLogin, onClose }) {
           {errors.confirmPassword && (
             <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>
           )}
+        </div>
+
+        <div>
+          <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
+            Account Type
+          </label>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => setFormData({...formData, role: 'user'})}
+              className={`p-3 rounded-lg border-2 transition-all duration-200 flex flex-col items-center ${
+                formData.role === 'user'
+                  ? 'border-blue-500 bg-blue-50 text-blue-700'
+                  : 'border-gray-300 hover:border-gray-400 text-gray-700'
+              }`}
+            >
+              <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              <span className="text-sm font-medium">Customer</span>
+              <span className="text-xs opacity-75">Find & book parking</span>
+            </button>
+            
+            <button
+              type="button"
+              onClick={() => setFormData({...formData, role: 'client'})}
+              className={`p-3 rounded-lg border-2 transition-all duration-200 flex flex-col items-center ${
+                formData.role === 'client'
+                  ? 'border-blue-500 bg-blue-50 text-blue-700'
+                  : 'border-gray-300 hover:border-gray-400 text-gray-700'
+              }`}
+            >
+              <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H3m2 0h4M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+              <span className="text-sm font-medium">Parking Owner</span>
+              <span className="text-xs opacity-75">Manage your parking</span>
+            </button>
+          </div>
         </div>
 
         <button

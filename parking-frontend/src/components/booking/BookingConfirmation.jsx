@@ -1,6 +1,42 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useBooking } from '../../contexts/BookingContext';
-import { generateNavigationURL, localNavigationPlatforms } from '../../data/kathmanduRealParkingData';
+
+// Navigation platform configurations (moved from deleted data file)
+const localNavigationPlatforms = {
+  galli: {
+    name: 'Galli Maps',
+    baseUrl: 'https://maps.galli.map',
+    supportsDeepLink: true,
+    isLocal: true
+  },
+  baato: {
+    name: 'Baato Maps', 
+    baseUrl: 'https://baato.io',
+    supportsDeepLink: true,
+    isLocal: true
+  },
+  google: {
+    name: 'Google Maps',
+    baseUrl: 'https://maps.google.com',
+    supportsDeepLink: true,
+    isLocal: false
+  }
+};
+
+// Generate navigation URL function (moved from deleted data file)
+const generateNavigationURL = (destination, platform = 'google') => {
+  const { lat, lng } = destination;
+  
+  switch (platform) {
+    case 'galli':
+      return `https://maps.galli.map/directions?destination=${lat},${lng}`;
+    case 'baato':
+      return `https://baato.io/directions?lat=${lat}&lng=${lng}`;
+    case 'google':
+    default:
+      return `https://maps.google.com/maps?daddr=${lat},${lng}&amp;ll=`;
+  }
+};
 
 function BookingConfirmation({ isOpen, onClose }) {
   const { currentBooking, navigationData, startNavigation, completeBooking } = useBooking();

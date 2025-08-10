@@ -28,8 +28,8 @@ const createTestLocation = async (locationData = {}) => {
     availableSpaces: 2,
     hourlyRate: 100,
     operatingHours: {
-      start: '06:00',
-      end: '22:00',
+      start: '00:00',
+      end: '23:59',
     },
     spaces: [
       {
