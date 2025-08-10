@@ -359,7 +359,7 @@ const getDashboardStats = async (req, res) => {
 // @desc    Get system health and performance metrics
 // @route   GET /api/admin/system-health
 // @access  Private (Super Admin only)
-const getSystemHealth = async (req, res) => {
+const getSystemHealth = async (_req, res) => {
   try {
     // Database connection status
     const dbStatus = {

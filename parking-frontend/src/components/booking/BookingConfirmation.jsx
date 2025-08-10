@@ -1,9 +1,47 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useBooking } from '../../contexts/BookingContext';
+
+// Navigation platform configurations (moved from deleted data file)
+const localNavigationPlatforms = {
+  galli: {
+    name: 'Galli Maps',
+    baseUrl: 'https://maps.galli.map',
+    supportsDeepLink: true,
+    isLocal: true
+  },
+  baato: {
+    name: 'Baato Maps', 
+    baseUrl: 'https://baato.io',
+    supportsDeepLink: true,
+    isLocal: true
+  },
+  google: {
+    name: 'Google Maps',
+    baseUrl: 'https://maps.google.com',
+    supportsDeepLink: true,
+    isLocal: false
+  }
+};
+
+// Generate navigation URL function (moved from deleted data file)
+const generateNavigationURL = (destination, platform = 'google') => {
+  const { lat, lng } = destination;
+  
+  switch (platform) {
+    case 'galli':
+      return `https://maps.galli.map/directions?destination=${lat},${lng}`;
+    case 'baato':
+      return `https://baato.io/directions?lat=${lat}&lng=${lng}`;
+    case 'google':
+    default:
+      return `https://maps.google.com/maps?daddr=${lat},${lng}&amp;ll=`;
+  }
+};
 
 function BookingConfirmation({ isOpen, onClose }) {
   const { currentBooking, navigationData, startNavigation, completeBooking } = useBooking();
   const [showQR, setShowQR] = useState(false);
+  const [selectedNavPlatform, setSelectedNavPlatform] = useState('galli');
 
   if (!isOpen || !currentBooking) return null;
 
@@ -11,13 +49,21 @@ function BookingConfirmation({ isOpen, onClose }) {
     if (navigationData) {
       startNavigation();
       
-      // Create Google Maps URL with directions
-      const origin = 'current+location'; // or use actual coordinates if available
-      const destination = `${navigationData.destination.lat},${navigationData.destination.lng}`;
-      const googleMapsUrl = `https://www.google.com/maps/dir/${origin}/${destination}`;
+      // Generate URL based on selected platform and parking spot's local navigation support
+      const parkingSpot = currentBooking.parkingSpot;
+      let navUrl;
       
-      // Open Google Maps in new tab
-      window.open(googleMapsUrl, '_blank');
+      if (selectedNavPlatform === 'galli' && parkingSpot.galliMapsSupported) {
+        navUrl = generateNavigationURL(navigationData.destination, 'galli');
+      } else if (selectedNavPlatform === 'baato' && parkingSpot.baatoMapsSupported) {
+        navUrl = generateNavigationURL(navigationData.destination, 'baato');
+      } else {
+        // Fallback to Google Maps
+        navUrl = generateNavigationURL(navigationData.destination, 'google');
+      }
+      
+      // Open navigation in new tab
+      window.open(navUrl, '_blank');
       
       // Close modal after starting navigation
       setTimeout(() => {
@@ -134,15 +180,76 @@ function BookingConfirmation({ isOpen, onClose }) {
               <div className="text-left flex-1">
                 <h3 className="font-semibold text-green-800 mb-2">🎉 Navigation Unlocked!</h3>
                 <p className="text-sm text-green-700 mb-4">
-                  Get turn-by-turn directions to your parking spot using Google Maps.
+                  Get turn-by-turn directions using your preferred navigation platform.
                 </p>
+                
+                {/* Navigation Platform Selection */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-green-800 mb-2">Choose Navigation Platform:</label>
+                  <div className="grid grid-cols-1 gap-2">
+                    {/* Galli Maps Option */}
+                    {currentBooking.parkingSpot.galliMapsSupported && (
+                      <label className="flex items-center p-2 border border-green-200 rounded-lg hover:bg-green-100 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="navPlatform"
+                          value="galli"
+                          checked={selectedNavPlatform === 'galli'}
+                          onChange={(e) => setSelectedNavPlatform(e.target.value)}
+                          className="mr-3"
+                        />
+                        <div className="flex-1">
+                          <div className="font-medium text-green-800">🇳🇵 Galli Maps</div>
+                          <div className="text-xs text-green-600">Local Nepali navigation with galli-level directions</div>
+                        </div>
+                        <span className="text-xs bg-green-200 text-green-800 px-2 py-1 rounded-full">Local</span>
+                      </label>
+                    )}
+                    
+                    {/* Baato Maps Option */}
+                    {currentBooking.parkingSpot.baatoMapsSupported && (
+                      <label className="flex items-center p-2 border border-green-200 rounded-lg hover:bg-green-100 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="navPlatform"
+                          value="baato"
+                          checked={selectedNavPlatform === 'baato'}
+                          onChange={(e) => setSelectedNavPlatform(e.target.value)}
+                          className="mr-3"
+                        />
+                        <div className="flex-1">
+                          <div className="font-medium text-green-800">🗺️ Baato Maps</div>
+                          <div className="text-xs text-green-600">Landmark-based navigation in Nepali context</div>
+                        </div>
+                        <span className="text-xs bg-green-200 text-green-800 px-2 py-1 rounded-full">Local</span>
+                      </label>
+                    )}
+                    
+                    {/* Google Maps Option */}
+                    <label className="flex items-center p-2 border border-green-200 rounded-lg hover:bg-green-100 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="navPlatform"
+                        value="google"
+                        checked={selectedNavPlatform === 'google'}
+                        onChange={(e) => setSelectedNavPlatform(e.target.value)}
+                        className="mr-3"
+                      />
+                      <div className="flex-1">
+                        <div className="font-medium text-green-800">🌐 Google Maps</div>
+                        <div className="text-xs text-green-600">Global navigation with real-time traffic</div>
+                      </div>
+                      <span className="text-xs bg-blue-200 text-blue-800 px-2 py-1 rounded-full">Global</span>
+                    </label>
+                  </div>
+                </div>
                 
                 <div className="space-y-2">
                   <button
                     onClick={handleOpenInApp}
                     className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition font-medium"
                   >
-                    🗺️ Open in Google Maps App
+                    📱 Open in Mobile App
                   </button>
                   
                   <button
@@ -153,9 +260,17 @@ function BookingConfirmation({ isOpen, onClose }) {
                   </button>
                 </div>
                 
-                <p className="text-xs text-green-600 mt-2">
-                  📍 Destination: {navigationData?.destination.name}
-                </p>
+                <div className="mt-3 p-2 bg-white rounded border-l-4 border-green-500">
+                  <p className="text-xs text-green-600">
+                    📍 Destination: {navigationData?.destination.name}
+                  </p>
+                  <p className="text-xs text-green-500">
+                    Platform: {localNavigationPlatforms[selectedNavPlatform]?.name || 'Google Maps'}
+                    {currentBooking.parkingSpot[`${selectedNavPlatform}MapsSupported`] && selectedNavPlatform !== 'google' && 
+                      <span className="ml-2 text-green-600">✓ Optimized for this location</span>
+                    }
+                  </p>
+                </div>
               </div>
             </div>
           </div>

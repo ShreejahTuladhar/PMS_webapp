@@ -1,6 +1,6 @@
-const User = require("../models/User");
-const { createSendToken } = require("../middleware/auth");
+const AuthService = require("../services/authService");
 const { validationResult } = require("express-validator");
+const { ValidationError, AuthenticationError } = require("../utils/errors");
 
 // @desc    Register new user
 // @route   POST /api/auth/register
@@ -17,41 +17,32 @@ const register = async (req, res) => {
       });
     }
 
-    const { username, email, password, firstName, lastName, phoneNumber } =
-      req.body;
-
-    // Check if user already exists
-    const existingUser = await User.findOne({
-      $or: [{ email: email.toLowerCase() }, { username }],
-    });
-
-    if (existingUser) {
-      const field =
-        existingUser.email === email.toLowerCase() ? "email" : "username";
-      return res.status(400).json({
-        success: false,
-        message: `User with this ${field} already exists`,
-      });
-    }
-
     // Create new user
-    const user = await User.create({
-      username,
-      email,
-      password,
-      firstName,
-      lastName,
-      phoneNumber,
-    });
+    const user = await AuthService.createUser(req.body);
 
     // Update last login
-    user.lastLogin = new Date();
-    await user.save({ validateBeforeSave: false });
+    await AuthService.updateLastLogin(user._id);
 
-    // Send token response
-    createSendToken(user, 201, res, "User registered successfully");
+    // Generate token and send response
+    const token = AuthService.generateToken(user._id);
+    const userResponse = AuthService.formatUserResponse(user, token);
+
+    res.status(201).json({
+      success: true,
+      message: "User registered successfully",
+      token: userResponse.token,
+      user: userResponse.user,
+    });
   } catch (error) {
     console.error("Registration error:", error);
+
+    // Handle custom validation errors
+    if (error instanceof ValidationError) {
+      return res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
 
     // Handle duplicate key error
     if (error.code === 11000) {
@@ -64,7 +55,7 @@ const register = async (req, res) => {
 
     res.status(500).json({
       success: false,
-      message: "Registration failed",
+      message: error.message || "Registration failed",
       error: error.message,
     });
   }
@@ -87,45 +78,33 @@ const login = async (req, res) => {
 
     const { username, password } = req.body;
 
-    // Find user by email or username and include password
-    const user = await User.findByEmailOrUsername(username).populate(
-      "assignedLocations",
-      "name address"
-    );
-
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid credentials",
-      });
-    }
-
-    // Check if account is active
-    if (!user.isActive) {
-      return res.status(403).json({
-        success: false,
-        message:
-          "Your account has been deactivated. Please contact administrator.",
-      });
-    }
-
-    // Check password
-    const isPasswordValid = await user.comparePassword(password);
-    if (!isPasswordValid) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid credentials",
-      });
-    }
+    // Validate credentials
+    const user = await AuthService.validateCredentials(username, password);
 
     // Update last login
-    user.lastLogin = new Date();
-    await user.save({ validateBeforeSave: false });
+    await AuthService.updateLastLogin(user._id);
 
-    // Send token response
-    createSendToken(user, 200, res, "Login successful");
+    // Generate token and send response
+    const token = AuthService.generateToken(user._id);
+    const userResponse = AuthService.formatUserResponse(user, token);
+
+    res.status(200).json({
+      success: true,
+      message: "Login successful",
+      token: userResponse.token,
+      user: userResponse.user,
+    });
   } catch (error) {
     console.error("Login error:", error);
+    
+    // Handle custom authentication errors
+    if (error instanceof AuthenticationError) {
+      return res.status(401).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
     res.status(500).json({
       success: false,
       message: "Login failed",
@@ -139,28 +118,11 @@ const login = async (req, res) => {
 // @access  Private
 const getMe = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).populate(
-      "assignedLocations",
-      "name address"
-    );
+    const userResponse = AuthService.formatUserResponse(req.user);
 
     res.status(200).json({
       success: true,
-      user: {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        fullName: user.fullName,
-        phoneNumber: user.phoneNumber,
-        role: user.role,
-        isActive: user.isActive,
-        vehicles: user.vehicles,
-        assignedLocations: user.assignedLocations,
-        lastLogin: user.lastLogin,
-        accountCreatedAt: user.accountCreatedAt,
-      },
+      user: userResponse,
     });
   } catch (error) {
     res.status(500).json({

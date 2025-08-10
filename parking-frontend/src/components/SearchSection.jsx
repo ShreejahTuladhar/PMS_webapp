@@ -1,10 +1,23 @@
 import { useState, useEffect, useRef } from 'react';
-import { kathmanduParkingData, kathmanduAreas } from '../data/kathmanduParkingData';
 
 const popularLocations = [
   'Thamel', 'Durbar Square', 'New Road', 'Ratna Park', 
   'Lazimpat', 'Bouddha', 'Patan', 'Swayambhunath'
 ];
+
+// Kathmandu area coordinates (moved from deleted data file)
+const kathmanduAreas = {
+  ratnapark: { lat: 27.7064, lng: 85.3238 },
+  thamel: { lat: 27.7151, lng: 85.3107 },
+  durbar: { lat: 27.7040, lng: 85.3070 },
+  newroad: { lat: 27.7016, lng: 85.3197 },
+  putalisadak: { lat: 27.7095, lng: 85.3269 },
+  baneshwor: { lat: 27.6893, lng: 85.3436 },
+  koteshwor: { lat: 27.6776, lng: 85.3470 },
+  lagankhel: { lat: 27.6667, lng: 85.3247 },
+  jawalakhel: { lat: 27.6701, lng: 85.3159 },
+  patan: { lat: 27.6648, lng: 85.3188 }
+};
 
 const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
   const [location, setLocation] = useState('');
@@ -19,20 +32,6 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
   const getAllSearchableLocations = () => {
     const locations = new Set();
     
-    // Add parking location names and addresses
-    kathmanduParkingData.forEach(parking => {
-      locations.add(parking.name);
-      locations.add(parking.address);
-      // Extract area names from addresses
-      const addressParts = parking.address.split(',');
-      addressParts.forEach(part => {
-        const cleanPart = part.trim();
-        if (cleanPart && cleanPart.length > 2) {
-          locations.add(cleanPart);
-        }
-      });
-    });
-    
     // Add known area names
     Object.keys(kathmanduAreas).forEach(area => {
       locations.add(area.charAt(0).toUpperCase() + area.slice(1));
@@ -40,6 +39,20 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
     
     // Add popular locations
     popularLocations.forEach(loc => locations.add(loc));
+    
+    // Add more common Kathmandu locations
+    const commonLocations = [
+      'Kamaladi', 'Anamnagar', 'Dillibazar', 'Maharajgunj', 'Baluwatar',
+      'Sundhara', 'Bagbazar', 'Ason', 'Indrachowk', 'Basantapur',
+      'Tripureshwor', 'Kalimati', 'Thankot', 'Balaju', 'Tokha',
+      'Budhanilkantha', 'Gongabu', 'Chabahil', 'Jorpati', 'Boudha',
+      'Pashupatinath', 'Gaushala', 'Sinamangal', 'Tinkune', 'Koteshwor',
+      'Thimi', 'Bhaktapur', 'Sano Thimi', 'Katunje', 'Lokanthali',
+      'Imadol', 'Satdobato', 'Lagankhel', 'Pulchowk', 'Kupondole',
+      'Sanepa', 'Jawalakhel', 'Patan Dhoka', 'Mangal Bazaar'
+    ];
+    
+    commonLocations.forEach(loc => locations.add(loc));
     
     return Array.from(locations).filter(loc => loc.length > 2);
   };
@@ -172,24 +185,60 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
   }, []);
 
   return (
-    <section className="bg-gradient-to-r from-blue-600 to-blue-800 py-12">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-8">
-          <h2 className="text-4xl font-bold text-white mb-4">
-            Find Smart Parking Solutions
-          </h2>
-          <p className="text-blue-100 text-lg max-w-2xl mx-auto">
-            Search, book, and manage parking spaces near you with real-time availability and competitive rates
-          </p>
+    <section className="relative py-20 overflow-hidden">
+      {/* Balanced Evening Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-900 via-slate-800 to-blue-900"></div>
+      
+      {/* Warm street lighting ambience */}
+      <div className="absolute inset-0 opacity-35">
+        <div className="absolute top-10 left-1/4 w-32 h-32 bg-gradient-to-r from-yellow-200 to-blue-200 rounded-full blur-3xl animate-pulse" style={{animationDelay: '0s', animationDuration: '4s'}}></div>
+        <div className="absolute top-32 right-1/3 w-24 h-24 bg-gradient-to-r from-blue-100 to-yellow-100 rounded-full blur-2xl animate-pulse" style={{animationDelay: '2s', animationDuration: '5s'}}></div>
+        <div className="absolute bottom-20 left-1/6 w-28 h-28 bg-gradient-to-r from-yellow-100 to-blue-100 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s', animationDuration: '3.5s'}}></div>
+      </div>
+
+      {/* Moving car headlights */}
+      <div className="absolute inset-0">
+        {/* Left to right traffic */}
+        <div className="absolute top-1/3 left-0 w-16 h-4 bg-gradient-to-r from-transparent via-white to-blue-100 blur-sm animate-car-lights-lr opacity-80"></div>
+        <div className="absolute top-1/3 left-0 w-12 h-3 bg-gradient-to-r from-transparent via-yellow-200 to-blue-200 blur-md animate-car-lights-lr-delay opacity-60" style={{animationDelay: '3s'}}></div>
+        
+        {/* Right to left traffic */}
+        <div className="absolute bottom-1/4 right-0 w-16 h-4 bg-gradient-to-l from-transparent via-red-400 to-orange-500 blur-sm animate-car-lights-rl opacity-70"></div>
+        <div className="absolute bottom-1/4 right-0 w-14 h-3 bg-gradient-to-l from-transparent via-red-300 to-yellow-400 blur-md animate-car-lights-rl-delay opacity-50" style={{animationDelay: '4s'}}></div>
+
+        {/* Diagonal traffic flow */}
+        <div className="absolute top-1/2 left-0 w-20 h-3 bg-gradient-to-r from-transparent via-cyan-200 to-white blur-sm animate-car-lights-diagonal opacity-60"></div>
+        
+        {/* Occasional bright headlight flashes */}
+        <div className="absolute top-2/3 left-1/4 w-6 h-2 bg-white blur-sm animate-headlight-flash opacity-90"></div>
+        <div className="absolute top-1/4 right-1/3 w-4 h-2 bg-blue-100 blur-sm animate-headlight-flash-delay opacity-80"></div>
+      </div>
+
+      {/* Urban glow overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-slate-800/20 via-transparent to-blue-900/30"></div>
+      
+      <div className="container mx-auto px-6 relative z-10">
+        <div className="text-center mb-12">
+          <div className="animate-fade-in-up">
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight">
+              <span className="text-green-300">🏠</span> Find Parking in Your <span className="text-orange-300">Neighborhood</span>
+            </h2>
+            <p className="text-lg text-white/90 max-w-3xl mx-auto leading-relaxed">
+              Built by locals, for locals! Our community-driven parking system helps you find 
+              <span className="text-yellow-300 font-semibold"> affordable spots</span> with 
+              <span className="text-yellow-300 font-semibold"> friendly service</span> across Kathmandu Valley
+            </p>
+          </div>
         </div>
 
-        <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl p-6">
-          <form onSubmit={handleSearch} className="space-y-4">
-            <div className="flex flex-col md:flex-row gap-4">
-              {/* Location Search */}
+        <div className="max-w-5xl mx-auto card-premium p-8">
+          <form onSubmit={handleSearch} className="space-y-6">
+            <div className="flex flex-col md:flex-row gap-6">
+              {/* Premium Location Search */}
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Search Location
+                <label className="block text-sm font-semibold text-gray-800 mb-3 flex items-center">
+                  <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                  🏠 Find Parking Near You
                 </label>
                 <div className="relative" ref={inputRef}>
                   <input
@@ -202,39 +251,53 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
                         setShowSuggestions(true);
                       }
                     }}
-                    placeholder="Type 'Tha...' for Thamel, 'Dur...' for Durbar Square..."
-                    className="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="जहाँ जाँदै हुनुहुन्छ? • Where are you going?"
+                    className="input-premium w-full px-6 py-4 pl-14 text-lg font-medium placeholder-gray-400 text-gray-800"
                     autoComplete="off"
                   />
-                  <svg className="absolute left-4 top-3.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
+                  <div className="absolute left-5 top-1/2 transform -translate-y-1/2">
+                    <div className="p-1 rounded-lg bg-gradient-primary">
+                      <svg className="w-5 h-5 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                    </div>
+                  </div>
                   
-                  {/* Suggestions Dropdown */}
+                  {/* Premium Suggestions Dropdown */}
                   {showSuggestions && suggestions.length > 0 && (
-                    <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto">
+                    <div className="absolute z-50 w-full mt-2 card-premium border border-yellow-200/50 max-h-80 overflow-y-auto">
                       {suggestions.map((suggestion, index) => (
                         <div
                           key={index}
                           ref={el => suggestionRefs.current[index] = el}
-                          className={`px-4 py-3 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors ${
+                          className={`px-6 py-4 cursor-pointer transition-all duration-300 border-b border-gray-100/50 last:border-b-0 ${
                             index === activeSuggestion 
-                              ? 'bg-blue-50 text-blue-700' 
-                              : 'hover:bg-gray-50 text-gray-700'
+                              ? 'bg-gradient-primary text-white transform scale-[1.02]' 
+                              : 'hover:bg-yellow-50 text-gray-700 hover:text-gray-900'
                           }`}
                           onClick={() => handleSuggestionClick(suggestion)}
                           onMouseEnter={() => setActiveSuggestion(index)}
                         >
                           <div className="flex items-center">
-                            <svg className="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            <span className="text-sm">
+                            <div className={`p-1.5 rounded-lg mr-4 ${
+                              index === activeSuggestion ? 'bg-white/20' : 'bg-gradient-primary'
+                            }`}>
+                              <svg className={`w-4 h-4 ${
+                                index === activeSuggestion ? 'text-yellow-300' : 'text-white'
+                              }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                              </svg>
+                            </div>
+                            <span className="font-medium">
                               {suggestion.text}
                             </span>
                             {suggestion.type === 'exact' && (
-                              <span className="ml-auto text-xs text-blue-500 font-medium">Exact match</span>
+                              <span className={`ml-auto text-xs font-bold px-2 py-1 rounded-full ${
+                                index === activeSuggestion 
+                                  ? 'bg-yellow-300 text-blue-900' 
+                                  : 'bg-gradient-primary text-white'
+                              }`}>Perfect Match</span>
                             )}
                           </div>
                         </div>
@@ -244,88 +307,104 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
                 </div>
               </div>
 
-              {/* Radius Selection */}
-              <div className="md:w-48">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Search Radius
+              {/* Premium Radius Selection */}
+              <div className="md:w-56">
+                <label className="block text-sm font-semibold text-gray-800 mb-3 flex items-center">
+                  <div className="w-2 h-2 bg-orange-500 rounded-full mr-2"></div>
+                  📍 Distance Range
                 </label>
-                <select 
-                  value={radius}
-                  onChange={(e) => onRadiusChange(Number(e.target.value))}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value={1}>1 km</option>
-                  <option value={2}>2 km</option>
-                  <option value={3}>3 km</option>
-                  <option value={4}>4 km</option>
-                  <option value={5}>5 km</option>
-                </select>
+                <div className="relative">
+                  <select 
+                    value={radius}
+                    onChange={(e) => onRadiusChange(Number(e.target.value))}
+                    className="input-premium w-full px-6 py-4 text-lg font-medium text-gray-800 appearance-none cursor-pointer"
+                  >
+                    <option value={1}>🚶 1 km - नजिकै (Nearby)</option>
+                    <option value={2}>🚗 2 km - सामान्य (Normal)</option>
+                    <option value={3}>🛣️ 3 km - फराकिलो (Wide)</option>
+                    <option value={4}>🌄 4 km - धेरै टाढा (Far)</option>
+                    <option value={5}>🗺️ 5 km - जता पनि (Anywhere)</option>
+                  </select>
+                  <div className="absolute right-5 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                    <div className="p-1 rounded-lg bg-gradient-primary">
+                      <svg className="w-4 h-4 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+            {/* Premium Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <button
                 type="submit"
                 disabled={isLoading || !location.trim()}
-                className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition flex items-center justify-center"
+                className="btn-primary flex-1 py-4 px-8 rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center text-lg font-bold relative overflow-hidden group"
               >
                 {isLoading ? (
                   <>
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Searching...
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-3"></div>
+                    <span>Discovering Premium Spots...</span>
                   </>
                 ) : (
                   <>
-                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                    Search Parking
+                    <div className="p-1 bg-white/20 rounded-lg mr-3">
+                      <svg className="w-5 h-5 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                    </div>
+                    <span>🏠 Find Local Parking</span>
                   </>
                 )}
+                <div className="absolute inset-0 bg-gradient-subtle opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </button>
               
               <button
                 type="button"
                 onClick={handleCurrentLocation}
                 disabled={isLoading}
-                className="sm:w-auto bg-gray-100 text-gray-700 py-3 px-6 rounded-lg hover:bg-gray-200 disabled:bg-gray-400 disabled:cursor-not-allowed transition flex items-center justify-center"
+                className="sm:w-auto glass-dark border-2 border-white/20 text-white py-4 px-8 rounded-2xl hover:bg-white/10 hover:border-yellow-300/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center font-bold group"
               >
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                Use Current Location
+                <div className="p-1 bg-yellow-300/20 rounded-lg mr-3">
+                  <svg className="w-5 h-5 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+                <span>Use My Location</span>
               </button>
             </div>
           </form>
           
-          {/* Popular Locations - Only show when not typing */}
+          {/* Premium Popular Locations */}
           {!showSuggestions && (
-            <div className="mt-6">
-              <h3 className="text-sm font-medium text-gray-700 mb-3">Popular Locations in Kathmandu:</h3>
-              <div className="flex flex-wrap gap-2">
+            <div className="mt-8 pt-6 border-t border-gray-200/50">
+              <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                <div className="w-3 h-3 bg-gradient-primary rounded-full mr-2"></div>
+                🏠 Popular Places in Kathmandu
+              </h3>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {popularLocations.map((loc) => (
                   <button
                     key={loc}
                     onClick={() => handleQuickSearch(loc)}
-                    className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm hover:bg-blue-100 transition"
+                    className="relative group px-4 py-3 glass-dark border border-white/10 rounded-xl hover:border-yellow-300/50 transition-all duration-300 hover:transform hover:scale-105"
                   >
-                    {loc}
+                    <span className="text-gray-700 font-semibold group-hover:text-gray-900 transition-colors duration-300">{loc}</span>
+                    <div className="absolute inset-0 bg-gradient-primary opacity-0 group-hover:opacity-5 rounded-xl transition-opacity duration-300"></div>
                   </button>
                 ))}
               </div>
             </div>
           )}
           
-          {/* Search Tips */}
+          {/* Premium Search Tips */}
           {showSuggestions && suggestions.length > 0 && (
-            <div className="mt-4">
-              <p className="text-xs text-gray-500 text-center">
-                Use ↑ ↓ arrow keys to navigate • Press Enter to select • Esc to close
+            <div className="mt-6 p-4 glass-dark border border-yellow-300/30 rounded-xl">
+              <p className="text-sm text-gray-700 text-center font-medium">
+                💡 <span className="text-yellow-600 font-bold">Pro Tip:</span> Use ↑ ↓ arrow keys to navigate • Press Enter to select • Esc to close
               </p>
             </div>
           )}
