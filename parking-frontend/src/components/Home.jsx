@@ -5,6 +5,7 @@ import { useBooking } from '../contexts/BookingContext';
 import SearchSection from './SearchSection';
 import MapView from './MapView';
 import ParkingList from './ParkingList';
+import PremiumLocationBanner from './PremiumLocationBanner';
 import AuthModal from './auth/AuthModal';
 import BookingModal from './booking/BookingModal';
 import BookingConfirmation from './booking/BookingConfirmation';
@@ -68,7 +69,10 @@ function Home() {
     koteshwor: { lat: 27.6776, lng: 85.3470 },
     lagankhel: { lat: 27.6667, lng: 85.3247 },
     jawalakhel: { lat: 27.6701, lng: 85.3159 },
-    patan: { lat: 27.6648, lng: 85.3188 }
+    patan: { lat: 27.6648, lng: 85.3188 },
+    satdobato: { lat: 27.6587, lng: 85.3247 },
+    imadol: { lat: 27.6550, lng: 85.3280 },
+    swayambhunath: { lat: 27.7148, lng: 85.2906 }
   };
 
   const handleSearch = async (location, searchType = 'manual') => {
@@ -447,6 +451,13 @@ function Home() {
           <div className="container mx-auto px-4 py-8">
             {searchResults.length > 0 ? (
               <>
+                {/* Premium Location Banner */}
+                <PremiumLocationBanner 
+                  parkingSpots={searchResults}
+                  onBookNow={handleBooking}
+                  onViewDetails={handleSpotSelect}
+                />
+
                 <div className="mb-6 text-center">
                   <h2 className="text-2xl font-bold text-gray-800 mb-2">
                     Parking Spots Near You
@@ -473,6 +484,7 @@ function Home() {
                       onBooking={handleBooking}
                       selectedSpot={selectedSpot}
                       onLoginRequired={handleLoginRequired}
+                      onSpotSelect={handleSpotSelect}
                     />
                   </div>
                 </div>

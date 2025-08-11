@@ -30,7 +30,10 @@ class SampleDataGenerator {
       { name: 'Balaju Industrial Area', lat: 27.7300, lng: 85.3000, type: 'industrial' },
       { name: 'Maharajgunj Medical Campus', lat: 27.7400, lng: 85.3300, type: 'medical' },
       { name: 'Putalisadak Government Area', lat: 27.7095, lng: 85.3269, type: 'government' },
-      { name: 'Anamnagar Residential', lat: 27.6950, lng: 85.3200, type: 'residential' }
+      { name: 'Anamnagar Residential', lat: 27.6950, lng: 85.3200, type: 'residential' },
+      { name: 'Satdobato Commercial Area', lat: 27.6587, lng: 85.3247, type: 'commercial' },
+      { name: 'Imadol Market Hub', lat: 27.6550, lng: 85.3280, type: 'market' },
+      { name: 'Swayambhunath Temple Area', lat: 27.7148, lng: 85.2906, type: 'heritage' }
     ];
 
     this.parkingTypes = [
