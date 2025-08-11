@@ -1,7 +1,38 @@
 import { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 
-const ParkingList = ({ parkingSpots, onBooking, selectedSpot }) => {
+const ParkingList = ({ parkingSpots, onBooking, selectedSpot, onLoginRequired }) => {
   const [sortBy, setSortBy] = useState('distance');
+  const [favorites, setFavorites] = useState(new Set());
+  const { isAuthenticated } = useAuth();
+
+  const handleBookingClick = (spot) => {
+    if (!isAuthenticated) {
+      if (onLoginRequired) {
+        onLoginRequired();
+      }
+      return;
+    }
+    onBooking(spot);
+  };
+
+  const toggleFavorite = (spotId) => {
+    if (!isAuthenticated) {
+      if (onLoginRequired) {
+        onLoginRequired();
+      }
+      return;
+    }
+    
+    const newFavorites = new Set(favorites);
+    if (newFavorites.has(spotId)) {
+      newFavorites.delete(spotId);
+    } else {
+      newFavorites.add(spotId);
+    }
+    setFavorites(newFavorites);
+    // TODO: Save to backend/localStorage
+  };
 
   const sortedSpots = [...parkingSpots].sort((a, b) => {
     switch (sortBy) {
@@ -71,7 +102,25 @@ const ParkingList = ({ parkingSpots, onBooking, selectedSpot }) => {
           >
             <div className="flex justify-between items-start mb-3">
               <div className="flex-1">
-                <h4 className="font-semibold text-gray-800 mb-1">{spot.name}</h4>
+                <div className="flex items-center justify-between">
+                  <h4 className="font-semibold text-gray-800 mb-1">{spot.name}</h4>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleFavorite(spot.id);
+                    }}
+                    className={`p-1 rounded-full transition-colors ${
+                      favorites.has(spot.id)
+                        ? 'text-yellow-500 hover:text-yellow-600'
+                        : 'text-gray-400 hover:text-yellow-500'
+                    }`}
+                    title={favorites.has(spot.id) ? 'Remove from favorites' : 'Add to favorites'}
+                  >
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                    </svg>
+                  </button>
+                </div>
                 <p className="text-gray-600 text-sm mb-2">{spot.address}</p>
                 
                 <div className="flex items-center space-x-4 text-sm text-gray-500">
@@ -100,11 +149,11 @@ const ParkingList = ({ parkingSpots, onBooking, selectedSpot }) => {
 
               <div className="text-right">
                 <div className="text-lg font-bold text-blue-600 mb-1">
-                  ${spot.hourlyRate}/hr
+                  NRS {spot.hourlyRate}/hr
                 </div>
                 {spot.vehicleTypes.motorcycle && (
                   <div className="text-sm text-gray-600">
-                    ${spot.vehicleTypes.motorcycle}/hr (motorcycle)
+                    NRS {spot.vehicleTypes.motorcycle}/hr (motorcycle)
                   </div>
                 )}
               </div>
@@ -128,7 +177,7 @@ const ParkingList = ({ parkingSpots, onBooking, selectedSpot }) => {
               </div>
 
               <button
-                onClick={() => onBooking(spot)}
+                onClick={() => handleBookingClick(spot)}
                 disabled={spot.availability === 0}
                 className={`px-4 py-2 rounded font-medium text-sm transition ${
                   spot.availability > 0
@@ -136,13 +185,13 @@ const ParkingList = ({ parkingSpots, onBooking, selectedSpot }) => {
                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 }`}
               >
-                {spot.availability > 0 ? 'Book Now' : 'Full'}
+                {spot.availability > 0 ? (isAuthenticated ? 'Book Now' : 'Sign in to Book') : 'Full'}
               </button>
             </div>
 
             {spot.specialOffers && (
               <div className="mt-2 p-2 bg-green-50 rounded text-sm text-green-700">
-                🎉 {spot.specialOffers}
+                 {spot.specialOffers}
               </div>
             )}
           </div>
