@@ -5,6 +5,7 @@ import { useBooking } from '../contexts/BookingContext';
 import SearchSection from './SearchSection';
 import MapView from './MapView';
 import ParkingList from './ParkingList';
+import PremiumLocationBanner from './PremiumLocationBanner';
 import AuthModal from './auth/AuthModal';
 import BookingModal from './booking/BookingModal';
 import BookingConfirmation from './booking/BookingConfirmation';
@@ -450,6 +451,13 @@ function Home() {
           <div className="container mx-auto px-4 py-8">
             {searchResults.length > 0 ? (
               <>
+                {/* Premium Location Banner */}
+                <PremiumLocationBanner 
+                  parkingSpots={searchResults}
+                  onBookNow={handleBooking}
+                  onViewDetails={handleSpotSelect}
+                />
+
                 <div className="mb-6 text-center">
                   <h2 className="text-2xl font-bold text-gray-800 mb-2">
                     Parking Spots Near You
@@ -476,6 +484,7 @@ function Home() {
                       onBooking={handleBooking}
                       selectedSpot={selectedSpot}
                       onLoginRequired={handleLoginRequired}
+                      onSpotSelect={handleSpotSelect}
                     />
                   </div>
                 </div>
