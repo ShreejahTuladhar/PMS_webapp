@@ -68,7 +68,10 @@ function Home() {
     koteshwor: { lat: 27.6776, lng: 85.3470 },
     lagankhel: { lat: 27.6667, lng: 85.3247 },
     jawalakhel: { lat: 27.6701, lng: 85.3159 },
-    patan: { lat: 27.6648, lng: 85.3188 }
+    patan: { lat: 27.6648, lng: 85.3188 },
+    satdobato: { lat: 27.6587, lng: 85.3247 },
+    imadol: { lat: 27.6550, lng: 85.3280 },
+    swayambhunath: { lat: 27.7148, lng: 85.2906 }
   };
 
   const handleSearch = async (location, searchType = 'manual') => {
