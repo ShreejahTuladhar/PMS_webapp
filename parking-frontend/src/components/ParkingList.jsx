@@ -149,11 +149,11 @@ const ParkingList = ({ parkingSpots, onBooking, selectedSpot, onLoginRequired })
 
               <div className="text-right">
                 <div className="text-lg font-bold text-blue-600 mb-1">
-                  ${spot.hourlyRate}/hr
+                  NRS {spot.hourlyRate}/hr
                 </div>
                 {spot.vehicleTypes.motorcycle && (
                   <div className="text-sm text-gray-600">
-                    ${spot.vehicleTypes.motorcycle}/hr (motorcycle)
+                    NRS {spot.vehicleTypes.motorcycle}/hr (motorcycle)
                   </div>
                 )}
               </div>

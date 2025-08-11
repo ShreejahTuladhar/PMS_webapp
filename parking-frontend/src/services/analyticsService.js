@@ -144,12 +144,36 @@ class AnalyticsService {
           updatedAt: result.data.updatedAt
         };
       } else {
+        // If analytics API is not available, return empty trends
+        if (result.error && result.error.toLowerCase().includes('route not found')) {
+          console.info('Analytics trends API not available - returning empty trends');
+          return {
+            success: true,
+            trends: [],
+            period: period,
+            totalSearches: 0,
+            updatedAt: Date.now()
+          };
+        }
+        
         return {
           success: false,
           error: result.error
         };
       }
     } catch (error) {
+      // If it's a 404, return empty trends instead of error
+      if (error.message && error.message.includes('404')) {
+        console.info('Analytics trends API not available - returning empty trends');
+        return {
+          success: true,
+          trends: [],
+          period: period,
+          totalSearches: 0,
+          updatedAt: Date.now()
+        };
+      }
+      
       return {
         success: false,
         error: error.message || 'Failed to fetch popular search trends'
@@ -178,12 +202,46 @@ class AnalyticsService {
           lastUpdated: result.data.lastUpdated
         };
       } else {
+        // If analytics API is not available, return basic analytics
+        if (result.error && result.error.toLowerCase().includes('route not found')) {
+          console.info('Search analytics API not available - returning basic analytics');
+          return {
+            success: true,
+            analytics: {
+              totalSearches: 0,
+              uniqueSearches: 0,
+              avgSearchDuration: 0,
+              topLocations: [],
+              searchTrends: []
+            },
+            period: params.period || '30d',
+            lastUpdated: Date.now()
+          };
+        }
+        
         return {
           success: false,
           error: result.error
         };
       }
     } catch (error) {
+      // If it's a 404, return basic analytics instead of error
+      if (error.message && error.message.includes('404')) {
+        console.info('Search analytics API not available - returning basic analytics');
+        return {
+          success: true,
+          analytics: {
+            totalSearches: 0,
+            uniqueSearches: 0,
+            avgSearchDuration: 0,
+            topLocations: [],
+            searchTrends: []
+          },
+          period: params.period || '30d',
+          lastUpdated: Date.now()
+        };
+      }
+      
       return {
         success: false,
         error: error.message || 'Failed to fetch search analytics'
@@ -217,6 +275,12 @@ class AnalyticsService {
       });
 
       if (!result.success) {
+        // Check if this is a "route not found" error - if so, don't retry
+        if (result.error && result.error.toLowerCase().includes('route not found')) {
+          console.info('Analytics API not available - events will be stored locally only');
+          return; // Don't re-add events for missing endpoints
+        }
+        
         console.warn('Failed to send analytics events:', result.error);
         // Re-add failed events to pending (up to a limit to avoid memory issues)
         if (this.pendingEvents.length < 50) {
@@ -224,7 +288,13 @@ class AnalyticsService {
         }
       }
     } catch (error) {
-      console.warn('Error sending analytics events:', error);
+      // Check if this is a network or 404 error - don't retry for missing endpoints
+      if (error.message && (error.message.includes('404') || error.message.includes('Route not found'))) {
+        console.info('Analytics API endpoints not available - operating in local-only mode');
+        return; // Don't re-add events for missing endpoints
+      }
+      
+      console.warn('Error sending analytics events:', error.message);
       // Re-add failed events to pending (up to a limit)
       if (this.pendingEvents.length < 50) {
         this.pendingEvents.unshift(...eventsToSend);

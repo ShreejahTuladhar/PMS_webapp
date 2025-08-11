@@ -1,11 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import searchHistory from '../utils/searchHistory';
-import { analyticsService } from '../services';
-
-const popularLocations = [
-  'Thamel', 'Durbar Square', 'New Road', 'Ratna Park', 
-  'Lazimpat', 'Bouddha', 'Patan', 'Swayambhunath'
-];
+import { analyticsService, locationService } from '../services';
+import { EnhancedSearch, highlightMatch } from '../utils/searchUtils';
 
 // Kathmandu area coordinates (moved from deleted data file)
 const kathmanduAreas = {
@@ -21,6 +17,9 @@ const kathmanduAreas = {
   patan: { lat: 27.6648, lng: 85.3188 }
 };
 
+// Debug log for kathmanduAreas
+console.log('🗺️ KATHMANDU AREAS COORDINATES (defined in SearchSection.jsx):', kathmanduAreas);
+
 const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
   const [location, setLocation] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -29,74 +28,177 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
   const [activeSuggestion, setActiveSuggestion] = useState(-1);
   const [recentSearches, setRecentSearches] = useState([]);
   const [showRecentSearches, setShowRecentSearches] = useState(false);
+  const [popularLocations, setPopularLocations] = useState([]);
+  const [extractedLocationData, setExtractedLocationData] = useState([]); // Store full location data with coordinates
+  const [loadingPopular, setLoadingPopular] = useState(true);
+  const [spellingSuggestions, setSpellingSuggestions] = useState([]);
+  const [showSpellingSuggestions, setShowSpellingSuggestions] = useState(false);
   const suggestionRefs = useRef([]);
   const inputRef = useRef(null);
+  const enhancedSearchRef = useRef(null);
 
-  // Generate all searchable locations
+  // Generate all searchable locations using dynamic and static data
   const getAllSearchableLocations = () => {
     const locations = new Set();
     
-    // Add known area names
-    Object.keys(kathmanduAreas).forEach(area => {
-      locations.add(area.charAt(0).toUpperCase() + area.slice(1));
+    console.log('🏛️ === SEARCH LOCATION SOURCES DEBUG ===');
+    
+    // Add known area names from kathmanduAreas
+    const kathmanduAreaNames = Object.keys(kathmanduAreas).map(area => 
+      area.charAt(0).toUpperCase() + area.slice(1)
+    );
+    console.log('📍 Kathmandu Areas (from kathmanduAreas object):', kathmanduAreaNames);
+    kathmanduAreaNames.forEach(area => locations.add(area));
+    
+    // Add extracted location names from parking spot addresses (primary source)
+    if (extractedLocationData.length > 0) {
+      console.log('🏗️ Extracted Location Data (from parking spot addresses):', extractedLocationData.map(loc => loc.name));
+      extractedLocationData.forEach(locData => {
+        if (locData.name) {
+          console.log(`  ➤ Adding extracted location: "${locData.name}" (${locData.spotCount} spots)`);
+          locations.add(locData.name);
+        }
+      });
+    }
+    
+    // Add popular locations from database/fallback
+    console.log('🔥 Popular Locations (from database/fallback):', popularLocations);
+    popularLocations.forEach(loc => {
+      if (typeof loc === 'string') {
+        console.log(`  ➤ Adding popular location: "${loc}"`);
+        locations.add(loc);
+      } else if (loc.name) {
+        console.log(`  ➤ Adding popular location from object: "${loc.name}"`);
+        locations.add(loc.name);
+      }
     });
     
-    // Add popular locations
-    popularLocations.forEach(loc => locations.add(loc));
+    // Add fallback common locations only if we have limited extracted data
+    if (extractedLocationData.length < 10) {
+      const commonLocations = [
+        'Kamaladi', 'Anamnagar', 'Dillibazar', 'Maharajgunj', 'Baluwatar',
+        'Sundhara', 'Bagbazar', 'Ason', 'Indrachowk', 'Basantapur',
+        'Tripureshwor', 'Kalimati', 'Thankot', 'Balaju', 'Tokha',
+        'Budhanilkantha', 'Gongabu', 'Chabahil', 'Jorpati', 'Boudha',
+        'Pashupatinath', 'Gaushala', 'Sinamangal', 'Tinkune', 'Koteshwor',
+        'Thimi', 'Bhaktapur', 'Sano Thimi', 'Katunje', 'Lokanthali',
+        'Imadol', 'Satdobato', 'Lagankhel', 'Pulchowk', 'Kupondole',
+        'Sanepa', 'Jawalakhel', 'Patan Dhoka', 'Mangal Bazaar'
+      ];
+      
+      console.log(`🏙️ Adding fallback common locations (extracted data count: ${extractedLocationData.length}):`, commonLocations.slice(0, 5), '...');
+      commonLocations.forEach(loc => locations.add(loc));
+    } else {
+      console.log(`✨ Skipping fallback locations - sufficient extracted data (${extractedLocationData.length} locations)`);
+    }
     
-    // Add more common Kathmandu locations
-    const commonLocations = [
-      'Kamaladi', 'Anamnagar', 'Dillibazar', 'Maharajgunj', 'Baluwatar',
-      'Sundhara', 'Bagbazar', 'Ason', 'Indrachowk', 'Basantapur',
-      'Tripureshwor', 'Kalimati', 'Thankot', 'Balaju', 'Tokha',
-      'Budhanilkantha', 'Gongabu', 'Chabahil', 'Jorpati', 'Boudha',
-      'Pashupatinath', 'Gaushala', 'Sinamangal', 'Tinkune', 'Koteshwor',
-      'Thimi', 'Bhaktapur', 'Sano Thimi', 'Katunje', 'Lokanthali',
-      'Imadol', 'Satdobato', 'Lagankhel', 'Pulchowk', 'Kupondole',
-      'Sanepa', 'Jawalakhel', 'Patan Dhoka', 'Mangal Bazaar'
-    ];
+    const finalLocations = Array.from(locations).filter(loc => loc.length > 2);
+    console.log(`🎯 FINAL SEARCHABLE LOCATIONS (${finalLocations.length} total):`, finalLocations.slice(0, 10), '...');
+    console.log('🏛️ === END SEARCH LOCATION SOURCES DEBUG ===');
     
-    commonLocations.forEach(loc => locations.add(loc));
-    
-    return Array.from(locations).filter(loc => loc.length > 2);
+    return finalLocations;
   };
 
-  const searchableLocations = getAllSearchableLocations();
+  // Generate searchable locations based on popular locations and extracted data (memoized)
+  const searchableLocations = useMemo(() => getAllSearchableLocations(), [popularLocations, extractedLocationData]);
 
-  // Load recent searches on component mount
+  // Initialize enhanced search when locations change
+  useEffect(() => {
+    if (searchableLocations.length > 0) {
+      enhancedSearchRef.current = new EnhancedSearch(searchableLocations);
+      console.log('🚀 Enhanced search initialized with', searchableLocations.length, 'locations');
+    }
+  }, [searchableLocations]);
+
+  // Load recent searches and popular locations on component mount
   useEffect(() => {
     const recent = searchHistory.getRecentSearches();
     setRecentSearches(recent.slice(0, 5)); // Show only top 5 recent searches
   }, []);
 
-  // Generate suggestions based on input
+  // Fetch popular locations from database using address extraction
+  useEffect(() => {
+    const fetchPopularLocations = async () => {
+      try {
+        setLoadingPopular(true);
+        
+        // Only fetch if we're in a browser environment
+        if (typeof window === 'undefined') {
+          setLoadingPopular(false);
+          return;
+        }
+        
+        console.log('🏗️ Fetching location names from parking spot addresses...');
+        const response = await locationService.getLocationNamesFromAddresses({
+          limit: 200 // Get comprehensive data for location extraction
+        });
+        
+        if (response.success && response.locations) {
+          // Store full location data for coordinate mapping
+          const topLocations = response.locations.slice(0, 8); // Top 8 most popular locations
+          setExtractedLocationData(topLocations);
+          
+          // Extract just the location names for display
+          const locationNames = topLocations.map(loc => loc.name);
+          
+          console.log('✅ Successfully extracted location names from addresses:', locationNames);
+          console.log('📊 Location data with coordinates:', topLocations);
+          setPopularLocations(locationNames);
+        } else {
+          console.warn('❌ Failed to extract location names from addresses:', response.error);
+          
+          // Fallback to static popular locations
+          const fallbackLocations = [
+            'Thamel', 'Durbar Square', 'New Road', 'Ratna Park',
+            'Lazimpat', 'Bouddha', 'Patan', 'Swayambhunath'
+          ];
+          console.log('📋 Using static fallback popular locations:', fallbackLocations);
+          setPopularLocations(fallbackLocations);
+        }
+      } catch (error) {
+        console.error('❌ Error extracting location names:', error);
+        // Fallback to static locations
+        const errorFallbackLocations = [
+          'Thamel', 'Durbar Square', 'New Road', 'Ratna Park',
+          'Lazimpat', 'Bouddha', 'Patan', 'Swayambhunath'
+        ];
+        console.log('🚨 Using error fallback popular locations:', errorFallbackLocations);
+        setPopularLocations(errorFallbackLocations);
+      } finally {
+        setLoadingPopular(false);
+      }
+    };
+
+    // Use a slight delay to prevent immediate API calls on page load
+    const timeoutId = setTimeout(fetchPopularLocations, 100);
+    
+    return () => clearTimeout(timeoutId);
+  }, []);
+
+  // Enhanced suggestion generation with fuzzy matching and spell correction
   const generateSuggestions = (input) => {
-    if (!input.trim() || input.length < 2) return [];
+    if (!input.trim() || input.length < 1) return [];
     
-    const query = input.toLowerCase().trim();
-    const matches = [];
+    if (!enhancedSearchRef.current) {
+      console.warn('Enhanced search not initialized yet');
+      return [];
+    }
     
-    // Exact matches first
-    searchableLocations.forEach(location => {
-      if (location.toLowerCase().startsWith(query)) {
-        matches.push({ text: location, type: 'exact' });
+    const smartSuggestions = enhancedSearchRef.current.getSmartSuggestions(input, 8);
+    console.log(`🎯 Generated ${smartSuggestions.length} smart suggestions for "${input}"`);
+    
+    // Check for spelling suggestions
+    if (input.length >= 3) {
+      const analysis = enhancedSearchRef.current.analyzeQuery(input);
+      if (analysis.hasTypos && analysis.suggestions.length > 0) {
+        setSpellingSuggestions(analysis.suggestions);
+        setShowSpellingSuggestions(true);
+      } else {
+        setShowSpellingSuggestions(false);
       }
-    });
+    }
     
-    // Partial matches
-    searchableLocations.forEach(location => {
-      if (!location.toLowerCase().startsWith(query) && 
-          location.toLowerCase().includes(query)) {
-        matches.push({ text: location, type: 'partial' });
-      }
-    });
-    
-    // Remove duplicates and limit to 8 suggestions
-    const uniqueMatches = matches.filter((match, index, self) => 
-      index === self.findIndex(m => m.text === match.text)
-    );
-    
-    return uniqueMatches.slice(0, 8);
+    return smartSuggestions;
   };
 
   const handleInputChange = (e) => {
@@ -107,6 +209,7 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
       // Show recent searches when input is empty
       setShowRecentSearches(recentSearches.length > 0);
       setShowSuggestions(false);
+      setShowSpellingSuggestions(false);
     } else {
       // Show suggestions based on input
       const newSuggestions = generateSuggestions(value);
@@ -422,45 +525,124 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
                     </div>
                   )}
 
-                  {/* Premium Suggestions Dropdown */}
-                  {showSuggestions && suggestions.length > 0 && (
-                    <div className="absolute z-50 w-full mt-2 card-premium border border-yellow-200/50 max-h-80 overflow-y-auto">
-                      {suggestions.map((suggestion, index) => (
+                  {/* Spelling Corrections */}
+                  {showSpellingSuggestions && spellingSuggestions.length > 0 && (
+                    <div className="absolute z-50 w-full mt-2 card-premium border border-orange-200/50">
+                      <div className="px-4 py-2 bg-orange-50 border-b border-orange-100">
+                        <span className="text-sm text-orange-700 font-medium flex items-center">
+                          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                          </svg>
+                          Did you mean?
+                        </span>
+                      </div>
+                      {spellingSuggestions.map((spelling, index) => (
                         <div
                           key={index}
-                          ref={el => suggestionRefs.current[index] = el}
-                          className={`px-6 py-4 cursor-pointer transition-all duration-300 border-b border-gray-100/50 last:border-b-0 ${
-                            index === activeSuggestion 
-                              ? 'bg-gradient-primary text-white transform scale-[1.02]' 
-                              : 'hover:bg-yellow-50 text-gray-700 hover:text-gray-900'
-                          }`}
-                          onClick={() => handleSuggestionClick(suggestion)}
-                          onMouseEnter={() => setActiveSuggestion(index)}
+                          className="px-4 py-3 cursor-pointer hover:bg-orange-50 border-b border-orange-100/50 last:border-b-0"
+                          onClick={() => {
+                            setLocation(spelling.suggestion);
+                            setShowSpellingSuggestions(false);
+                            handleSuggestionClick({ text: spelling.suggestion, type: 'correction' });
+                          }}
                         >
-                          <div className="flex items-center">
-                            <div className={`p-1.5 rounded-lg mr-4 ${
-                              index === activeSuggestion ? 'bg-white/20' : 'bg-gradient-primary'
+                          <div className="flex items-center justify-between">
+                            <span className="font-medium text-gray-800">{spelling.suggestion}</span>
+                            <span className={`text-xs px-2 py-1 rounded ${
+                              spelling.confidence === 'high' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
                             }`}>
-                              <svg className={`w-4 h-4 ${
-                                index === activeSuggestion ? 'text-yellow-300' : 'text-white'
-                              }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                              </svg>
-                            </div>
-                            <span className="font-medium">
-                              {suggestion.text}
+                              {spelling.confidence} confidence
                             </span>
-                            {suggestion.type === 'exact' && (
-                              <span className={`ml-auto text-xs font-bold px-2 py-1 rounded-full ${
-                                index === activeSuggestion 
-                                  ? 'bg-yellow-300 text-blue-900' 
-                                  : 'bg-gradient-primary text-white'
-                              }`}>Perfect Match</span>
-                            )}
                           </div>
                         </div>
                       ))}
+                    </div>
+                  )}
+
+                  {/* Enhanced Premium Suggestions Dropdown */}
+                  {showSuggestions && suggestions.length > 0 && (
+                    <div className="absolute z-50 w-full mt-2 card-premium border border-yellow-200/50 max-h-80 overflow-y-auto">
+                      {suggestions.map((suggestion, index) => {
+                        const highlight = highlightMatch(suggestion.text, location);
+                        return (
+                          <div
+                            key={index}
+                            ref={el => suggestionRefs.current[index] = el}
+                            className={`px-6 py-4 cursor-pointer transition-all duration-300 border-b border-gray-100/50 last:border-b-0 ${
+                              index === activeSuggestion 
+                                ? 'bg-gradient-primary text-white transform scale-[1.02]' 
+                                : 'hover:bg-yellow-50 text-gray-700 hover:text-gray-900'
+                            }`}
+                            onClick={() => handleSuggestionClick(suggestion)}
+                            onMouseEnter={() => setActiveSuggestion(index)}
+                          >
+                            <div className="flex items-center">
+                              <div className={`p-1.5 rounded-lg mr-4 ${
+                                index === activeSuggestion ? 'bg-white/20' : 'bg-gradient-primary'
+                              }`}>
+                                {suggestion.type === 'fuzzy' ? (
+                                  <svg className={`w-4 h-4 ${
+                                    index === activeSuggestion ? 'text-yellow-300' : 'text-white'
+                                  }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                  </svg>
+                                ) : (
+                                  <svg className={`w-4 h-4 ${
+                                    index === activeSuggestion ? 'text-yellow-300' : 'text-white'
+                                  }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                  </svg>
+                                )}
+                              </div>
+                              <div className="flex-1">
+                                <div className="font-medium">
+                                  {highlight.hasHighlight ? (
+                                    <>
+                                      {highlight.before}
+                                      <span className={`${
+                                        index === activeSuggestion ? 'bg-yellow-300/30' : 'bg-yellow-200'
+                                      } px-1 rounded`}>
+                                        {highlight.match}
+                                      </span>
+                                      {highlight.after}
+                                    </>
+                                  ) : (
+                                    suggestion.text
+                                  )}
+                                </div>
+                                {suggestion.reason && (
+                                  <div className={`text-xs mt-1 ${
+                                    index === activeSuggestion ? 'text-white/70' : 'text-gray-500'
+                                  }`}>
+                                    {suggestion.reason}
+                                  </div>
+                                )}
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                {suggestion.confidence && (
+                                  <div className={`text-xs px-2 py-1 rounded ${
+                                    index === activeSuggestion 
+                                      ? 'bg-white/20 text-yellow-100' 
+                                      : suggestion.confidence > 0.8 
+                                        ? 'bg-green-100 text-green-700' 
+                                        : 'bg-yellow-100 text-yellow-700'
+                                  }`}>
+                                    {Math.round(suggestion.confidence * 100)}%
+                                  </div>
+                                )}
+                                {suggestion.type === 'exact' && (
+                                  <span className={`text-xs font-bold px-2 py-1 rounded-full ${
+                                    index === activeSuggestion 
+                                      ? 'bg-yellow-300 text-blue-900' 
+                                      : 'bg-gradient-primary text-white'
+                                  }`}>Perfect Match</span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -544,26 +726,55 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
                 <div className="w-3 h-3 bg-gradient-primary rounded-full mr-2"></div>
                  Popular Places in Kathmandu
               </h3>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {popularLocations.map((loc, index) => (
-                  <button
-                    key={loc}
-                    onClick={() => handleQuickSearch(loc, index)}
-                    className="relative group px-4 py-3 glass-dark border border-white/10 rounded-xl hover:border-yellow-300/50 transition-all duration-300 hover:transform hover:scale-105"
-                  >
-                    <span className="text-gray-700 font-semibold group-hover:text-gray-900 transition-colors duration-300">{loc}</span>
-                    <div className="absolute inset-0 bg-gradient-primary opacity-0 group-hover:opacity-5 rounded-xl transition-opacity duration-300"></div>
-                  </button>
-                ))}
-              </div>
+              
+              {loadingPopular ? (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {Array.from({ length: 8 }).map((_, index) => (
+                    <div
+                      key={index}
+                      className="px-4 py-3 glass-dark border border-white/10 rounded-xl animate-pulse"
+                    >
+                      <div className="h-5 bg-gray-300 rounded"></div>
+                    </div>
+                  ))}
+                </div>
+              ) : popularLocations.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {popularLocations.map((loc, index) => (
+                    <button
+                      key={loc}
+                      onClick={() => handleQuickSearch(loc, index)}
+                      className="relative group px-4 py-3 glass-dark border border-white/10 rounded-xl hover:border-yellow-300/50 transition-all duration-300 hover:transform hover:scale-105"
+                    >
+                      <span className="text-gray-700 font-semibold group-hover:text-gray-900 transition-colors duration-300">{loc}</span>
+                      <div className="absolute inset-0 bg-gradient-primary opacity-0 group-hover:opacity-5 rounded-xl transition-opacity duration-300"></div>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-4">
+                  <div className="text-gray-500 text-sm">
+                    <svg className="w-8 h-8 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    </svg>
+                    No popular locations available
+                  </div>
+                </div>
+              )}
             </div>
           )}
           
-          {/* Premium Search Tips */}
-          {showSuggestions && suggestions.length > 0 && (
+          {/* Enhanced Search Tips */}
+          {(showSuggestions && suggestions.length > 0) || showSpellingSuggestions ? (
             <div className="mt-6 p-4 glass-dark border border-yellow-300/30 rounded-xl">
               <p className="text-sm text-gray-700 text-center font-medium">
-                  <span className="text-yellow-600 font-bold">Pro Tip:</span> Use ↑ ↓ arrow keys to navigate, Enter to select, Esc to close
+                <span className="text-yellow-600 font-bold">Smart Search:</span> Detects typos, suggests corrections, and finds partial matches • Use ↑ ↓ arrow keys to navigate
+              </p>
+            </div>
+          ) : location.length >= 2 && suggestions.length === 0 && enhancedSearchRef.current && (
+            <div className="mt-6 p-4 glass-dark border border-red-300/30 rounded-xl">
+              <p className="text-sm text-gray-700 text-center font-medium">
+                <span className="text-red-600 font-bold">No matches found:</span> Try checking spelling or use a shorter search term
               </p>
             </div>
           )}

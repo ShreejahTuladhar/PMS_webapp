@@ -72,37 +72,87 @@ function Home() {
   };
 
   const handleSearch = async (location, searchType = 'manual') => {
+    // Validate search parameters before proceeding
+    if (!location) {
+      console.warn('Search called without location parameter');
+      return;
+    }
+    
+    if (typeof location === 'string' && !location.trim()) {
+      console.warn('Search called with empty string');
+      return;
+    }
+    
+    if (typeof location === 'object' && (!location.lat || !location.lng)) {
+      console.warn('Search called with invalid location object:', location);
+      return;
+    }
+    
     console.log('Searching for parking near:', location);
     
     let searchLat, searchLng, searchLoc, searchQuery;
     
     if (typeof location === 'string') {
-      // Try to match with known Kathmandu areas
-      const locationLower = location.toLowerCase();
-      let matchedArea = null;
+      // Validate string input
+      const locationTrimmed = location.trim();
+      if (!locationTrimmed) {
+        console.warn('Empty search string provided');
+        return;
+      }
       
-      for (const [areaName, coords] of Object.entries(kathmanduAreas)) {
-        if (locationLower.includes(areaName.toLowerCase()) || 
-            areaName.toLowerCase().includes(locationLower)) {
-          matchedArea = coords;
-          break;
+      // Try to get coordinates from extracted location data first
+      let defaultCoords = kathmanduAreas.ratnapark; // Default fallback
+      
+      try {
+        const coordsResult = await locationService.getCoordinatesForLocationName(locationTrimmed);
+        if (coordsResult.success && coordsResult.coordinates) {
+          defaultCoords = coordsResult.coordinates;
+          console.log(`🎯 Using extracted coordinates for "${locationTrimmed}":`, defaultCoords);
+        } else {
+          // Fall back to kathmanduAreas matching
+          const locationLower = locationTrimmed.toLowerCase();
+          for (const [areaName, coords] of Object.entries(kathmanduAreas)) {
+            if (locationLower.includes(areaName.toLowerCase()) || 
+                areaName.toLowerCase().includes(locationLower)) {
+              defaultCoords = coords;
+              console.log(`🗺️ Using kathmanduAreas coordinates for "${locationTrimmed}":`, defaultCoords);
+              break;
+            }
+          }
+        }
+      } catch (error) {
+        console.warn('Error getting coordinates from extracted data:', error);
+        // Fall back to kathmanduAreas matching
+        const locationLower = locationTrimmed.toLowerCase();
+        for (const [areaName, coords] of Object.entries(kathmanduAreas)) {
+          if (locationLower.includes(areaName.toLowerCase()) || 
+              areaName.toLowerCase().includes(locationLower)) {
+            defaultCoords = coords;
+            break;
+          }
         }
       }
       
-      // If no match found, default to central Kathmandu (Ratna Park)
-      const defaultCoords = matchedArea || kathmanduAreas.ratnapark;
-      
       searchLat = defaultCoords.lat;
       searchLng = defaultCoords.lng;
-      searchQuery = location;
+      searchQuery = locationTrimmed;
       searchLoc = {
-        address: location,
+        address: locationTrimmed,
         lat: searchLat,
         lng: searchLng,
         isCurrentLocation: false
       };
     } else {
       // Location is already an object with coordinates
+      // Validate coordinates
+      if (!location.lat || !location.lng || 
+          isNaN(location.lat) || isNaN(location.lng) ||
+          location.lat < -90 || location.lat > 90 ||
+          location.lng < -180 || location.lng > 180) {
+        console.warn('Invalid coordinates provided:', location);
+        return;
+      }
+      
       searchLat = location.lat;
       searchLng = location.lng;
       searchQuery = location.address || 'Current Location';
@@ -113,23 +163,78 @@ function Home() {
     const searchStartTime = Date.now();
     
     try {
-      // Use backend search API instead of client-side filtering
-      console.log('Using backend search API for optimal performance...');
-      const response = await locationService.searchParkingSpots(
-        { lat: searchLat, lng: searchLng },
-        searchRadius,
-        {
-          isActive: true,
-          limit: 50,
-          sortBy: 'distance'
+      let response = null;
+      let usedFallback = false;
+      
+      // Try backend search API first, but fallback immediately if it fails
+      console.log('Attempting backend search API...');
+      try {
+        response = await locationService.searchParkingSpots(
+          { lat: searchLat, lng: searchLng },
+          searchRadius,
+          {
+            isActive: true,
+            limit: 50,
+            sortBy: 'distance'
+          }
+        );
+        
+        // Check if the response indicates an error even with success flag
+        if (!response.success || response.error) {
+          throw new Error(response.error || 'Backend search API returned error');
         }
-      );
+        
+        // Check if no results were found, might indicate backend database is empty or search issue
+        const resultSpots = response.parkingSpots || response.data || [];
+        if (resultSpots.length === 0) {
+          console.warn('Backend search returned 0 results, trying fallback method to get all locations');
+          throw new Error('No results from backend search, using fallback');
+        }
+      } catch (searchError) {
+        console.warn('Backend search API not available, using fallback method:', searchError.message);
+        usedFallback = true;
+        
+        // Fallback to getAllParkingSpots with client-side filtering
+        console.log('🔄 Using fallback: getAllParkingSpots with client-side filtering');
+        response = await locationService.getAllParkingSpots({ 
+          limit: 100, // Increase limit to get more locations
+          // Remove isActive filter to get all locations and filter client-side
+        });
+        console.log('📦 Fallback response:', response);
+      }
       
       const searchDuration = Date.now() - searchStartTime;
       
-      if (response.success) {
+      if (response && response.success) {
+        // Handle different response formats
+        let parkingSpots = response.parkingSpots || response.data || [];
+        console.log(`🏁 Raw parking spots received: ${parkingSpots.length}`, parkingSpots);
+        
+        if (usedFallback) {
+          // Apply client-side filtering for fallback
+          console.log('Applying client-side filtering for fallback...');
+          console.log(`📍 Search coordinates: ${searchLat}, ${searchLng}, radius: ${searchRadius}km`);
+          
+          parkingSpots = parkingSpots.map(spot => {
+            const distance = calculateDistance(searchLat, searchLng, 
+              spot.coordinates?.latitude || spot.coordinates?.lat || 0, 
+              spot.coordinates?.longitude || spot.coordinates?.lng || 0);
+            console.log(`📏 Distance to ${spot.name}: ${distance.toFixed(2)}km`);
+            return {
+              ...spot,
+              distance
+            };
+          })
+          .filter(spot => {
+            const withinRadius = spot.distance <= searchRadius;
+            console.log(`✅ ${spot.name} within ${searchRadius}km: ${withinRadius}`);
+            return withinRadius;
+          })
+          .sort((a, b) => a.distance - b.distance);
+        }
+        
         // Transform database format to match expected format
-        const parkingLocations = response.parkingSpots.map(spot => ({
+        const parkingLocations = parkingSpots.map(spot => ({
           id: spot.id,
           name: spot.name,
           address: spot.address,
@@ -177,7 +282,8 @@ function Home() {
           expectedOpening: null
         }));
         
-        console.log(`Found ${parkingLocations.length} locations within ${searchRadius}km using backend search`);
+        console.log(`🎯 Final result: Found ${parkingLocations.length} locations within ${searchRadius}km using ${usedFallback ? 'fallback method' : 'backend search'}`);
+        console.log('🗺️ Parking locations to display on map:', parkingLocations);
         
         // Track successful search
         searchHistory.addRecentSearch(searchQuery, searchLoc);
@@ -194,28 +300,28 @@ function Home() {
           query: searchQuery,
           duration: searchDuration,
           resultsCount: parkingLocations.length,
-          endpoint: '/locations/search',
+          endpoint: usedFallback ? '/locations' : '/locations/search',
           success: true
         });
         
         setSearchResults(parkingLocations);
       } else {
-        console.error('Backend search failed:', response.error);
+        console.error('Search failed:', response?.error || 'Unknown error');
         
         // Track failed search
         analyticsService.trackSearchPerformance({
           query: searchQuery,
-          duration: searchDuration,
+          duration: Date.now() - searchStartTime,
           resultsCount: 0,
-          endpoint: '/locations/search',
+          endpoint: usedFallback ? '/locations' : '/locations/search',
           success: false,
-          error: response.error
+          error: response?.error || 'Unknown error'
         });
         
         setSearchResults([]);
       }
     } catch (error) {
-      console.error('Error with backend search:', error);
+      console.error('Error during search operation:', error);
       
       // Track search error
       analyticsService.trackSearchPerformance({
