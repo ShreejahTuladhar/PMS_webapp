@@ -27,7 +27,7 @@ class ErrorBoundary extends Component {
         <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
           <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6">
             <div className="text-center">
-              <div className="text-6xl mb-4">💥</div>
+              <div className="text-6xl mb-4">error</div>
               <h1 className="text-2xl font-bold text-gray-800 mb-2">
                 Oops! Something went wrong
               </h1>

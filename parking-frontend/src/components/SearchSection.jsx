@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
+import searchHistory from '../utils/searchHistory';
+import { analyticsService } from '../services';
 
 const popularLocations = [
   'Thamel', 'Durbar Square', 'New Road', 'Ratna Park', 
@@ -25,6 +27,8 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [activeSuggestion, setActiveSuggestion] = useState(-1);
+  const [recentSearches, setRecentSearches] = useState([]);
+  const [showRecentSearches, setShowRecentSearches] = useState(false);
   const suggestionRefs = useRef([]);
   const inputRef = useRef(null);
 
@@ -58,6 +62,12 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
   };
 
   const searchableLocations = getAllSearchableLocations();
+
+  // Load recent searches on component mount
+  useEffect(() => {
+    const recent = searchHistory.getRecentSearches();
+    setRecentSearches(recent.slice(0, 5)); // Show only top 5 recent searches
+  }, []);
 
   // Generate suggestions based on input
   const generateSuggestions = (input) => {
@@ -93,9 +103,18 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
     const value = e.target.value;
     setLocation(value);
     
-    const newSuggestions = generateSuggestions(value);
-    setSuggestions(newSuggestions);
-    setShowSuggestions(newSuggestions.length > 0);
+    if (value.trim() === '') {
+      // Show recent searches when input is empty
+      setShowRecentSearches(recentSearches.length > 0);
+      setShowSuggestions(false);
+    } else {
+      // Show suggestions based on input
+      const newSuggestions = generateSuggestions(value);
+      setSuggestions(newSuggestions);
+      setShowSuggestions(newSuggestions.length > 0);
+      setShowRecentSearches(false);
+    }
+    
     setActiveSuggestion(-1);
   };
 
@@ -105,8 +124,12 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
     
     setIsLoading(true);
     setShowSuggestions(false);
+    setShowRecentSearches(false);
     try {
-      await onSearch(location);
+      await onSearch(location, 'manual');
+      // Update recent searches after successful search
+      const updatedRecent = searchHistory.getRecentSearches();
+      setRecentSearches(updatedRecent.slice(0, 5));
     } finally {
       setIsLoading(false);
     }
@@ -115,12 +138,26 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
   const handleCurrentLocation = () => {
     if (navigator.geolocation) {
       setIsLoading(true);
+      setShowSuggestions(false);
+      setShowRecentSearches(false);
       navigator.geolocation.getCurrentPosition(
-        (position) => {
+        async (position) => {
           const { latitude, longitude } = position.coords;
-          onSearch({ lat: latitude, lng: longitude, isCurrentLocation: true });
-          setLocation('Current Location');
-          setIsLoading(false);
+          try {
+            await onSearch({ 
+              lat: latitude, 
+              lng: longitude, 
+              address: 'Current Location',
+              isCurrentLocation: true 
+            }, 'current_location');
+            setLocation('Current Location');
+            
+            // Update recent searches after successful search
+            const updatedRecent = searchHistory.getRecentSearches();
+            setRecentSearches(updatedRecent.slice(0, 5));
+          } finally {
+            setIsLoading(false);
+          }
         },
         (error) => {
           console.error('Error getting location:', error);
@@ -130,10 +167,47 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
     }
   };
 
-  const handleSuggestionClick = (suggestion) => {
+  const handleSuggestionClick = async (suggestion) => {
     setLocation(suggestion.text);
     setShowSuggestions(false);
-    onSearch(suggestion.text);
+    setShowRecentSearches(false);
+    try {
+      await onSearch(suggestion.text, 'suggestion');
+      // Update recent searches after successful search
+      const updatedRecent = searchHistory.getRecentSearches();
+      setRecentSearches(updatedRecent.slice(0, 5));
+    } catch (error) {
+      console.error('Error during suggestion search:', error);
+    }
+  };
+
+  const handleRecentSearchClick = async (recentSearch, index) => {
+    // Track recent search click analytics
+    const daysDiff = Math.floor((Date.now() - recentSearch.timestamp) / (1000 * 60 * 60 * 24));
+    analyticsService.trackRecentSearchClick(recentSearch.query, daysDiff);
+    
+    setLocation(recentSearch.query);
+    setShowRecentSearches(false);
+    setShowSuggestions(false);
+    
+    try {
+      if (recentSearch.location) {
+        await onSearch(recentSearch.location, 'recent');
+      } else {
+        await onSearch(recentSearch.query, 'recent');
+      }
+      // Update recent searches after successful search
+      const updatedRecent = searchHistory.getRecentSearches();
+      setRecentSearches(updatedRecent.slice(0, 5));
+    } catch (error) {
+      console.error('Error during recent search:', error);
+    }
+  };
+
+  const handleRemoveRecentSearch = (searchId, e) => {
+    e.stopPropagation();
+    const updatedRecent = searchHistory.removeRecentSearch(searchId);
+    setRecentSearches(updatedRecent.slice(0, 5));
   };
 
   const handleKeyDown = (e) => {
@@ -165,17 +239,30 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
     }
   };
 
-  const handleQuickSearch = (locationName) => {
+  const handleQuickSearch = async (locationName, index) => {
+    // Track popular search click analytics
+    analyticsService.trackPopularSearchClick(locationName, index);
+    
     setLocation(locationName);
     setShowSuggestions(false);
-    onSearch(locationName);
+    setShowRecentSearches(false);
+    
+    try {
+      await onSearch(locationName, 'popular');
+      // Update recent searches after successful search
+      const updatedRecent = searchHistory.getRecentSearches();
+      setRecentSearches(updatedRecent.slice(0, 5));
+    } catch (error) {
+      console.error('Error during popular search:', error);
+    }
   };
 
-  // Click outside to close suggestions
+  // Click outside to close suggestions and recent searches
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (inputRef.current && !inputRef.current.contains(event.target)) {
         setShowSuggestions(false);
+        setShowRecentSearches(false);
         setActiveSuggestion(-1);
       }
     };
@@ -221,7 +308,7 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
         <div className="text-center mb-12">
           <div className="animate-fade-in-up">
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight">
-              <span className="text-green-300">🏠</span> Find Parking in Your <span className="text-orange-300">Neighborhood</span>
+              <span className="text-green-300"></span> Find Parking in Your <span className="text-orange-300">Neighborhood</span>
             </h2>
             <p className="text-lg text-white/90 max-w-3xl mx-auto leading-relaxed">
               Built by locals, for locals! Our community-driven parking system helps you find 
@@ -238,7 +325,7 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
               <div className="flex-1">
                 <label className="block text-sm font-semibold text-gray-800 mb-3 flex items-center">
                   <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                  🏠 Find Parking Near You
+                   Find Parking Near You
                 </label>
                 <div className="relative" ref={inputRef}>
                   <input
@@ -247,11 +334,13 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
                     onChange={handleInputChange}
                     onKeyDown={handleKeyDown}
                     onFocus={() => {
-                      if (suggestions.length > 0) {
+                      if (location.trim() === '' && recentSearches.length > 0) {
+                        setShowRecentSearches(true);
+                      } else if (suggestions.length > 0) {
                         setShowSuggestions(true);
                       }
                     }}
-                    placeholder="जहाँ जाँदै हुनुहुन्छ? • Where are you going?"
+                    placeholder="Where are you going?"
                     className="input-premium w-full px-6 py-4 pl-14 text-lg font-medium placeholder-gray-400 text-gray-800"
                     autoComplete="off"
                   />
@@ -263,6 +352,76 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
                     </div>
                   </div>
                   
+                  {/* Premium Recent Searches Dropdown */}
+                  {showRecentSearches && recentSearches.length > 0 && (
+                    <div className="absolute z-50 w-full mt-2 card-premium border border-blue-200/50 max-h-80 overflow-y-auto">
+                      <div className="px-6 py-3 border-b border-gray-100/50 bg-gradient-to-r from-blue-50 to-indigo-50">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-bold text-gray-800 flex items-center">
+                            <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                             Recent Searches
+                          </span>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              searchHistory.clearRecentSearches();
+                              setRecentSearches([]);
+                              setShowRecentSearches(false);
+                            }}
+                            className="text-xs text-gray-500 hover:text-gray-700 transition-colors px-2 py-1 rounded hover:bg-white/50"
+                          >
+                            Clear All
+                          </button>
+                        </div>
+                      </div>
+                      {recentSearches.map((recentSearch, index) => (
+                        <div
+                          key={recentSearch.id}
+                          className="px-6 py-4 cursor-pointer transition-all duration-300 border-b border-gray-100/50 last:border-b-0 hover:bg-blue-50 group"
+                          onClick={() => handleRecentSearchClick(recentSearch, index)}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center flex-1">
+                              <div className="p-1.5 rounded-lg mr-4 bg-gradient-to-r from-blue-500 to-indigo-500">
+                                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  {recentSearch.location?.isCurrentLocation ? (
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                  ) : (
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                  )}
+                                </svg>
+                              </div>
+                              <div className="flex-1">
+                                <span className="font-medium text-gray-800 group-hover:text-gray-900">
+                                  {recentSearch.query}
+                                </span>
+                                <div className="text-xs text-gray-500 mt-1">
+                                  {new Date(recentSearch.timestamp).toLocaleDateString('en-US', { 
+                                    month: 'short', 
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  })}
+                                </div>
+                              </div>
+                            </div>
+                            <button
+                              onClick={(e) => handleRemoveRecentSearch(recentSearch.id, e)}
+                              className="p-1 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100"
+                              title="Remove from recent searches"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
                   {/* Premium Suggestions Dropdown */}
                   {showSuggestions && suggestions.length > 0 && (
                     <div className="absolute z-50 w-full mt-2 card-premium border border-yellow-200/50 max-h-80 overflow-y-auto">
@@ -311,7 +470,7 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
               <div className="md:w-56">
                 <label className="block text-sm font-semibold text-gray-800 mb-3 flex items-center">
                   <div className="w-2 h-2 bg-orange-500 rounded-full mr-2"></div>
-                  📍 Distance Range
+                   Distance Range
                 </label>
                 <div className="relative">
                   <select 
@@ -319,11 +478,11 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
                     onChange={(e) => onRadiusChange(Number(e.target.value))}
                     className="input-premium w-full px-6 py-4 text-lg font-medium text-gray-800 appearance-none cursor-pointer"
                   >
-                    <option value={1}>🚶 1 km - नजिकै (Nearby)</option>
-                    <option value={2}>🚗 2 km - सामान्य (Normal)</option>
-                    <option value={3}>🛣️ 3 km - फराकिलो (Wide)</option>
-                    <option value={4}>🌄 4 km - धेरै टाढा (Far)</option>
-                    <option value={5}>🗺️ 5 km - जता पनि (Anywhere)</option>
+                    <option value={1}>1 km - Nearby</option>
+                    <option value={2}>2 km - Normal</option>
+                    <option value={3}>3 km - Wide</option>
+                    <option value={4}>4 km - Far</option>
+                    <option value={5}>5 km - Anywhere</option>
                   </select>
                   <div className="absolute right-5 top-1/2 transform -translate-y-1/2 pointer-events-none">
                     <div className="p-1 rounded-lg bg-gradient-primary">
@@ -355,7 +514,7 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                       </svg>
                     </div>
-                    <span>🏠 Find Local Parking</span>
+                    <span> Find Local Parking</span>
                   </>
                 )}
                 <div className="absolute inset-0 bg-gradient-subtle opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -379,17 +538,17 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
           </form>
           
           {/* Premium Popular Locations */}
-          {!showSuggestions && (
+          {!showSuggestions && !showRecentSearches && (
             <div className="mt-8 pt-6 border-t border-gray-200/50">
               <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
                 <div className="w-3 h-3 bg-gradient-primary rounded-full mr-2"></div>
-                🏠 Popular Places in Kathmandu
+                 Popular Places in Kathmandu
               </h3>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {popularLocations.map((loc) => (
+                {popularLocations.map((loc, index) => (
                   <button
                     key={loc}
-                    onClick={() => handleQuickSearch(loc)}
+                    onClick={() => handleQuickSearch(loc, index)}
                     className="relative group px-4 py-3 glass-dark border border-white/10 rounded-xl hover:border-yellow-300/50 transition-all duration-300 hover:transform hover:scale-105"
                   >
                     <span className="text-gray-700 font-semibold group-hover:text-gray-900 transition-colors duration-300">{loc}</span>
@@ -404,7 +563,7 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
           {showSuggestions && suggestions.length > 0 && (
             <div className="mt-6 p-4 glass-dark border border-yellow-300/30 rounded-xl">
               <p className="text-sm text-gray-700 text-center font-medium">
-                💡 <span className="text-yellow-600 font-bold">Pro Tip:</span> Use ↑ ↓ arrow keys to navigate • Press Enter to select • Esc to close
+                  <span className="text-yellow-600 font-bold">Pro Tip:</span> Use ↑ ↓ arrow keys to navigate, Enter to select, Esc to close
               </p>
             </div>
           )}

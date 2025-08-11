@@ -178,7 +178,7 @@ function BookingConfirmation({ isOpen, onClose }) {
                 </svg>
               </div>
               <div className="text-left flex-1">
-                <h3 className="font-semibold text-green-800 mb-2">🎉 Navigation Unlocked!</h3>
+                <h3 className="font-semibold text-green-800 mb-2"> Navigation Unlocked!</h3>
                 <p className="text-sm text-green-700 mb-4">
                   Get turn-by-turn directions using your preferred navigation platform.
                 </p>
@@ -199,7 +199,7 @@ function BookingConfirmation({ isOpen, onClose }) {
                           className="mr-3"
                         />
                         <div className="flex-1">
-                          <div className="font-medium text-green-800">🇳🇵 Galli Maps</div>
+                          <div className="font-medium text-green-800"> Galli Maps</div>
                           <div className="text-xs text-green-600">Local Nepali navigation with galli-level directions</div>
                         </div>
                         <span className="text-xs bg-green-200 text-green-800 px-2 py-1 rounded-full">Local</span>
@@ -218,7 +218,7 @@ function BookingConfirmation({ isOpen, onClose }) {
                           className="mr-3"
                         />
                         <div className="flex-1">
-                          <div className="font-medium text-green-800">🗺️ Baato Maps</div>
+                          <div className="font-medium text-green-800"> Baato Maps</div>
                           <div className="text-xs text-green-600">Landmark-based navigation in Nepali context</div>
                         </div>
                         <span className="text-xs bg-green-200 text-green-800 px-2 py-1 rounded-full">Local</span>
@@ -236,7 +236,7 @@ function BookingConfirmation({ isOpen, onClose }) {
                         className="mr-3"
                       />
                       <div className="flex-1">
-                        <div className="font-medium text-green-800">🌐 Google Maps</div>
+                        <div className="font-medium text-green-800"> Google Maps</div>
                         <div className="text-xs text-green-600">Global navigation with real-time traffic</div>
                       </div>
                       <span className="text-xs bg-blue-200 text-blue-800 px-2 py-1 rounded-full">Global</span>
@@ -249,25 +249,25 @@ function BookingConfirmation({ isOpen, onClose }) {
                     onClick={handleOpenInApp}
                     className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition font-medium"
                   >
-                    📱 Open in Mobile App
+                     Open in Mobile App
                   </button>
                   
                   <button
                     onClick={handleStartNavigation}
                     className="w-full bg-white text-green-700 border border-green-300 py-2 px-4 rounded-lg hover:bg-green-50 transition font-medium"
                   >
-                    🌐 Open in Browser
+                     Open in Browser
                   </button>
                 </div>
                 
                 <div className="mt-3 p-2 bg-white rounded border-l-4 border-green-500">
                   <p className="text-xs text-green-600">
-                    📍 Destination: {navigationData?.destination.name}
+                     Destination: {navigationData?.destination.name}
                   </p>
                   <p className="text-xs text-green-500">
                     Platform: {localNavigationPlatforms[selectedNavPlatform]?.name || 'Google Maps'}
                     {currentBooking.parkingSpot[`${selectedNavPlatform}MapsSupported`] && selectedNavPlatform !== 'google' && 
-                      <span className="ml-2 text-green-600">✓ Optimized for this location</span>
+                      <span className="ml-2 text-green-600">• Optimized for this location</span>
                     }
                   </p>
                 </div>
@@ -277,7 +277,7 @@ function BookingConfirmation({ isOpen, onClose }) {
           
           {/* Important Notes */}
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6 text-left">
-            <h4 className="font-semibold text-yellow-800 mb-2">📋 Important Notes:</h4>
+            <h4 className="font-semibold text-yellow-800 mb-2"> Important Notes:</h4>
             <ul className="text-sm text-yellow-700 space-y-1">
               <li>• Please arrive within 15 minutes of your booking time</li>
               <li>• Show your QR code at the entrance gate</li>

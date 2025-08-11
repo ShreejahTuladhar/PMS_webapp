@@ -2,7 +2,7 @@ const axios = require('axios');
 
 const testCompleteSearchFlow = async () => {
   try {
-    console.log('🚀 Testing Complete Frontend Search Flow...\n');
+    console.log(' Testing Complete Frontend Search Flow...\n');
     
     // Step 1: Test API endpoint availability
     console.log('📡 Step 1: Testing API endpoint...');
@@ -10,7 +10,7 @@ const testCompleteSearchFlow = async () => {
     console.log(`✅ Backend health: ${healthCheck.data.status}`);
     
     // Step 2: Test location API
-    console.log('\n📍 Step 2: Testing location API...');
+    console.log('\n Step 2: Testing location API...');
     const locationResponse = await axios.get('http://localhost:8080/api/locations', {
       params: {
         limit: 10,
@@ -132,7 +132,7 @@ const testCompleteSearchFlow = async () => {
     });
     
     // Step 6: Frontend endpoint test
-    console.log('\n🌐 Step 6: Testing frontend accessibility...');
+    console.log('\n Step 6: Testing frontend accessibility...');
     try {
       const frontendResponse = await axios.get('http://localhost:3001', { timeout: 5000 });
       if (frontendResponse.status === 200) {
@@ -142,7 +142,7 @@ const testCompleteSearchFlow = async () => {
       console.log('⚠️  Frontend test failed, but this is expected in headless mode');
     }
     
-    console.log('\n🎉 Complete Search Flow Test Results:');
+    console.log('\n Complete Search Flow Test Results:');
     console.log('✅ Backend API: Working');
     console.log('✅ Database connection: Working');
     console.log('✅ Location data fetch: Working');
@@ -150,7 +150,7 @@ const testCompleteSearchFlow = async () => {
     console.log('✅ MapView compatibility: Fixed');
     console.log('✅ Distance calculation: Working');
     console.log('✅ Search filtering: Working');
-    console.log('\n🚀 The search flow is ready for frontend testing!');
+    console.log('\n The search flow is ready for frontend testing!');
     
   } catch (error) {
     console.error('❌ Complete search flow test failed:');

@@ -28,19 +28,19 @@ function PaymentVerification({ ticketData, onComplete, onBack }) {
     {
       id: 'card',
       name: 'Credit/Debit Card',
-      icon: '💳',
+      icon: '',
       description: 'Visa, Mastercard, American Express'
     },
     {
       id: 'digital',
       name: 'Digital Wallet',
-      icon: '📱',
+      icon: '',
       description: 'eSewa, Khalti, PayPal'
     },
     {
       id: 'bank',
       name: 'Bank Transfer',
-      icon: '🏦',
+      icon: '',
       description: 'Direct bank account transfer'
     }
   ];
@@ -92,8 +92,8 @@ function PaymentVerification({ ticketData, onComplete, onBack }) {
         <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-8">
           <div className="text-center">
             <div className="text-5xl mb-4">
-              {paymentStep === 'review' ? '💳' :
-               paymentStep === 'processing' ? '⚡' : '🎉'}
+              {paymentStep === 'review' ? '' :
+               paymentStep === 'processing' ? '⚡' : ''}
             </div>
             <h2 className="text-3xl font-bold mb-2">
               {paymentStep === 'review' ? 'Payment Summary' :
@@ -115,7 +115,7 @@ function PaymentVerification({ ticketData, onComplete, onBack }) {
               {/* Parking Summary */}
               <div className="bg-gradient-to-br from-blue-50 to-yellow-50 rounded-2xl p-6 border border-blue-200">
                 <h3 className="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
-                  🚗 Parking Summary
+                   Parking Summary
                 </h3>
                 
                 <div className="grid grid-cols-2 gap-4 mb-6">
@@ -233,7 +233,7 @@ function PaymentVerification({ ticketData, onComplete, onBack }) {
                 className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-4 rounded-2xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 disabled:opacity-50 relative overflow-hidden group"
               >
                 <span className="relative z-10 flex items-center justify-center gap-2">
-                  💳 Pay NPR {totalAmount} & Exit
+                   Pay NPR {totalAmount} & Exit
                 </span>
                 <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </button>
@@ -279,7 +279,7 @@ function PaymentVerification({ ticketData, onComplete, onBack }) {
           {/* Success Step */}
           {paymentStep === 'success' && paymentData && (
             <div className="text-center space-y-6">
-              <div className="text-6xl mb-4">🎉</div>
+              <div className="text-6xl mb-4"></div>
               <h3 className="text-2xl font-bold text-gray-700 mb-2">
                 Payment Successful!
               </h3>
@@ -323,7 +323,7 @@ function PaymentVerification({ ticketData, onComplete, onBack }) {
                 onClick={handleComplete}
                 className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-4 rounded-2xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300"
               >
-                🚀 Complete Exit Process
+                 Complete Exit Process
               </button>
             </div>
           )}

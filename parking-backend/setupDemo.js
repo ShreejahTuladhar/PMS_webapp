@@ -106,7 +106,7 @@ async function insertDummyData() {
 
 async function verifyData() {
   try {
-    console.log('🔍 Verifying inserted data...');
+    console.log(' Verifying inserted data...');
     
     const userCount = await User.countDocuments();
     const locationCount = await ParkingLocation.countDocuments();
@@ -153,7 +153,7 @@ async function verifyData() {
 }
 
 async function setupDemo() {
-  console.log('🚀 Setting up PMS Demo Database...\n');
+  console.log(' Setting up PMS Demo Database...\n');
   
   try {
     // Connect to database
@@ -172,13 +172,13 @@ async function setupDemo() {
     await verifyData();
 
     console.log('\n✅ Demo setup completed successfully!');
-    console.log('\n🎯 Demo Credentials:');
+    console.log('\n Demo Credentials:');
     console.log('   Customer: john_doe / password123');
     console.log('   Customer: jane_smith / password123');
     console.log('   Admin: admin_ram / password123');
     console.log('   Super Admin: super_admin / password123');
     
-    console.log('\n🗺️ Demo Locations:');
+    console.log('\n Demo Locations:');
     console.log('   • Ratna Park Parking (Rs.50/hr)');
     console.log('   • New Road Shopping Plaza (Rs.60/hr)');
     console.log('   • Thamel Tourist Hub (Rs.80/hr)');

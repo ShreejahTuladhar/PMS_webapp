@@ -9,6 +9,7 @@ import CustomerJourney from './components/customer/CustomerJourney';
 import UserDashboard from './components/dashboard/user/UserDashboard';
 import ClientDashboard from './components/dashboard/client/ClientDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
+import NotFound from './components/common/NotFound';
 
 function App() {
   return (
@@ -16,7 +17,7 @@ function App() {
       <AuthProvider>
         <BookingProvider>
           <Router>
-            <div className="min-h-screen bg-gray-50">
+            <div className="min-h-screen">
               <Header />
               <Routes>
                 <Route path="/" element={<Home />} />
@@ -25,7 +26,7 @@ function App() {
                 <Route 
                   path="/dashboard" 
                   element={
-                    <ProtectedRoute allowedRoles={['customer', 'user']}>
+                    <ProtectedRoute>
                       <UserDashboard />
                     </ProtectedRoute>
                   } 
@@ -33,11 +34,12 @@ function App() {
                 <Route 
                   path="/client-dashboard" 
                   element={
-                    <ProtectedRoute allowedRoles={['client', 'parking_owner']}>
+                    <ProtectedRoute>
                       <ClientDashboard />
                     </ProtectedRoute>
                   } 
                 />
+                <Route path="*" element={<NotFound />} /> 
               </Routes>
             </div>
           </Router>

@@ -23,11 +23,11 @@ function VehicleRegistration({ onComplete, onBack }) {
   ];
 
   const vehicleTypes = [
-    { value: 'car', icon: '🚗', label: 'Car' },
-    { value: 'suv', icon: '🚙', label: 'SUV' },
-    { value: 'motorcycle', icon: '🏍️', label: 'Motorcycle' },
-    { value: 'truck', icon: '🚚', label: 'Truck' },
-    { value: 'van', icon: '🚐', label: 'Van' }
+    { value: 'car', label: 'Car' },
+    { value: 'suv', label: 'SUV' },
+    { value: 'motorcycle', label: 'Motorcycle' },
+    { value: 'truck', label: 'Truck' },
+    { value: 'van', label: 'Van' }
   ];
 
   const colors = [
@@ -93,7 +93,7 @@ function VehicleRegistration({ onComplete, onBack }) {
         <div className="relative z-10">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="text-5xl mb-4">🚗</div>
+            <div className="text-5xl mb-4"></div>
             <h2 className="text-3xl font-bold text-gray-700 mb-2">
               Register Your Vehicle
             </h2>
@@ -265,7 +265,7 @@ function VehicleRegistration({ onComplete, onBack }) {
                     </>
                   ) : (
                     <>
-                      🎫 Generate Digital Ticket
+                       Generate Digital Ticket
                     </>
                   )}
                 </span>

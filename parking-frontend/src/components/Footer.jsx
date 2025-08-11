@@ -21,7 +21,7 @@ function Footer() {
               <h3 className="text-xl font-bold text-gray-700">
                 Park<span className="text-blue-600">Smart</span>
               </h3>
-              <p className="text-xs text-gray-500 font-medium">💡 Smart Parking Solutions</p>
+              <p className="text-xs text-gray-500 font-medium">  Smart Parking Solutions</p>
             </div>
           </div>
 

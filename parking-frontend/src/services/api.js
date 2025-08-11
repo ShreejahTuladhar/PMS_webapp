@@ -21,7 +21,7 @@ api.interceptors.request.use(
     
     // Log requests in development
     if (process.env.NODE_ENV === 'development') {
-      console.log(`🚀 ${config.method?.toUpperCase()} ${config.url}`, {
+      console.log(` ${config.method?.toUpperCase()} ${config.url}`, {
         data: config.data,
         params: config.params,
       });

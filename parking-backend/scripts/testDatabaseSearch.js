@@ -58,8 +58,8 @@ const testFrontendAPI = async () => {
         .sort((a, b) => a.distance - b.distance)
         .slice(0, 10);
       
-      console.log(`🎯 Found ${nearbySpots.length} spots within 5km of Ratna Park`);
-      console.log('📍 Nearest spots:');
+      console.log(` Found ${nearbySpots.length} spots within 5km of Ratna Park`);
+      console.log(' Nearest spots:');
       nearbySpots.forEach(spot => {
         console.log(`- ${spot.name}: ${spot.distance.toFixed(2)}km away, Rs.${spot.hourlyRate}/hr, ${spot.availableSpaces}/${spot.totalSpaces} available`);
       });

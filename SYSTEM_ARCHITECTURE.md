@@ -3,7 +3,7 @@
 
 ---
 
-## 🎯 **System Overview**
+##  **System Overview**
 
 ParkSathi is a comprehensive digital parking management system that combines real-time data processing, intelligent location services, and user-friendly interfaces to solve urban parking challenges. The system uses a microservices architecture with modern web technologies to deliver a scalable, secure, and efficient parking solution.
 
@@ -107,13 +107,13 @@ src/
 ```
 
 ### **Key Frontend Features**
-- 🌟 **Responsive Design**: Mobile-first approach with adaptive layouts
+-  **Responsive Design**: Mobile-first approach with adaptive layouts
 - 🎨 **Consistent Theming**: Balanced yellow-blue light theme
-- 🔍 **Smart Search**: Real-time parking space discovery
-- 🗺️ **Interactive Maps**: Visual parking location selection
+-  **Smart Search**: Real-time parking space discovery
+-  **Interactive Maps**: Visual parking location selection
 - 🔐 **Secure Authentication**: JWT-based auth with refresh tokens
 - ⚡ **Real-time Updates**: WebSocket connections for live data
-- 📱 **PWA Ready**: Service workers and offline capabilities
+-  **PWA Ready**: Service workers and offline capabilities
 
 ---
 
@@ -359,7 +359,7 @@ Backend Services/
 
 ---
 
-## 🚀 **Deployment Architecture**
+##  **Deployment Architecture**
 
 ### **Cloud Infrastructure (AWS)**
 ```
@@ -460,18 +460,18 @@ jobs:
 
 ---
 
-## 🎯 **Future Enhancements**
+##  **Future Enhancements**
 
 ### **Phase 2 Features**
-- 🚗 **IoT Integration**: Smart parking sensors
+-  **IoT Integration**: Smart parking sensors
 - 🤖 **AI/ML**: Predictive parking availability
-- 📱 **Mobile App**: Native iOS/Android applications
-- 🔍 **Advanced Search**: ML-powered recommendations
-- 🌐 **Multi-language**: Internationalization support
+-  **Mobile App**: Native iOS/Android applications
+-  **Advanced Search**: ML-powered recommendations
+-  **Multi-language**: Internationalization support
 
 ### **Phase 3 Features**
-- 🚙 **EV Charging**: Electric vehicle charging stations
-- 🎫 **Events Integration**: Concert/sports venue parking
+-  **EV Charging**: Electric vehicle charging stations
+-  **Events Integration**: Concert/sports venue parking
 - 🏢 **Enterprise**: Corporate parking management
 - 📈 **Advanced Analytics**: Business intelligence dashboard
 - 🌍 **Multi-city**: Expansion to multiple cities

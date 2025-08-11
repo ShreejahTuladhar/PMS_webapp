@@ -32,7 +32,6 @@ const UserProfile = () => {
     smsNotifications: false,
     pushNotifications: true,
     marketingEmails: false,
-    language: 'en',
     currency: 'NPR',
     theme: 'light'
   });
@@ -142,10 +141,10 @@ const UserProfile = () => {
   };
 
   const sections = [
-    { id: 'personal', name: 'Personal Info', icon: '👤' },
-    { id: 'security', name: 'Security', icon: '🔒' },
-    { id: 'preferences', name: 'Preferences', icon: '⚙️' },
-    { id: 'privacy', name: 'Privacy', icon: '🛡️' }
+    { id: 'personal', name: 'Personal Info', icon: '' },
+    { id: 'security', name: 'Security', icon: '' },
+    { id: 'preferences', name: 'Preferences', icon: '' },
+    { id: 'privacy', name: 'Privacy', icon: '' }
   ];
 
   return (
@@ -485,24 +484,10 @@ const UserProfile = () => {
                     </div>
                   </div>
 
-                  {/* Language & Region */}
+                  {/* Currency Settings */}
                   <div className="border-t pt-6">
-                    <h4 className="font-medium text-gray-900 mb-3">Language & Region</h4>
+                    <h4 className="font-medium text-gray-900 mb-3">Currency</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Language
-                        </label>
-                        <select
-                          value={preferences.language}
-                          onChange={(e) => setPreferences({...preferences, language: e.target.value})}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        >
-                          <option value="en">English</option>
-                          <option value="ne">नेपाली (Nepali)</option>
-                          <option value="hi">हिन्दी (Hindi)</option>
-                        </select>
-                      </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Currency

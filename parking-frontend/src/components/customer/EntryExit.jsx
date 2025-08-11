@@ -88,7 +88,7 @@ function EntryExit({ mode, vehicleData, ticketData, onComplete, onBack }) {
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-8 relative">
           <div className="text-center relative z-10">
-            <div className="text-5xl mb-4">{isEntry ? '🎫' : '🚀'}</div>
+            <div className="text-5xl mb-4">{isEntry ? '' : ''}</div>
             <h2 className="text-3xl font-bold mb-2">
               {isEntry ? 'Park Entry' : 'Exit Process'}
             </h2>
@@ -114,9 +114,9 @@ function EntryExit({ mode, vehicleData, ticketData, onComplete, onBack }) {
                 <div className="bg-white rounded-xl p-4 mb-6 border border-gray-200">
                   <div className="flex items-center justify-center gap-4">
                     <span className="text-3xl">
-                      {vehicleData.type === 'car' ? '🚗' : 
-                       vehicleData.type === 'motorcycle' ? '🏍️' : 
-                       vehicleData.type === 'suv' ? '🚙' : '🚐'}
+                      {vehicleData.type === 'car' ? '' : 
+                       vehicleData.type === 'motorcycle' ? '' : 
+                       vehicleData.type === 'suv' ? '' : ''}
                     </span>
                     <div className="text-center">
                       <div className="font-bold text-xl text-gray-700">
@@ -155,7 +155,7 @@ function EntryExit({ mode, vehicleData, ticketData, onComplete, onBack }) {
                 className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-12 py-4 rounded-2xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 relative overflow-hidden group"
               >
                 <span className="relative z-10 flex items-center justify-center gap-2">
-                  {isEntry ? '🎯 Generate Ticket & Enter' : '💳 Process Payment & Exit'}
+                  {isEntry ? ' Generate Ticket & Enter' : ' Process Payment & Exit'}
                 </span>
                 <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </button>
@@ -168,7 +168,7 @@ function EntryExit({ mode, vehicleData, ticketData, onComplete, onBack }) {
               <div className="w-20 h-20 mx-auto relative">
                 <div className="w-20 h-20 border-4 border-blue-200 rounded-full animate-spin border-t-blue-500"></div>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-2xl">{isEntry ? '🎫' : '⚡'}</span>
+                  <span className="text-2xl">{isEntry ? '' : '⚡'}</span>
                 </div>
               </div>
               
@@ -198,7 +198,7 @@ function EntryExit({ mode, vehicleData, ticketData, onComplete, onBack }) {
           {processStep === 'success' && isEntry && generatedTicket && (
             <div className="space-y-6">
               <div className="text-center">
-                <div className="text-6xl mb-4">🎉</div>
+                <div className="text-6xl mb-4"></div>
                 <h3 className="text-2xl font-bold text-gray-700 mb-2">
                   Welcome! You're All Set!
                 </h3>
@@ -266,7 +266,7 @@ function EntryExit({ mode, vehicleData, ticketData, onComplete, onBack }) {
                 onClick={handleComplete}
                 className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300"
               >
-                ✨ Continue to Parking
+                 Continue to Parking
               </button>
             </div>
           )}
@@ -274,7 +274,7 @@ function EntryExit({ mode, vehicleData, ticketData, onComplete, onBack }) {
           {/* Success State - Exit */}
           {processStep === 'success' && !isEntry && (
             <div className="text-center space-y-6">
-              <div className="text-6xl mb-4">🎉</div>
+              <div className="text-6xl mb-4"></div>
               <h3 className="text-2xl font-bold text-gray-700 mb-2">
                 Thank You for Parking with Us!
               </h3>
@@ -298,7 +298,7 @@ function EntryExit({ mode, vehicleData, ticketData, onComplete, onBack }) {
                 onClick={handleComplete}
                 className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300"
               >
-                🏠 Return Home
+                 Return Home
               </button>
             </div>
           )}

@@ -60,7 +60,7 @@ src/
 - **Common Components**: Reusable UI components (LoadingSpinner, SearchForm)
 - **Component Composition**: Smaller, focused components
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### Prerequisites
 - Node.js 16+
@@ -143,7 +143,7 @@ function MyComponent() {
 - **Day.js**: Date manipulation
 - **JWT Decode**: Token parsing
 
-## 🎯 Performance Optimizations
+##  Performance Optimizations
 
 ### Bundle Splitting
 - Vendor chunks separated for better caching
@@ -215,7 +215,7 @@ VITE_APP_VERSION=1.0.0
 - **Development**: Source maps, hot reload, debug tools
 - **Production**: Minified, optimized, tree-shaken
 
-## 📋 Migration Notes
+##  Migration Notes
 
 ### From Context to Redux
 1. **AuthContext** → Redux auth slice (✅ Implemented)
@@ -227,7 +227,7 @@ VITE_APP_VERSION=1.0.0
 2. **Error handling** → Use interceptors (✅ Implemented)
 3. **Loading states** → Redux loading flags (✅ Implemented)
 
-## 🚀 Next Steps
+##  Next Steps
 
 1. **Complete Context Migration**: Remove Context providers, use Redux
 2. **Component Refactoring**: Break down large components

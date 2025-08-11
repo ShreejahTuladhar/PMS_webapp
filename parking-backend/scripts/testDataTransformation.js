@@ -13,7 +13,7 @@ const testDataTransformation = async () => {
     
     if (response.data.success) {
       const rawSpot = response.data.data[0];
-      console.log('📋 Raw database data:');
+      console.log(' Raw database data:');
       console.log(JSON.stringify(rawSpot, null, 2));
       
       // Transform the same way frontend does
@@ -64,7 +64,7 @@ const testDataTransformation = async () => {
       console.log('\n✅ Transformed data for MapView:');
       console.log(JSON.stringify(transformedSpot, null, 2));
       
-      console.log('\n🔍 Checking MapView required properties:');
+      console.log('\n Checking MapView required properties:');
       console.log('- businessHours.isOpen24:', transformedSpot.businessHours.isOpen24);
       console.log('- features:', transformedSpot.features);
       console.log('- availability:', transformedSpot.availability);

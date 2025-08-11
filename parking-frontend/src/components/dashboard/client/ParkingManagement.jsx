@@ -234,7 +234,7 @@ const ParkingManagement = () => {
   const getStatusIcon = (status) => {
     const icons = {
       available: '✅',
-      occupied: '🚗',
+      occupied: '',
       maintenance: '🔧',
       disabled: '❌'
     };

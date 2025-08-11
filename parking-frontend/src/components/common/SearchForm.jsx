@@ -80,7 +80,7 @@ function SearchForm({ onSearch, onRadiusChange, radius, loading: externalLoading
                 </>
               ) : (
                 <>
-                  <span className="text-lg">📍</span>
+                  <span className="text-lg"></span>
                   <span className="hidden sm:inline">Use Current</span>
                 </>
               )}
@@ -98,7 +98,7 @@ function SearchForm({ onSearch, onRadiusChange, radius, loading: externalLoading
                 </>
               ) : (
                 <>
-                  <span className="text-lg">🔍</span>
+                  <span className="text-lg"></span>
                   <span className="hidden sm:inline">Search</span>
                 </>
               )}
