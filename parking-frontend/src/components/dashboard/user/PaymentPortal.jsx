@@ -6,7 +6,6 @@ const PaymentPortal = () => {
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [paymentHistory, setPaymentHistory] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [selectedMethod, setSelectedMethod] = useState(null);
   const [loading, setLoading] = useState(false);
 
   // New payment method form

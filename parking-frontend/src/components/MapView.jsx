@@ -187,7 +187,7 @@ const MapView = ({ parkingSpots, radius, center, onSpotSelect, onBooking }) => {
       return [center.lat, center.lng];
     }
     return defaultCenter;
-  }, [center]);
+  }, [center, defaultCenter]);
 
   // Use actual coordinates from parking data
   const parkingSpotsWithCoords = useMemo(() => {

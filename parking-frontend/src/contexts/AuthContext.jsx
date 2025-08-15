@@ -1,6 +1,7 @@
-import { createContext, useContext, useReducer, useEffect } from 'react';
+import { createContext, useReducer, useEffect } from 'react';
 
 const AuthContext = createContext();
+export { AuthContext };
 
 const initialState = {
   user: null,
@@ -56,7 +57,7 @@ export function AuthProvider({ children }) {
           type: 'LOGIN_SUCCESS',
           payload: { user, token }
         });
-      } catch (error) {
+      } catch {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         dispatch({ type: 'SET_LOADING', payload: false });
@@ -115,10 +116,3 @@ export function AuthProvider({ children }) {
   );
 }
 
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-}

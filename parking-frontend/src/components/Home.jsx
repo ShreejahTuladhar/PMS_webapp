@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { useBooking } from '../contexts/BookingContext';
+import { useAuth } from '../hooks/useAuth';
+import { useBooking } from '../hooks/useBooking';
 import SearchSection from './SearchSection';
 import MapView from './MapView';
 import ParkingList from './ParkingList';

@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { locationService } from '../../../services';
 import toast from 'react-hot-toast';
 
 const ParkingManagement = () => {

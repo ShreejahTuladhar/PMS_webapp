@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import AuthModal from './auth/AuthModal';
 
 const Header = () => {
@@ -19,10 +19,6 @@ const Header = () => {
     setIsAuthModalOpen(true);
   };
 
-  const handleSignUp = () => {
-    setAuthModalTab('register');
-    setIsAuthModalOpen(true);
-  };
 
   const handleLogout = () => {
     logout();

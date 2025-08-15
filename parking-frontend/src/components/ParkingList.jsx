@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import ParkingMarketingGrid from './ParkingMarketingGrid';
 import specialOffersService from '../services/specialOffersService';
 
@@ -22,7 +22,7 @@ const ParkingList = ({ parkingSpots, onBooking, selectedSpot, onLoginRequired, o
     if (hasMarketingData && viewMode !== 'list') {
       setViewMode('cards');
     }
-  }, [hasMarketingData]);
+  }, [hasMarketingData, viewMode]);
 
   const handleBookingClick = (spot) => {
     if (!isAuthenticated) {
@@ -288,23 +288,23 @@ const ParkingList = ({ parkingSpots, onBooking, selectedSpot, onLoginRequired, o
                 {enhancedSpot.bestOffer && enhancedSpot.bestOffer.discountedPrice ? (
                   <div>
                     <div className="text-lg font-bold text-green-600 mb-1">
-                      NRS {enhancedSpot.bestOffer.discountedPrice}/hr
+                      रु {enhancedSpot.bestOffer.discountedPrice}/hr
                       <span className="text-sm text-gray-400 line-through ml-2">
-                        NRS {enhancedSpot.hourlyRate}
+                        रु {enhancedSpot.hourlyRate}
                       </span>
                     </div>
                     <div className="text-xs text-green-600 font-medium">
-                      Save NRS {enhancedSpot.hourlyRate - enhancedSpot.bestOffer.discountedPrice}/hr
+                      Save रु {enhancedSpot.hourlyRate - enhancedSpot.bestOffer.discountedPrice}/hr
                     </div>
                   </div>
                 ) : (
                   <div className="text-lg font-bold text-blue-600 mb-1">
-                    NRS {enhancedSpot.hourlyRate}/hr
+                    रु {enhancedSpot.hourlyRate}/hr
                   </div>
                 )}
                 {enhancedSpot.vehicleTypes?.motorcycle && (
                   <div className="text-sm text-gray-600">
-                    NRS {enhancedSpot.vehicleTypes.motorcycle}/hr (motorcycle)
+                    रु {enhancedSpot.vehicleTypes.motorcycle}/hr (motorcycle)
                   </div>
                 )}
               </div>

@@ -93,17 +93,6 @@ const UserActivity = () => {
     }
   };
 
-  const getActivityIcon = (type) => {
-    const icons = {
-      booking: '🅿️',
-      payment: '',
-      profile: '👤',
-      security: '🔒',
-      notification: '🔔'
-    };
-    return icons[type] || '📝';
-  };
-
   const getActivityColor = (color) => {
     const colors = {
       blue: 'bg-blue-100 text-blue-800',

@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
 
 function VehicleRegistration({ onComplete, onBack }) {
-  const { user } = useAuth();
   const [vehicle, setVehicle] = useState({
     make: '',
     model: '',

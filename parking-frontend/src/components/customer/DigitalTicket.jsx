@@ -21,7 +21,6 @@ function DigitalTicket({ ticketData, vehicleData, onExit, onSupport }) {
   const minutes = parkingDuration % 60;
   
   const currentCost = Math.ceil(parkingDuration / 60) * ticketData.pricing.hourlyRate;
-  const estimatedExitTime = new Date(entryTime.getTime() + (hours + 1) * 60 * 60 * 1000);
 
   const qrData = JSON.stringify({
     ticketId: ticketData.id,

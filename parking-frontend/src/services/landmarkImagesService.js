@@ -342,7 +342,7 @@ class LandmarkImagesService {
   /**
    * Get landmarks by category
    */
-  getLandmarksByCategory(category) {
+  getLandmarksByCategory() {
     // This would require additional categorization data
     // For now, return all landmarks
     return this.getAllLandmarks();

@@ -1,11 +1,32 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 
+/**
+ * EntryExit component handles the parking entry and exit process for customers.
+ * It manages the UI flow for generating a digital parking ticket (with QR code) on entry,
+ * and processes payment and exit authorization on exit.
+ *
+ * @component
+ * @param {Object} props
+ * @param {'entry'|'exit'} props.mode - Determines if the process is for entry or exit.
+ * @param {Object} props.vehicleData - Vehicle information (licensePlate, type, make, model, year, color).
+ * @param {Object} [props.ticketData] - Existing ticket data (used for exit process).
+ * @param {Function} props.onComplete - Callback invoked when the process completes (returns ticket or exit info).
+ * @param {Function} props.onBack - Callback invoked when the user clicks the back button.
+ *
+ * @example
+ * <EntryExit
+ *   mode="entry"
+ *   vehicleData={{ licensePlate: 'BA 2 PA 1234', type: 'car', make: 'Toyota', model: 'Corolla', year: 2020, color: 'white' }}
+ *   onComplete={handleComplete}
+ *   onBack={handleBack}
+ * />
+ */
 function EntryExit({ mode, vehicleData, ticketData, onComplete, onBack }) {
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
   const [processStep, setProcessStep] = useState('ready'); // ready, processing, success
   const [generatedTicket, setGeneratedTicket] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const isEntry = mode === 'entry';
   const currentTime = new Date();
@@ -20,8 +41,8 @@ function EntryExit({ mode, vehicleData, ticketData, onComplete, onBack }) {
   }) : '';
 
   const handleProcess = async () => {
-    setIsProcessing(true);
     setProcessStep('processing');
+    setIsLoading(true);
 
     // Simulate processing time
     await new Promise(resolve => setTimeout(resolve, 2000));
@@ -52,16 +73,14 @@ function EntryExit({ mode, vehicleData, ticketData, onComplete, onBack }) {
       // Simulate successful entry
       setTimeout(() => {
         setProcessStep('success');
-        setIsProcessing(false);
-        setIsSuccess(true);
+        setIsLoading(false);
       }, 1000);
       
     } else {
       // Process exit
       setTimeout(() => {
         setProcessStep('success');
-        setIsProcessing(false);
-        setIsSuccess(true);
+        setIsLoading(false);
       }, 1000);
     }
   };
@@ -231,7 +250,6 @@ function EntryExit({ mode, vehicleData, ticketData, onComplete, onBack }) {
                         value={qrData} 
                         size={120}
                         level="H"
-                        includeMargin={false}
                       />
                     </div>
                     <div className="text-sm mt-2 opacity-80">
@@ -307,5 +325,10 @@ function EntryExit({ mode, vehicleData, ticketData, onComplete, onBack }) {
     </div>
   );
 }
+
+// Move to separate service
+const generateTicket = (vehicleData, currentTime) => {
+  // Ticket generation logic
+};
 
 export default EntryExit;

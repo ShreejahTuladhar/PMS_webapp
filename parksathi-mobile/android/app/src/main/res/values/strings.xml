@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ParkSathi Mobile App Strings -->
+    <!-- Author: Shreeraj Tuladhar - 1Ox4Fox LLC -->
+    
+    <string name="app_name">ParkSathi</string>
+    <string name="app_description">Smart Parking Management</string>
+    <string name="app_company">1Ox4Fox LLC</string>
+    <string name="app_author">Shreeraj Tuladhar</string>
+    
+    <!-- Permissions -->
+    <string name="location_permission_rationale">ParkSathi needs location access to find nearby parking spots</string>
+    <string name="camera_permission_rationale">ParkSathi needs camera access to scan QR codes</string>
+    
+    <!-- Notifications -->
+    <string name="notification_channel_name">ParkSathi Notifications</string>
+    <string name="notification_channel_desc">Parking booking updates and reminders</string>
+</resources>

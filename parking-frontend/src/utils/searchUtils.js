@@ -251,8 +251,7 @@ export class EnhancedSearch {
     const {
       maxResults = 6,
       includeReasons = true,
-      minQueryLength = 1,
-      fuzzyThreshold = 0.6
+      minQueryLength = 1
     } = options;
 
     if (!query || query.length < minQueryLength) return [];

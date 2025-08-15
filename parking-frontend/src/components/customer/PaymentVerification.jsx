@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 function PaymentVerification({ ticketData, onComplete, onBack }) {
   const [isProcessing, setIsProcessing] = useState(false);

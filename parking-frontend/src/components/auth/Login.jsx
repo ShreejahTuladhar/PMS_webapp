@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { useAuth as useAuthContext } from '../../contexts/AuthContext';
+import { useAuth as useAuthContext } from '../../hooks/useAuth';
 import authService from '../../services/authService';
 
 function Login({ onSwitchToRegister, onClose }) {

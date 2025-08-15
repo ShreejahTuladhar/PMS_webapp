@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import searchHistory from '../utils/searchHistory';
 import { analyticsService, locationService } from '../services';
 import { EnhancedSearch, highlightMatch } from '../utils/searchUtils';
@@ -41,7 +41,7 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
   const enhancedSearchRef = useRef(null);
 
   // Generate all searchable locations using dynamic and static data
-  const getAllSearchableLocations = () => {
+  const getAllSearchableLocations = useCallback(() => {
     const locations = new Set();
     
     console.log('🏛️ === SEARCH LOCATION SOURCES DEBUG ===');
@@ -100,10 +100,10 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
     console.log('🏛️ === END SEARCH LOCATION SOURCES DEBUG ===');
     
     return finalLocations;
-  };
+  }, [extractedLocationData, popularLocations]);
 
   // Generate searchable locations based on popular locations and extracted data (memoized)
-  const searchableLocations = useMemo(() => getAllSearchableLocations(), [popularLocations, extractedLocationData]);
+  const searchableLocations = useMemo(() => getAllSearchableLocations(), [getAllSearchableLocations]);
 
   // Initialize enhanced search when locations change
   useEffect(() => {
@@ -287,7 +287,7 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
     }
   };
 
-  const handleRecentSearchClick = async (recentSearch, index) => {
+  const handleRecentSearchClick = async (recentSearch) => {
     // Track recent search click analytics
     const daysDiff = Math.floor((Date.now() - recentSearch.timestamp) / (1000 * 60 * 60 * 24));
     analyticsService.trackRecentSearchClick(recentSearch.query, daysDiff);

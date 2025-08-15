@@ -18,7 +18,7 @@ export const inspectAuthStorage = () => {
 };
 
 // Auto-run inspection in development
-if (process.env.NODE_ENV === 'development') {
+if (import.meta.env.MODE === 'development') {
   window.clearAuthStorage = clearAuthStorage;
   window.inspectAuthStorage = inspectAuthStorage;
   console.log('🛠️  Auth debugging utilities available: clearAuthStorage(), inspectAuthStorage()');

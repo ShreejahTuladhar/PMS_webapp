@@ -35,10 +35,11 @@ const ParkingMarketingGrid = ({
   // Sort spots based on criteria
   const sortedSpots = [...enhancedSpots].sort((a, b) => {
     switch (sortBy) {
-      case 'price':
+      case 'price': {
         const priceA = a.bestOffer ? a.bestOffer.discountedPrice || a.hourlyRate : a.hourlyRate;
         const priceB = b.bestOffer ? b.bestOffer.discountedPrice || b.hourlyRate : b.hourlyRate;
         return priceA - priceB;
+      }
       case 'availability':
         return (b.availableSpaces / b.totalSpaces) - (a.availableSpaces / a.totalSpaces);
       case 'offers':

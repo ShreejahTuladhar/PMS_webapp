@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
+import { useState } from 'react';
 import VehicleRegistration from './VehicleRegistration';
 import DigitalTicket from './DigitalTicket';
 import EntryExit from './EntryExit';
@@ -7,7 +6,6 @@ import PaymentVerification from './PaymentVerification';
 import CustomerSupport from './CustomerSupport';
 
 function CustomerJourney() {
-  const { user } = useAuth();
   const [journeyStep, setJourneyStep] = useState('welcome'); // welcome, vehicle, entry, parked, exit, support
   const [customerData, setCustomerData] = useState({
     vehicle: null,

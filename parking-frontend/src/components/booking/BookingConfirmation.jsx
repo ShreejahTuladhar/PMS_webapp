@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useBooking } from '../../contexts/BookingContext';
+import { useBooking } from '../../hooks/useBooking';
 
 // Navigation platform configurations (moved from deleted data file)
 const localNavigationPlatforms = {

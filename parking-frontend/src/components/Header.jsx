@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef, memo, useMemo } from 'react';
+import { useState, useEffect, useRef, memo } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import AuthModal from './auth/AuthModal';
 
 const MemoizedLogo = memo(({ className }) => (
@@ -75,6 +75,21 @@ const Header = () => {
     };
   }, []);
 
+  // Close menu and dropdown on Escape key press
+  const handleKeyDown = (event) => {
+    if (event.key === 'Escape') {
+      setIsProfileDropdownOpen(false);
+      setIsMenuOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -144,6 +159,9 @@ const Header = () => {
                     <button 
                       onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
                       className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                      aria-expanded={isProfileDropdownOpen}
+                      aria-haspopup="true"
+                      aria-label="User menu"
                     >
                       <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                         <span className="text-blue-600 font-semibold text-sm">
@@ -160,7 +178,12 @@ const Header = () => {
 
                     {/* Profile Dropdown */}
                     {isProfileDropdownOpen && (
-                      <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                      <div 
+                        role="menu" 
+                        aria-orientation="vertical" 
+                        aria-labelledby="user-menu"
+                        className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50"
+                      >
                         {/* User Info */}
                         <div className="px-4 py-3 border-b border-gray-100">
                           <div className="flex items-center space-x-3">

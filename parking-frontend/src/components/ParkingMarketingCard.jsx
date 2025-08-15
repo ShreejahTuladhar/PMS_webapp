@@ -26,7 +26,6 @@ const ParkingMarketingCard = ({
     marketing, 
     pricing, 
     amenities = [], 
-    coordinates,
     totalSpaces = 0,
     availableSpaces = 0,
     operatingHours = {},
@@ -108,7 +107,7 @@ const ParkingMarketingCard = ({
         {/* Pricing */}
         <div className="card-pricing">
           <div className="price-main">
-            <span className="price-value">₹{actualPricing.hourlyRate}</span>
+            <span className="price-value">रु{actualPricing.hourlyRate}</span>
             <span className="price-unit">/hour</span>
           </div>
           {actualPricing.studentDiscount > 0 && (

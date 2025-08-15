@@ -1,4 +1,5 @@
 import { apiHelpers } from './api';
+import api from './api';
 
 class AnalyticsService {
   constructor() {
@@ -6,8 +7,27 @@ class AnalyticsService {
     this.FLUSH_INTERVAL = 30000; // 30 seconds
     this.pendingEvents = [];
     this.isOnline = navigator.onLine;
+    this.baseURL = '/api/analytics';
+    this.cache = new Map();
+    this.cacheTimeout = 5 * 60 * 1000; // 5 minutes
     this.setupOnlineListeners();
     this.startBatchFlushTimer();
+  }
+
+  // Cache management
+  getFromCache(key) {
+    const cached = this.cache.get(key);
+    if (cached && Date.now() - cached.timestamp < this.cacheTimeout) {
+      return cached.data;
+    }
+    return null;
+  }
+
+  setCache(key, data) {
+    this.cache.set(key, {
+      data,
+      timestamp: Date.now()
+    });
   }
 
   setupOnlineListeners() {
@@ -448,6 +468,120 @@ class AnalyticsService {
         error: error.message || 'Failed to fetch search insights'
       };
     }
+  }
+
+  // Advanced Dashboard Analytics Methods
+  
+  // Real-time dashboard metrics
+  async getRealTimeDashboard() {
+    const cacheKey = 'realtime-dashboard';
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const response = await api.get(`${this.baseURL}/realtime`);
+      this.setCache(cacheKey, response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to fetch real-time dashboard:', error);
+      throw error;
+    }
+  }
+
+  // Revenue analytics
+  async getRevenueAnalytics(period = 'month', locationId = null) {
+    const cacheKey = `revenue-${period}-${locationId || 'all'}`;
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const params = { period };
+      if (locationId) params.locationId = locationId;
+
+      const response = await api.get(`${this.baseURL}/revenue`, { params });
+      this.setCache(cacheKey, response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to fetch revenue analytics:', error);
+      throw error;
+    }
+  }
+
+  // Utilization analytics
+  async getUtilizationAnalytics(locationId = null, period = 'week') {
+    const cacheKey = `utilization-${period}-${locationId || 'all'}`;
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const params = { period };
+      if (locationId) params.locationId = locationId;
+
+      const response = await api.get(`${this.baseURL}/utilization`, { params });
+      this.setCache(cacheKey, response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to fetch utilization analytics:', error);
+      throw error;
+    }
+  }
+
+  // Peak hours analysis
+  async getPeakHoursAnalysis(locationId = null, days = 30) {
+    const cacheKey = `peak-hours-${days}-${locationId || 'all'}`;
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const params = { days };
+      if (locationId) params.locationId = locationId;
+
+      const response = await api.get(`${this.baseURL}/peak-hours`, { params });
+      this.setCache(cacheKey, response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to fetch peak hours analysis:', error);
+      throw error;
+    }
+  }
+
+  // User behavior analytics
+  async getUserBehaviorAnalytics(period = 'month') {
+    const cacheKey = `user-behavior-${period}`;
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const response = await api.get(`${this.baseURL}/user-behavior`, {
+        params: { period }
+      });
+      this.setCache(cacheKey, response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to fetch user behavior analytics:', error);
+      throw error;
+    }
+  }
+
+  // Get all locations for filters
+  async getAllLocations() {
+    const cacheKey = 'all-locations';
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const response = await api.get('/api/locations');
+      this.setCache(cacheKey, response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to fetch locations:', error);
+      throw error;
+    }
+  }
+
+  // Clear cache
+  clearCache() {
+    this.cache.clear();
   }
 
   // Cleanup method for when component unmounts

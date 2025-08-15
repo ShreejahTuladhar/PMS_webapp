@@ -33,7 +33,7 @@ function SearchForm({ onSearch, onRadiusChange, radius, loading: externalLoading
               onSearch(locationData);
               resolve(locationData);
             },
-            (error) => {
+            () => {
               reject(new Error('Unable to get your location. Please check location permissions.'));
             },
             {

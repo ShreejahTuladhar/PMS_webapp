@@ -70,7 +70,7 @@ class AuthService {
     }
   }
 
-  async getProfile(token) {
+  async getProfile() {
     try {
       const result = await apiHelpers.get('/auth/me');
       
@@ -93,7 +93,7 @@ class AuthService {
     }
   }
 
-  async logout(token) {
+  async logout() {
     try {
       const result = await apiHelpers.post('/auth/logout');
       
