@@ -8,6 +8,7 @@ import About from './components/About';
 import CustomerJourney from './components/customer/CustomerJourney';
 import UserDashboard from './components/dashboard/user/UserDashboard';
 import ClientDashboard from './components/dashboard/client/ClientDashboard';
+import SuperAdminDashboard from './components/dashboard/superadmin/SuperAdminDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import NotFound from './components/common/NotFound';
 
@@ -36,6 +37,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <ClientDashboard />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/super-admin" 
+                  element={
+                    <ProtectedRoute>
+                      <SuperAdminDashboard />
                     </ProtectedRoute>
                   } 
                 />

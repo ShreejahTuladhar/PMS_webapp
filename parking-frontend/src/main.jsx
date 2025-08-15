@@ -4,7 +4,6 @@ import { Provider } from 'react-redux'
 import { Toaster } from 'react-hot-toast'
 import { store } from './store'
 import './index.css'
-import './utils/clearAuthStorage' // Import auth debugging utilities
 import App from './App.jsx'
 
 createRoot(document.getElementById('root')).render(
