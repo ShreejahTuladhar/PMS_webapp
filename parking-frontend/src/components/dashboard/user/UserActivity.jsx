@@ -46,7 +46,7 @@ const UserActivity = () => {
             title: 'Booked parking at Durbar Marg',
             description: 'Space A-12 • 2 hours',
             timestamp: '2024-01-20T10:30:00Z',
-            icon: '🅿️',
+            icon: '',
             color: 'blue'
           },
           {
@@ -55,7 +55,7 @@ const UserActivity = () => {
             title: 'Payment completed',
             description: 'Rs. 250 via eSewa',
             timestamp: '2024-01-20T10:32:00Z',
-            icon: '💳',
+            icon: '',
             color: 'green'
           },
           {
@@ -64,7 +64,7 @@ const UserActivity = () => {
             title: 'Profile updated',
             description: 'Changed phone number',
             timestamp: '2024-01-19T15:45:00Z',
-            icon: '👤',
+            icon: '',
             color: 'purple'
           },
           {
@@ -73,7 +73,7 @@ const UserActivity = () => {
             title: 'Booking cancelled',
             description: 'New Road Plaza • Refund processed',
             timestamp: '2024-01-18T09:15:00Z',
-            icon: '❌',
+            icon: '',
             color: 'red'
           }
         ],
@@ -91,17 +91,6 @@ const UserActivity = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const getActivityIcon = (type) => {
-    const icons = {
-      booking: '🅿️',
-      payment: '💳',
-      profile: '👤',
-      security: '🔒',
-      notification: '🔔'
-    };
-    return icons[type] || '📝';
   };
 
   const getActivityColor = (color) => {

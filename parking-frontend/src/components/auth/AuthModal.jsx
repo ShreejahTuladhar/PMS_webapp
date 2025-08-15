@@ -1,9 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Login from './Login';
 import Register from './Register';
 
 function AuthModal({ isOpen, onClose, defaultTab = 'login' }) {
   const [activeTab, setActiveTab] = useState(defaultTab);
+
+  // Sync internal state with defaultTab prop changes
+  useEffect(() => {
+    if (isOpen) {
+      setActiveTab(defaultTab);
+    }
+  }, [defaultTab, isOpen]);
 
   if (!isOpen) return null;
 
@@ -53,15 +60,15 @@ function AuthModal({ isOpen, onClose, defaultTab = 'login' }) {
               <div>
                 <h3 className="text-3xl md:text-4xl font-bold mb-2 tracking-tight drop-shadow-sm">
                   {activeTab === 'login' ? (
-                    <>💡 Welcome <span className="text-blue-600">Back!</span></>
+                    <>Welcome <span className="text-blue-600">Back!</span></>
                   ) : (
-                    <>💡 Join <span className="text-blue-600">ParkSathi!</span></>
+                    <>Join <span className="text-blue-600">ParkSathi!</span></>
                   )}
                 </h3>
                 <p className="text-gray-600 text-base font-medium">
                   {activeTab === 'login' 
-                    ? '🚀 Access your smart parking dashboard' 
-                    : '✨ Create your account for intelligent parking solutions'
+                    ? 'Access your smart parking dashboard' 
+                    : 'Create your account for intelligent parking solutions'
                   }
                 </p>
               </div>
@@ -73,44 +80,6 @@ function AuthModal({ isOpen, onClose, defaultTab = 'login' }) {
                 <svg className="w-6 h-6 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
                 </svg>
-              </button>
-            </div>
-          </div>
-          
-          {/* Bright Tab Navigation */}
-          <div className="bg-yellow-50/80 px-8 py-6 border-b border-yellow-200/50 relative z-10">
-            <div className="flex rounded-2xl bg-white/60 p-3 shadow-lg">
-              <button
-                onClick={() => setActiveTab('login')}
-                className={`flex-1 py-4 px-6 rounded-xl font-bold text-base transition-all duration-500 relative overflow-hidden ${
-                  activeTab === 'login'
-                    ? 'bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-800 shadow-xl transform scale-105'
-                    : 'text-gray-700 hover:text-gray-900 flashlight-hover'
-                }`}
-              >
-                <span className="relative z-10">🔐 Sign In</span>
-                {activeTab === 'login' && (
-                  <div className="absolute inset-0 bg-gradient-radial from-white via-yellow-200 to-transparent opacity-50 animate-pulse"></div>
-                )}
-                {activeTab !== 'login' && (
-                  <div className="absolute inset-0 bg-gradient-radial from-white via-yellow-200 to-transparent opacity-0 group-hover:opacity-80 transition-opacity duration-300 scale-0 group-hover:scale-150"></div>
-                )}
-              </button>
-              <button
-                onClick={() => setActiveTab('register')}
-                className={`flex-1 py-4 px-6 rounded-xl font-bold text-base transition-all duration-500 relative overflow-hidden ${
-                  activeTab === 'register'
-                    ? 'bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-800 shadow-xl transform scale-105'
-                    : 'text-gray-700 hover:text-gray-900 flashlight-hover'
-                }`}
-              >
-                <span className="relative z-10">✨ Sign Up</span>
-                {activeTab === 'register' && (
-                  <div className="absolute inset-0 bg-gradient-radial from-white via-yellow-200 to-transparent opacity-50 animate-pulse"></div>
-                )}
-                {activeTab !== 'register' && (
-                  <div className="absolute inset-0 bg-gradient-radial from-white via-yellow-200 to-transparent opacity-0 group-hover:opacity-80 transition-opacity duration-300 scale-0 group-hover:scale-150"></div>
-                )}
               </button>
             </div>
           </div>
@@ -132,7 +101,7 @@ function AuthModal({ isOpen, onClose, defaultTab = 'login' }) {
           <div className="bg-gradient-to-r from-yellow-100 to-amber-100 px-8 py-6 border-t border-yellow-200/50 rounded-b-3xl relative z-10">
             <div className="text-center">
               <p className="text-sm text-gray-700 font-bold mb-2">
-                💡 Your data is protected with bright enterprise-grade security
+                  Your data is protected with bright enterprise-grade security
               </p>
               <p className="text-xs text-gray-600 font-medium">
                 By continuing, you agree to ParkSathi's <span className="text-orange-600 font-bold">Terms of Service</span> and <span className="text-orange-600 font-bold">Privacy Policy</span>

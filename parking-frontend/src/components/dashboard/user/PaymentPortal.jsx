@@ -6,7 +6,6 @@ const PaymentPortal = () => {
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [paymentHistory, setPaymentHistory] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [selectedMethod, setSelectedMethod] = useState(null);
   const [loading, setLoading] = useState(false);
 
   // New payment method form
@@ -156,9 +155,9 @@ const PaymentPortal = () => {
   };
 
   const tabs = [
-    { id: 'methods', name: 'Payment Methods', icon: '💳' },
-    { id: 'history', name: 'Payment History', icon: '📄' },
-    { id: 'billing', name: 'Billing Info', icon: '🧾' }
+    { id: 'methods', name: 'Payment Methods',  },
+    { id: 'history', name: 'Payment History', icon: '' },
+    { id: 'billing', name: 'Billing Info', icon: '' }
   ];
 
   return (
@@ -483,7 +482,7 @@ const PaymentPortal = () => {
                           : 'border-gray-300 hover:border-gray-400'
                       }`}
                     >
-                      💳 Card
+                       Card
                     </button>
                     <button
                       type="button"
@@ -494,7 +493,7 @@ const PaymentPortal = () => {
                           : 'border-gray-300 hover:border-gray-400'
                       }`}
                     >
-                      📱 Mobile
+                       Mobile
                     </button>
                   </div>
                 </div>

@@ -8,7 +8,6 @@ import About from './components/About';
 import CustomerJourney from './components/customer/CustomerJourney';
 import UserDashboard from './components/dashboard/user/UserDashboard';
 import ClientDashboard from './components/dashboard/client/ClientDashboard';
-import DashboardContainer from './components/dashboard/DashboardContainer';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -25,14 +24,6 @@ function App() {
                 <Route path="/parking" element={<CustomerJourney />} />
                 <Route 
                   path="/dashboard" 
-                  element={
-                    <ProtectedRoute>
-                      <DashboardContainer />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/user-dashboard" 
                   element={
                     <ProtectedRoute allowedRoles={['customer', 'user']}>
                       <UserDashboard />

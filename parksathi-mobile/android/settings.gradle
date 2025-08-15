@@ -1,0 +1,20 @@
+/**
+ * Settings for ParkSathi Mobile Android Project
+ * Author: Shreeraj Tuladhar - 1Ox4Fox LLC
+ */
+
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.name = 'ParkSathi'
+
+// Auto-link native modules
+apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle")
+applyNativeModulesSettingsGradle(settings)
+
+include ':app'

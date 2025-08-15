@@ -1,35 +1,17 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '../../../contexts/AuthContext';
+import { BaseDashboard } from '../base/BaseDashboard';
 import BookingHistory from './BookingHistory';
 import PaymentPortal from './PaymentPortal';
 import UserProfile from './UserProfile';
 import UserActivity from './UserActivity';
 import { bookingService, userService } from '../../../services';
 
-const UserDashboard = ({ hideHeader = false }) => {
-  const { user, isAuthenticated } = useAuth();
-  const [activeTab, setActiveTab] = useState('overview');
-  const [dashboardData, setDashboardData] = useState({
-    recentBookings: [],
-    totalBookings: 0,
-    totalSpent: 0,
-    savedAmount: 0,
-    upcomingBookings: [],
-    loading: true
-  });
-
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      loadDashboardData();
-    }
-  }, [isAuthenticated, user]);
-
-  const loadDashboardData = async () => {
+const UserDashboard = () => {
+  const loadUserData = async (setDashboardData) => {
     try {
       setDashboardData(prev => ({ ...prev, loading: true }));
       
       const [bookingsResponse, statsResponse] = await Promise.all([
-        bookingService.getUserBookings({ limit: 5, status: 'all' }),
+        bookingService.getBookings({ limit: 5, status: 'all' }),
         userService.getUserStats()
       ]);
 
@@ -49,152 +31,135 @@ const UserDashboard = ({ hideHeader = false }) => {
     }
   };
 
-  const tabs = [
-    { id: 'overview', name: 'Overview', icon: '📊' },
-    { id: 'bookings', name: 'Bookings', icon: '🅿️' },
-    { id: 'payments', name: 'Payments', icon: '💳' },
-    { id: 'profile', name: 'Profile', icon: '👤' },
-    { id: 'activity', name: 'Activity', icon: '📈' },
+  const initialState = {
+    recentBookings: [],
+    totalBookings: 0,
+    totalSpent: 0,
+    savedAmount: 0,
+    upcomingBookings: []
+  };
+
+  const additionalTabs = [
+    { id: 'bookings', name: 'Booking History', icon: '' },
+    { id: 'transactions', name: 'Transaction History', icon: '' },
+    { id: 'vehicles', name: 'Vehicle Details', icon: '' },
+    { id: 'favorites', name: 'Favorite Locations', icon: '' },
+    { id: 'payments', name: 'Payments', icon: '' },
+    { id: 'activity', name: 'Activity', icon: '' },
   ];
 
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Please Login</h2>
-          <p className="text-gray-600">You need to be logged in to access your dashboard.</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className={hideHeader ? "" : "min-h-screen bg-gray-50"}>
-      {!hideHeader && (
-        <div className="bg-white shadow-sm border-b">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="py-6">
-              <div className="md:flex md:items-center md:justify-between">
-                <div className="flex-1 min-w-0">
-                  <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
-                    Welcome back, {user?.firstName || 'User'}! 👋
-                  </h2>
-                  <p className="mt-1 text-sm text-gray-500">
-                    Manage your parking bookings and account settings
-                  </p>
-                </div>
-                <div className="mt-4 flex md:mt-0 md:ml-4">
-                  <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
-                    + New Booking
-                  </button>
-                </div>
-              </div>
-            </div>
+    <BaseDashboard
+      userType="user"
+      loadDataFunction={loadUserData}
+      initialDashboardState={initialState}
+      additionalTabs={additionalTabs}
+    >
+      {{
+        headerActions: (
+          <div className="mt-4 flex md:mt-0 md:ml-4">
+            <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+              + New Booking
+            </button>
           </div>
-        </div>
-      )}
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Quick Stats */}
-        {activeTab === 'overview' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white">
+        ),
+        quickStats: ({ dashboardData }) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Total Bookings */}
+            <div className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
               <div className="flex items-center">
-                <div className="p-2 bg-white/20 rounded-lg">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                 </div>
                 <div className="ml-4">
-                  <p className="text-blue-100">Total Bookings</p>
-                  <p className="text-2xl font-bold">{dashboardData.totalBookings}</p>
+                  <p className="text-sm font-medium text-gray-600">Total Bookings</p>
+                  <p className="text-2xl font-bold text-gray-900">{dashboardData?.totalBookings || 0}</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-6 text-white">
+            {/* Total Spent */}
+            <div className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
               <div className="flex items-center">
-                <div className="p-2 bg-white/20 rounded-lg">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                  <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                   </svg>
                 </div>
                 <div className="ml-4">
-                  <p className="text-green-100">Total Spent</p>
-                  <p className="text-2xl font-bold">Rs. {dashboardData.totalSpent}</p>
+                  <p className="text-sm font-medium text-gray-600">Total Spent</p>
+                  <p className="text-2xl font-bold text-gray-900">Rs. {dashboardData?.totalSpent || 0}</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-6 text-white">
+            {/* Amount Saved */}
+            <div className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
               <div className="flex items-center">
-                <div className="p-2 bg-white/20 rounded-lg">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                   </svg>
                 </div>
                 <div className="ml-4">
-                  <p className="text-purple-100">Amount Saved</p>
-                  <p className="text-2xl font-bold">Rs. {dashboardData.savedAmount}</p>
+                  <p className="text-sm font-medium text-gray-600">Amount Saved</p>
+                  <p className="text-2xl font-bold text-gray-900">Rs. {dashboardData?.savedAmount || 0}</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl p-6 text-white">
+            {/* Upcoming Bookings */}
+            <div className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
               <div className="flex items-center">
-                <div className="p-2 bg-white/20 rounded-lg">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                  <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
                 <div className="ml-4">
-                  <p className="text-orange-100">Upcoming</p>
-                  <p className="text-2xl font-bold">{dashboardData.upcomingBookings.length}</p>
+                  <p className="text-sm font-medium text-gray-600">Upcoming</p>
+                  <p className="text-2xl font-bold text-gray-900">{dashboardData?.upcomingBookings?.length || 0}</p>
                 </div>
               </div>
             </div>
           </div>
-        )}
-
-        {/* Navigation Tabs */}
-        <div className="bg-white rounded-xl shadow-sm mb-6">
-          <div className="border-b border-gray-200">
-            <nav className="-mb-px flex space-x-8 px-6">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
-                    activeTab === tab.id
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  <span className="mr-2">{tab.icon}</span>
-                  {tab.name}
-                </button>
-              ))}
-            </nav>
-          </div>
-
-          {/* Tab Content */}
-          <div className="p-6">
-            {activeTab === 'overview' && (
+        ),
+        renderTabContent: ({ activeTab, dashboardData }) => {
+          if (activeTab === 'overview') {
+            return (
               <div className="space-y-6">
                 {/* Recent Bookings */}
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">Recent Bookings</h3>
+                <div className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-lg font-semibold text-gray-900">Recent Bookings</h3>
+                    <button className="text-blue-600 hover:text-blue-700 text-sm font-medium transition-colors">
+                      View all →
+                    </button>
+                  </div>
                   {dashboardData.loading ? (
-                    <div className="text-center py-4">
+                    <div className="text-center py-8">
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+                      <p className="text-gray-600 mt-3">Loading your bookings...</p>
                     </div>
                   ) : dashboardData.recentBookings.length > 0 ? (
                     <div className="space-y-3">
-                      {dashboardData.recentBookings.slice(0, 3).map((booking) => (
-                        <div key={booking.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                          <div>
-                            <p className="font-medium text-gray-900">{booking.locationName}</p>
-                            <p className="text-sm text-gray-500">{new Date(booking.startTime).toLocaleDateString()}</p>
+                      {dashboardData.recentBookings.slice(0, 4).map((booking) => (
+                        <div key={booking.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                          <div className="flex items-center space-x-4">
+                            <div className="w-10 h-10 bg-gradient-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center">
+                              <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                              </svg>
+                            </div>
+                            <div>
+                              <p className="font-semibold text-gray-900">{booking.locationName}</p>
+                              <p className="text-sm text-gray-600">
+                                {new Date(booking.startTime).toLocaleDateString()} • {booking.duration || 2}h
+                              </p>
+                            </div>
                           </div>
                           <div className="text-right">
                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -205,49 +170,118 @@ const UserDashboard = ({ hideHeader = false }) => {
                             }`}>
                               {booking.status}
                             </span>
-                            <p className="text-sm font-medium text-gray-900 mt-1">Rs. {booking.totalAmount}</p>
+                            <p className="text-sm font-bold text-gray-900 mt-1">Rs. {booking.totalAmount?.toLocaleString()}</p>
                           </div>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-gray-500 text-center py-4">No recent bookings found</p>
+                    <div className="text-center py-8">
+                      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                      <p className="text-gray-500 font-medium">No recent bookings found</p>
+                      <p className="text-sm text-gray-400 mt-1">Your booking history will appear here</p>
+                    </div>
                   )}
                 </div>
 
                 {/* Quick Actions */}
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
+                <div className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-6">Quick Actions</h3>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <button className="p-4 bg-blue-50 hover:bg-blue-100 rounded-lg text-center transition">
-                      <div className="text-2xl mb-2">🔍</div>
-                      <p className="text-sm font-medium text-blue-800">Find Parking</p>
+                    <button className="group p-6 bg-gradient-to-br from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 rounded-xl text-center transition-all duration-200 hover:shadow-md">
+                      <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                      </div>
+                      <p className="text-sm font-semibold text-blue-800">Find Parking</p>
+                      <p className="text-xs text-blue-600 mt-1">Search nearby spots</p>
                     </button>
-                    <button className="p-4 bg-green-50 hover:bg-green-100 rounded-lg text-center transition">
-                      <div className="text-2xl mb-2">💳</div>
-                      <p className="text-sm font-medium text-green-800">Add Payment</p>
+                    <button className="group p-6 bg-gradient-to-br from-green-50 to-green-100 hover:from-green-100 hover:to-green-200 rounded-xl text-center transition-all duration-200 hover:shadow-md">
+                      <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                        </svg>
+                      </div>
+                      <p className="text-sm font-semibold text-green-800">Add Payment</p>
+                      <p className="text-xs text-green-600 mt-1">Manage cards</p>
                     </button>
-                    <button className="p-4 bg-purple-50 hover:bg-purple-100 rounded-lg text-center transition">
-                      <div className="text-2xl mb-2">📱</div>
-                      <p className="text-sm font-medium text-purple-800">Digital Ticket</p>
+                    <button className="group p-6 bg-gradient-to-br from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 rounded-xl text-center transition-all duration-200 hover:shadow-md">
+                      <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                      <p className="text-sm font-semibold text-purple-800">Digital Ticket</p>
+                      <p className="text-xs text-purple-600 mt-1">Mobile parking pass</p>
                     </button>
-                    <button className="p-4 bg-orange-50 hover:bg-orange-100 rounded-lg text-center transition">
-                      <div className="text-2xl mb-2">🎯</div>
-                      <p className="text-sm font-medium text-orange-800">Support</p>
+                    <button className="group p-6 bg-gradient-to-br from-orange-50 to-orange-100 hover:from-orange-100 hover:to-orange-200 rounded-xl text-center transition-all duration-200 hover:shadow-md">
+                      <div className="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <p className="text-sm font-semibold text-orange-800">Get Support</p>
+                      <p className="text-xs text-orange-600 mt-1">Help & assistance</p>
                     </button>
                   </div>
                 </div>
               </div>
-            )}
-
-            {activeTab === 'bookings' && <BookingHistory />}
-            {activeTab === 'payments' && <PaymentPortal />}
-            {activeTab === 'profile' && <UserProfile />}
-            {activeTab === 'activity' && <UserActivity />}
-          </div>
-        </div>
-      </div>
-    </div>
+            );
+          }
+          
+          if (activeTab === 'bookings') return <BookingHistory />;
+          if (activeTab === 'transactions') return (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h3 className="text-2xl font-bold text-gray-900">Transaction History</h3>
+                <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                  Export History
+                </button>
+              </div>
+              <div className="bg-white border border-gray-200 rounded-lg p-6">
+                <p className="text-gray-600">Transaction history will be displayed here.</p>
+              </div>
+            </div>
+          );
+          if (activeTab === 'vehicles') return (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h3 className="text-2xl font-bold text-gray-900">Vehicle Details</h3>
+                <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
+                  + Add Vehicle
+                </button>
+              </div>
+              <div className="bg-white border border-gray-200 rounded-lg p-6">
+                <p className="text-gray-600">Your registered vehicles will appear here.</p>
+              </div>
+            </div>
+          );
+          if (activeTab === 'favorites') return (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h3 className="text-2xl font-bold text-gray-900">Favorite Parking Locations</h3>
+                <button className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition">
+                  Manage Favorites
+                </button>
+              </div>
+              <div className="bg-white border border-gray-200 rounded-lg p-6">
+                <p className="text-gray-600">Your favorite parking locations will be listed here.</p>
+              </div>
+            </div>
+          );
+          if (activeTab === 'payments') return <PaymentPortal />;
+          if (activeTab === 'profile') return <UserProfile />;
+          if (activeTab === 'activity') return <UserActivity />;
+          
+          return null;
+        }
+      }}
+    </BaseDashboard>
   );
 };
 

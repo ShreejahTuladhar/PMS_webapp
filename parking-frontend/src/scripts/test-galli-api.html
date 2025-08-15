@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Galli Maps API Test</title>
+</head>
+<body>
+    <h1>Galli Maps API Test</h1>
+    <button onclick="testAPI()">Test API</button>
+    <div id="results"></div>
+
+    <script>
+        async function testAPI() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = 'Testing API...';
+            
+            try {
+                const response = await fetch('https://route-init.gallimap.com/api/v1/search/autocomplete?accessToken=aeda757c-f04b-43cf-b220-538b0ed42f07&word=kathmandu&lat=27.7172&lng=85.3240');
+                const data = await response.json();
+                
+                resultsDiv.innerHTML = `
+                    <h2>Response:</h2>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultsDiv.innerHTML = `<h2>Error:</h2><pre>${error.message}</pre>`;
+            }
+        }
+    </script>
+</body>
+</html>

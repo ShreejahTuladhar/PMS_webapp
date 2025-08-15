@@ -1,9 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
-
-const popularLocations = [
-  'Thamel', 'Durbar Square', 'New Road', 'Ratna Park', 
-  'Lazimpat', 'Bouddha', 'Patan', 'Swayambhunath'
-];
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import searchHistory from '../utils/searchHistory';
+import { analyticsService, locationService } from '../services';
+import { EnhancedSearch, highlightMatch } from '../utils/searchUtils';
 
 // Kathmandu area coordinates (moved from deleted data file)
 const kathmanduAreas = {
@@ -16,8 +14,14 @@ const kathmanduAreas = {
   koteshwor: { lat: 27.6776, lng: 85.3470 },
   lagankhel: { lat: 27.6667, lng: 85.3247 },
   jawalakhel: { lat: 27.6701, lng: 85.3159 },
-  patan: { lat: 27.6648, lng: 85.3188 }
+  patan: { lat: 27.6648, lng: 85.3188 },
+  satdobato: { lat: 27.6587, lng: 85.3247 },
+  imadol: { lat: 27.6550, lng: 85.3280 },
+  swayambhunath: { lat: 27.7148, lng: 85.2906 }
 };
+
+// Debug log for kathmanduAreas
+console.log('🗺️ KATHMANDU AREAS COORDINATES (defined in SearchSection.jsx):', kathmanduAreas);
 
 const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
   const [location, setLocation] = useState('');
@@ -25,77 +29,198 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [activeSuggestion, setActiveSuggestion] = useState(-1);
+  const [recentSearches, setRecentSearches] = useState([]);
+  const [showRecentSearches, setShowRecentSearches] = useState(false);
+  const [popularLocations, setPopularLocations] = useState([]);
+  const [extractedLocationData, setExtractedLocationData] = useState([]); // Store full location data with coordinates
+  const [loadingPopular, setLoadingPopular] = useState(true);
+  const [spellingSuggestions, setSpellingSuggestions] = useState([]);
+  const [showSpellingSuggestions, setShowSpellingSuggestions] = useState(false);
   const suggestionRefs = useRef([]);
   const inputRef = useRef(null);
+  const enhancedSearchRef = useRef(null);
 
-  // Generate all searchable locations
-  const getAllSearchableLocations = () => {
+  // Generate all searchable locations using dynamic and static data
+  const getAllSearchableLocations = useCallback(() => {
     const locations = new Set();
     
-    // Add known area names
-    Object.keys(kathmanduAreas).forEach(area => {
-      locations.add(area.charAt(0).toUpperCase() + area.slice(1));
-    });
+    console.log('🏛️ === SEARCH LOCATION SOURCES DEBUG ===');
     
-    // Add popular locations
-    popularLocations.forEach(loc => locations.add(loc));
-    
-    // Add more common Kathmandu locations
-    const commonLocations = [
-      'Kamaladi', 'Anamnagar', 'Dillibazar', 'Maharajgunj', 'Baluwatar',
-      'Sundhara', 'Bagbazar', 'Ason', 'Indrachowk', 'Basantapur',
-      'Tripureshwor', 'Kalimati', 'Thankot', 'Balaju', 'Tokha',
-      'Budhanilkantha', 'Gongabu', 'Chabahil', 'Jorpati', 'Boudha',
-      'Pashupatinath', 'Gaushala', 'Sinamangal', 'Tinkune', 'Koteshwor',
-      'Thimi', 'Bhaktapur', 'Sano Thimi', 'Katunje', 'Lokanthali',
-      'Imadol', 'Satdobato', 'Lagankhel', 'Pulchowk', 'Kupondole',
-      'Sanepa', 'Jawalakhel', 'Patan Dhoka', 'Mangal Bazaar'
-    ];
-    
-    commonLocations.forEach(loc => locations.add(loc));
-    
-    return Array.from(locations).filter(loc => loc.length > 2);
-  };
-
-  const searchableLocations = getAllSearchableLocations();
-
-  // Generate suggestions based on input
-  const generateSuggestions = (input) => {
-    if (!input.trim() || input.length < 2) return [];
-    
-    const query = input.toLowerCase().trim();
-    const matches = [];
-    
-    // Exact matches first
-    searchableLocations.forEach(location => {
-      if (location.toLowerCase().startsWith(query)) {
-        matches.push({ text: location, type: 'exact' });
-      }
-    });
-    
-    // Partial matches
-    searchableLocations.forEach(location => {
-      if (!location.toLowerCase().startsWith(query) && 
-          location.toLowerCase().includes(query)) {
-        matches.push({ text: location, type: 'partial' });
-      }
-    });
-    
-    // Remove duplicates and limit to 8 suggestions
-    const uniqueMatches = matches.filter((match, index, self) => 
-      index === self.findIndex(m => m.text === match.text)
+    // Add known area names from kathmanduAreas
+    const kathmanduAreaNames = Object.keys(kathmanduAreas).map(area => 
+      area.charAt(0).toUpperCase() + area.slice(1)
     );
+    console.log('📍 Kathmandu Areas (from kathmanduAreas object):', kathmanduAreaNames);
+    kathmanduAreaNames.forEach(area => locations.add(area));
     
-    return uniqueMatches.slice(0, 8);
+    // Add extracted location names from parking spot addresses (primary source)
+    if (extractedLocationData.length > 0) {
+      console.log('🏗️ Extracted Location Data (from parking spot addresses):', extractedLocationData.map(loc => loc.name));
+      extractedLocationData.forEach(locData => {
+        if (locData.name) {
+          console.log(`  ➤ Adding extracted location: "${locData.name}" (${locData.spotCount} spots)`);
+          locations.add(locData.name);
+        }
+      });
+    }
+    
+    // Add popular locations from database/fallback
+    console.log('🔥 Popular Locations (from database/fallback):', popularLocations);
+    popularLocations.forEach(loc => {
+      if (typeof loc === 'string') {
+        console.log(`  ➤ Adding popular location: "${loc}"`);
+        locations.add(loc);
+      } else if (loc.name) {
+        console.log(`  ➤ Adding popular location from object: "${loc.name}"`);
+        locations.add(loc.name);
+      }
+    });
+    
+    // Add fallback common locations only if we have limited extracted data
+    if (extractedLocationData.length < 10) {
+      const commonLocations = [
+        'Kamaladi', 'Anamnagar', 'Dillibazar', 'Maharajgunj', 'Baluwatar',
+        'Sundhara', 'Bagbazar', 'Ason', 'Indrachowk', 'Basantapur',
+        'Tripureshwor', 'Kalimati', 'Thankot', 'Balaju', 'Tokha',
+        'Budhanilkantha', 'Gongabu', 'Chabahil', 'Jorpati', 'Boudha',
+        'Pashupatinath', 'Gaushala', 'Sinamangal', 'Tinkune', 'Koteshwor',
+        'Thimi', 'Bhaktapur', 'Sano Thimi', 'Katunje', 'Lokanthali',
+        'Imadol', 'Satdobato', 'Lagankhel', 'Pulchowk', 'Kupondole',
+        'Sanepa', 'Jawalakhel', 'Patan Dhoka', 'Mangal Bazaar'
+      ];
+      
+      console.log(`🏙️ Adding fallback common locations (extracted data count: ${extractedLocationData.length}):`, commonLocations.slice(0, 5), '...');
+      commonLocations.forEach(loc => locations.add(loc));
+    } else {
+      console.log(`✨ Skipping fallback locations - sufficient extracted data (${extractedLocationData.length} locations)`);
+    }
+    
+    const finalLocations = Array.from(locations).filter(loc => loc.length > 2);
+    console.log(`🎯 FINAL SEARCHABLE LOCATIONS (${finalLocations.length} total):`, finalLocations.slice(0, 10), '...');
+    console.log('🏛️ === END SEARCH LOCATION SOURCES DEBUG ===');
+    
+    return finalLocations;
+  }, [extractedLocationData, popularLocations]);
+
+  // Generate searchable locations based on popular locations and extracted data (memoized)
+  const searchableLocations = useMemo(() => getAllSearchableLocations(), [getAllSearchableLocations]);
+
+  // Initialize enhanced search when locations change
+  useEffect(() => {
+    if (searchableLocations.length > 0) {
+      enhancedSearchRef.current = new EnhancedSearch(searchableLocations);
+      console.log('🚀 Enhanced search initialized with', searchableLocations.length, 'locations');
+    }
+  }, [searchableLocations]);
+
+  // Load recent searches and popular locations on component mount
+  useEffect(() => {
+    const recent = searchHistory.getRecentSearches();
+    setRecentSearches(recent.slice(0, 5)); // Show only top 5 recent searches
+  }, []);
+
+  // Fetch popular locations from database using address extraction
+  useEffect(() => {
+    const fetchPopularLocations = async () => {
+      try {
+        setLoadingPopular(true);
+        
+        // Only fetch if we're in a browser environment
+        if (typeof window === 'undefined') {
+          setLoadingPopular(false);
+          return;
+        }
+        
+        console.log('🏗️ Fetching location names from parking spot addresses...');
+        const response = await locationService.getLocationNamesFromAddresses({
+          limit: 200 // Get comprehensive data for location extraction
+        });
+        
+        if (response.success && response.locations) {
+          // Store full location data for coordinate mapping
+          const topLocations = response.locations.slice(0, 8); // Top 8 most popular locations
+          setExtractedLocationData(topLocations);
+          
+          // Extract just the location names for display
+          const locationNames = topLocations.map(loc => loc.name);
+          
+          console.log('✅ Successfully extracted location names from addresses:', locationNames);
+          console.log('📊 Location data with coordinates:', topLocations);
+          setPopularLocations(locationNames);
+        } else {
+          console.warn('❌ Failed to extract location names from addresses:', response.error);
+          
+          // Fallback to static popular locations
+          const fallbackLocations = [
+            'Thamel', 'Durbar Square', 'New Road', 'Ratna Park',
+            'Lazimpat', 'Bouddha', 'Patan', 'Swayambhunath'
+          ];
+          console.log('📋 Using static fallback popular locations:', fallbackLocations);
+          setPopularLocations(fallbackLocations);
+        }
+      } catch (error) {
+        console.error('❌ Error extracting location names:', error);
+        // Fallback to static locations
+        const errorFallbackLocations = [
+          'Thamel', 'Durbar Square', 'New Road', 'Ratna Park',
+          'Lazimpat', 'Bouddha', 'Patan', 'Swayambhunath'
+        ];
+        console.log('🚨 Using error fallback popular locations:', errorFallbackLocations);
+        setPopularLocations(errorFallbackLocations);
+      } finally {
+        setLoadingPopular(false);
+      }
+    };
+
+    // Use a slight delay to prevent immediate API calls on page load
+    const timeoutId = setTimeout(fetchPopularLocations, 100);
+    
+    return () => clearTimeout(timeoutId);
+  }, []);
+
+  // Enhanced suggestion generation with fuzzy matching and spell correction
+  const generateSuggestions = (input) => {
+    if (!input.trim() || input.length < 1) return [];
+    
+    if (!enhancedSearchRef.current) {
+      console.warn('Enhanced search not initialized yet');
+      return [];
+    }
+    
+    const smartSuggestions = enhancedSearchRef.current.getSmartSuggestions(input, 8);
+    console.log(`🎯 Generated ${smartSuggestions.length} smart suggestions for "${input}"`);
+    
+    // Check for spelling suggestions
+    if (input.length >= 3) {
+      const analysis = enhancedSearchRef.current.analyzeQuery(input);
+      if (analysis.hasTypos && analysis.suggestions.length > 0) {
+        setSpellingSuggestions(analysis.suggestions);
+        setShowSpellingSuggestions(true);
+      } else {
+        setShowSpellingSuggestions(false);
+      }
+    }
+    
+    return smartSuggestions;
   };
 
   const handleInputChange = (e) => {
     const value = e.target.value;
     setLocation(value);
     
-    const newSuggestions = generateSuggestions(value);
-    setSuggestions(newSuggestions);
-    setShowSuggestions(newSuggestions.length > 0);
+    if (value.trim() === '') {
+      // Show recent searches when input is empty
+      setShowRecentSearches(recentSearches.length > 0);
+      setShowSuggestions(false);
+      setShowSpellingSuggestions(false);
+    } else {
+      // Show suggestions based on input
+      const newSuggestions = generateSuggestions(value);
+      setSuggestions(newSuggestions);
+      setShowSuggestions(newSuggestions.length > 0);
+      setShowRecentSearches(false);
+    }
+    
     setActiveSuggestion(-1);
   };
 
@@ -105,8 +230,12 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
     
     setIsLoading(true);
     setShowSuggestions(false);
+    setShowRecentSearches(false);
     try {
-      await onSearch(location);
+      await onSearch(location, 'manual');
+      // Update recent searches after successful search
+      const updatedRecent = searchHistory.getRecentSearches();
+      setRecentSearches(updatedRecent.slice(0, 5));
     } finally {
       setIsLoading(false);
     }
@@ -115,12 +244,26 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
   const handleCurrentLocation = () => {
     if (navigator.geolocation) {
       setIsLoading(true);
+      setShowSuggestions(false);
+      setShowRecentSearches(false);
       navigator.geolocation.getCurrentPosition(
-        (position) => {
+        async (position) => {
           const { latitude, longitude } = position.coords;
-          onSearch({ lat: latitude, lng: longitude, isCurrentLocation: true });
-          setLocation('Current Location');
-          setIsLoading(false);
+          try {
+            await onSearch({ 
+              lat: latitude, 
+              lng: longitude, 
+              address: 'Current Location',
+              isCurrentLocation: true 
+            }, 'current_location');
+            setLocation('Current Location');
+            
+            // Update recent searches after successful search
+            const updatedRecent = searchHistory.getRecentSearches();
+            setRecentSearches(updatedRecent.slice(0, 5));
+          } finally {
+            setIsLoading(false);
+          }
         },
         (error) => {
           console.error('Error getting location:', error);
@@ -130,10 +273,47 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
     }
   };
 
-  const handleSuggestionClick = (suggestion) => {
+  const handleSuggestionClick = async (suggestion) => {
     setLocation(suggestion.text);
     setShowSuggestions(false);
-    onSearch(suggestion.text);
+    setShowRecentSearches(false);
+    try {
+      await onSearch(suggestion.text, 'suggestion');
+      // Update recent searches after successful search
+      const updatedRecent = searchHistory.getRecentSearches();
+      setRecentSearches(updatedRecent.slice(0, 5));
+    } catch (error) {
+      console.error('Error during suggestion search:', error);
+    }
+  };
+
+  const handleRecentSearchClick = async (recentSearch) => {
+    // Track recent search click analytics
+    const daysDiff = Math.floor((Date.now() - recentSearch.timestamp) / (1000 * 60 * 60 * 24));
+    analyticsService.trackRecentSearchClick(recentSearch.query, daysDiff);
+    
+    setLocation(recentSearch.query);
+    setShowRecentSearches(false);
+    setShowSuggestions(false);
+    
+    try {
+      if (recentSearch.location) {
+        await onSearch(recentSearch.location, 'recent');
+      } else {
+        await onSearch(recentSearch.query, 'recent');
+      }
+      // Update recent searches after successful search
+      const updatedRecent = searchHistory.getRecentSearches();
+      setRecentSearches(updatedRecent.slice(0, 5));
+    } catch (error) {
+      console.error('Error during recent search:', error);
+    }
+  };
+
+  const handleRemoveRecentSearch = (searchId, e) => {
+    e.stopPropagation();
+    const updatedRecent = searchHistory.removeRecentSearch(searchId);
+    setRecentSearches(updatedRecent.slice(0, 5));
   };
 
   const handleKeyDown = (e) => {
@@ -165,17 +345,30 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
     }
   };
 
-  const handleQuickSearch = (locationName) => {
+  const handleQuickSearch = async (locationName, index) => {
+    // Track popular search click analytics
+    analyticsService.trackPopularSearchClick(locationName, index);
+    
     setLocation(locationName);
     setShowSuggestions(false);
-    onSearch(locationName);
+    setShowRecentSearches(false);
+    
+    try {
+      await onSearch(locationName, 'popular');
+      // Update recent searches after successful search
+      const updatedRecent = searchHistory.getRecentSearches();
+      setRecentSearches(updatedRecent.slice(0, 5));
+    } catch (error) {
+      console.error('Error during popular search:', error);
+    }
   };
 
-  // Click outside to close suggestions
+  // Click outside to close suggestions and recent searches
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (inputRef.current && !inputRef.current.contains(event.target)) {
         setShowSuggestions(false);
+        setShowRecentSearches(false);
         setActiveSuggestion(-1);
       }
     };
@@ -221,7 +414,7 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
         <div className="text-center mb-12">
           <div className="animate-fade-in-up">
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight">
-              <span className="text-green-300">🏠</span> Find Parking in Your <span className="text-orange-300">Neighborhood</span>
+              <span className="text-green-300"></span> Find Parking in Your <span className="text-orange-300">Neighborhood</span>
             </h2>
             <p className="text-lg text-white/90 max-w-3xl mx-auto leading-relaxed">
               Built by locals, for locals! Our community-driven parking system helps you find 
@@ -238,7 +431,7 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
               <div className="flex-1">
                 <label className="block text-sm font-semibold text-gray-800 mb-3 flex items-center">
                   <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                  🏠 Find Parking Near You
+                   Find Parking Near You
                 </label>
                 <div className="relative" ref={inputRef}>
                   <input
@@ -247,11 +440,13 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
                     onChange={handleInputChange}
                     onKeyDown={handleKeyDown}
                     onFocus={() => {
-                      if (suggestions.length > 0) {
+                      if (location.trim() === '' && recentSearches.length > 0) {
+                        setShowRecentSearches(true);
+                      } else if (suggestions.length > 0) {
                         setShowSuggestions(true);
                       }
                     }}
-                    placeholder="जहाँ जाँदै हुनुहुन्छ? • Where are you going?"
+                    placeholder="Where are you going?"
                     className="input-premium w-full px-6 py-4 pl-14 text-lg font-medium placeholder-gray-400 text-gray-800"
                     autoComplete="off"
                   />
@@ -263,45 +458,194 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
                     </div>
                   </div>
                   
-                  {/* Premium Suggestions Dropdown */}
-                  {showSuggestions && suggestions.length > 0 && (
-                    <div className="absolute z-50 w-full mt-2 card-premium border border-yellow-200/50 max-h-80 overflow-y-auto">
-                      {suggestions.map((suggestion, index) => (
+                  {/* Premium Recent Searches Dropdown */}
+                  {showRecentSearches && recentSearches.length > 0 && (
+                    <div className="absolute z-50 w-full mt-2 card-premium border border-blue-200/50 max-h-80 overflow-y-auto">
+                      <div className="px-6 py-3 border-b border-gray-100/50 bg-gradient-to-r from-blue-50 to-indigo-50">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-bold text-gray-800 flex items-center">
+                            <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                             Recent Searches
+                          </span>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              searchHistory.clearRecentSearches();
+                              setRecentSearches([]);
+                              setShowRecentSearches(false);
+                            }}
+                            className="text-xs text-gray-500 hover:text-gray-700 transition-colors px-2 py-1 rounded hover:bg-white/50"
+                          >
+                            Clear All
+                          </button>
+                        </div>
+                      </div>
+                      {recentSearches.map((recentSearch, index) => (
                         <div
-                          key={index}
-                          ref={el => suggestionRefs.current[index] = el}
-                          className={`px-6 py-4 cursor-pointer transition-all duration-300 border-b border-gray-100/50 last:border-b-0 ${
-                            index === activeSuggestion 
-                              ? 'bg-gradient-primary text-white transform scale-[1.02]' 
-                              : 'hover:bg-yellow-50 text-gray-700 hover:text-gray-900'
-                          }`}
-                          onClick={() => handleSuggestionClick(suggestion)}
-                          onMouseEnter={() => setActiveSuggestion(index)}
+                          key={recentSearch.id}
+                          className="px-6 py-4 cursor-pointer transition-all duration-300 border-b border-gray-100/50 last:border-b-0 hover:bg-blue-50 group"
+                          onClick={() => handleRecentSearchClick(recentSearch, index)}
                         >
-                          <div className="flex items-center">
-                            <div className={`p-1.5 rounded-lg mr-4 ${
-                              index === activeSuggestion ? 'bg-white/20' : 'bg-gradient-primary'
-                            }`}>
-                              <svg className={`w-4 h-4 ${
-                                index === activeSuggestion ? 'text-yellow-300' : 'text-white'
-                              }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                              </svg>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center flex-1">
+                              <div className="p-1.5 rounded-lg mr-4 bg-gradient-to-r from-blue-500 to-indigo-500">
+                                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  {recentSearch.location?.isCurrentLocation ? (
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                  ) : (
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                  )}
+                                </svg>
+                              </div>
+                              <div className="flex-1">
+                                <span className="font-medium text-gray-800 group-hover:text-gray-900">
+                                  {recentSearch.query}
+                                </span>
+                                <div className="text-xs text-gray-500 mt-1">
+                                  {new Date(recentSearch.timestamp).toLocaleDateString('en-US', { 
+                                    month: 'short', 
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  })}
+                                </div>
+                              </div>
                             </div>
-                            <span className="font-medium">
-                              {suggestion.text}
-                            </span>
-                            {suggestion.type === 'exact' && (
-                              <span className={`ml-auto text-xs font-bold px-2 py-1 rounded-full ${
-                                index === activeSuggestion 
-                                  ? 'bg-yellow-300 text-blue-900' 
-                                  : 'bg-gradient-primary text-white'
-                              }`}>Perfect Match</span>
-                            )}
+                            <button
+                              onClick={(e) => handleRemoveRecentSearch(recentSearch.id, e)}
+                              className="p-1 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100"
+                              title="Remove from recent searches"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </button>
                           </div>
                         </div>
                       ))}
+                    </div>
+                  )}
+
+                  {/* Spelling Corrections */}
+                  {showSpellingSuggestions && spellingSuggestions.length > 0 && (
+                    <div className="absolute z-50 w-full mt-2 card-premium border border-orange-200/50">
+                      <div className="px-4 py-2 bg-orange-50 border-b border-orange-100">
+                        <span className="text-sm text-orange-700 font-medium flex items-center">
+                          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                          </svg>
+                          Did you mean?
+                        </span>
+                      </div>
+                      {spellingSuggestions.map((spelling, index) => (
+                        <div
+                          key={index}
+                          className="px-4 py-3 cursor-pointer hover:bg-orange-50 border-b border-orange-100/50 last:border-b-0"
+                          onClick={() => {
+                            setLocation(spelling.suggestion);
+                            setShowSpellingSuggestions(false);
+                            handleSuggestionClick({ text: spelling.suggestion, type: 'correction' });
+                          }}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="font-medium text-gray-800">{spelling.suggestion}</span>
+                            <span className={`text-xs px-2 py-1 rounded ${
+                              spelling.confidence === 'high' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                            }`}>
+                              {spelling.confidence} confidence
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Enhanced Premium Suggestions Dropdown */}
+                  {showSuggestions && suggestions.length > 0 && (
+                    <div className="absolute z-50 w-full mt-2 card-premium border border-yellow-200/50 max-h-80 overflow-y-auto">
+                      {suggestions.map((suggestion, index) => {
+                        const highlight = highlightMatch(suggestion.text, location);
+                        return (
+                          <div
+                            key={index}
+                            ref={el => suggestionRefs.current[index] = el}
+                            className={`px-6 py-4 cursor-pointer transition-all duration-300 border-b border-gray-100/50 last:border-b-0 ${
+                              index === activeSuggestion 
+                                ? 'bg-gradient-primary text-white transform scale-[1.02]' 
+                                : 'hover:bg-yellow-50 text-gray-700 hover:text-gray-900'
+                            }`}
+                            onClick={() => handleSuggestionClick(suggestion)}
+                            onMouseEnter={() => setActiveSuggestion(index)}
+                          >
+                            <div className="flex items-center">
+                              <div className={`p-1.5 rounded-lg mr-4 ${
+                                index === activeSuggestion ? 'bg-white/20' : 'bg-gradient-primary'
+                              }`}>
+                                {suggestion.type === 'fuzzy' ? (
+                                  <svg className={`w-4 h-4 ${
+                                    index === activeSuggestion ? 'text-yellow-300' : 'text-white'
+                                  }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                  </svg>
+                                ) : (
+                                  <svg className={`w-4 h-4 ${
+                                    index === activeSuggestion ? 'text-yellow-300' : 'text-white'
+                                  }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                  </svg>
+                                )}
+                              </div>
+                              <div className="flex-1">
+                                <div className="font-medium">
+                                  {highlight.hasHighlight ? (
+                                    <>
+                                      {highlight.before}
+                                      <span className={`${
+                                        index === activeSuggestion ? 'bg-yellow-300/30' : 'bg-yellow-200'
+                                      } px-1 rounded`}>
+                                        {highlight.match}
+                                      </span>
+                                      {highlight.after}
+                                    </>
+                                  ) : (
+                                    suggestion.text
+                                  )}
+                                </div>
+                                {suggestion.reason && (
+                                  <div className={`text-xs mt-1 ${
+                                    index === activeSuggestion ? 'text-white/70' : 'text-gray-500'
+                                  }`}>
+                                    {suggestion.reason}
+                                  </div>
+                                )}
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                {suggestion.confidence && (
+                                  <div className={`text-xs px-2 py-1 rounded ${
+                                    index === activeSuggestion 
+                                      ? 'bg-white/20 text-yellow-100' 
+                                      : suggestion.confidence > 0.8 
+                                        ? 'bg-green-100 text-green-700' 
+                                        : 'bg-yellow-100 text-yellow-700'
+                                  }`}>
+                                    {Math.round(suggestion.confidence * 100)}%
+                                  </div>
+                                )}
+                                {suggestion.type === 'exact' && (
+                                  <span className={`text-xs font-bold px-2 py-1 rounded-full ${
+                                    index === activeSuggestion 
+                                      ? 'bg-yellow-300 text-blue-900' 
+                                      : 'bg-gradient-primary text-white'
+                                  }`}>Perfect Match</span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -311,7 +655,7 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
               <div className="md:w-56">
                 <label className="block text-sm font-semibold text-gray-800 mb-3 flex items-center">
                   <div className="w-2 h-2 bg-orange-500 rounded-full mr-2"></div>
-                  📍 Distance Range
+                   Distance Range
                 </label>
                 <div className="relative">
                   <select 
@@ -319,11 +663,11 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
                     onChange={(e) => onRadiusChange(Number(e.target.value))}
                     className="input-premium w-full px-6 py-4 text-lg font-medium text-gray-800 appearance-none cursor-pointer"
                   >
-                    <option value={1}>🚶 1 km - नजिकै (Nearby)</option>
-                    <option value={2}>🚗 2 km - सामान्य (Normal)</option>
-                    <option value={3}>🛣️ 3 km - फराकिलो (Wide)</option>
-                    <option value={4}>🌄 4 km - धेरै टाढा (Far)</option>
-                    <option value={5}>🗺️ 5 km - जता पनि (Anywhere)</option>
+                    <option value={1}>1 km - Nearby</option>
+                    <option value={2}>2 km - Normal</option>
+                    <option value={3}>3 km - Wide</option>
+                    <option value={4}>4 km - Far</option>
+                    <option value={5}>5 km - Anywhere</option>
                   </select>
                   <div className="absolute right-5 top-1/2 transform -translate-y-1/2 pointer-events-none">
                     <div className="p-1 rounded-lg bg-gradient-primary">
@@ -355,7 +699,7 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                       </svg>
                     </div>
-                    <span>🏠 Find Local Parking</span>
+                    <span> Find Local Parking</span>
                   </>
                 )}
                 <div className="absolute inset-0 bg-gradient-subtle opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -379,32 +723,61 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
           </form>
           
           {/* Premium Popular Locations */}
-          {!showSuggestions && (
+          {!showSuggestions && !showRecentSearches && (
             <div className="mt-8 pt-6 border-t border-gray-200/50">
               <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
                 <div className="w-3 h-3 bg-gradient-primary rounded-full mr-2"></div>
-                🏠 Popular Places in Kathmandu
+                 Popular Places in Kathmandu
               </h3>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {popularLocations.map((loc) => (
-                  <button
-                    key={loc}
-                    onClick={() => handleQuickSearch(loc)}
-                    className="relative group px-4 py-3 glass-dark border border-white/10 rounded-xl hover:border-yellow-300/50 transition-all duration-300 hover:transform hover:scale-105"
-                  >
-                    <span className="text-gray-700 font-semibold group-hover:text-gray-900 transition-colors duration-300">{loc}</span>
-                    <div className="absolute inset-0 bg-gradient-primary opacity-0 group-hover:opacity-5 rounded-xl transition-opacity duration-300"></div>
-                  </button>
-                ))}
-              </div>
+              
+              {loadingPopular ? (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {Array.from({ length: 8 }).map((_, index) => (
+                    <div
+                      key={index}
+                      className="px-4 py-3 glass-dark border border-white/10 rounded-xl animate-pulse"
+                    >
+                      <div className="h-5 bg-gray-300 rounded"></div>
+                    </div>
+                  ))}
+                </div>
+              ) : popularLocations.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {popularLocations.map((loc, index) => (
+                    <button
+                      key={loc}
+                      onClick={() => handleQuickSearch(loc, index)}
+                      className="relative group px-4 py-3 glass-dark border border-white/10 rounded-xl hover:border-yellow-300/50 transition-all duration-300 hover:transform hover:scale-105"
+                    >
+                      <span className="text-gray-700 font-semibold group-hover:text-gray-900 transition-colors duration-300">{loc}</span>
+                      <div className="absolute inset-0 bg-gradient-primary opacity-0 group-hover:opacity-5 rounded-xl transition-opacity duration-300"></div>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-4">
+                  <div className="text-gray-500 text-sm">
+                    <svg className="w-8 h-8 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    </svg>
+                    No popular locations available
+                  </div>
+                </div>
+              )}
             </div>
           )}
           
-          {/* Premium Search Tips */}
-          {showSuggestions && suggestions.length > 0 && (
+          {/* Enhanced Search Tips */}
+          {(showSuggestions && suggestions.length > 0) || showSpellingSuggestions ? (
             <div className="mt-6 p-4 glass-dark border border-yellow-300/30 rounded-xl">
               <p className="text-sm text-gray-700 text-center font-medium">
-                💡 <span className="text-yellow-600 font-bold">Pro Tip:</span> Use ↑ ↓ arrow keys to navigate • Press Enter to select • Esc to close
+                <span className="text-yellow-600 font-bold">Smart Search:</span> Detects typos, suggests corrections, and finds partial matches • Use ↑ ↓ arrow keys to navigate
+              </p>
+            </div>
+          ) : location.length >= 2 && suggestions.length === 0 && enhancedSearchRef.current && (
+            <div className="mt-6 p-4 glass-dark border border-red-300/30 rounded-xl">
+              <p className="text-sm text-gray-700 text-center font-medium">
+                <span className="text-red-600 font-bold">No matches found:</span> Try checking spelling or use a shorter search term
               </p>
             </div>
           )}

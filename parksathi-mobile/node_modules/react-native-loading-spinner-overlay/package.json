@@ -1,0 +1,148 @@
+{
+  "name": "react-native-loading-spinner-overlay",
+  "description": "The only pure React Native Native iOS and Android loading spinner (progress bar indicator) overlay",
+  "version": "3.0.1",
+  "author": "Nick Baugh <niftylettuce@gmail.com>",
+  "bugs": {
+    "url": "https://github.com/joinspontaneous/react-native-loading-spinner-overlay/issues"
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
+  },
+  "contributors": [
+    "Nick Baugh <niftylettuce@gmail.com> (http://niftylettuce.com)",
+    "Rohit Bhatia <irohitbhatia@gmail.com> (http://blendtale.com)",
+    "Spencer Snyder <sasnyde2@gmail.com> (http://spencersnyder.io)",
+    "Luciano Lima <beavess@gmail.com>",
+    "George Savvidis",
+    "Sandro Machado <sandroemachado@gmail.com>",
+    "Ben Sutter <sutt8r@gmail.com>",
+    "Ivan Kuznetsov <me@jeiwan.ru>",
+    "Darren Camp <darren@codingintent.com>",
+    "Rigo B Castro <rigo@imaginamos.com>",
+    "Raj Kissu",
+    "Ivan Pusic <pusic007@gmail.com>",
+    "Antonio Grass <antoniograssb@gmail.com>",
+    "Vijay Chouhan <vijaychouhan.rails@gmail.com>",
+    "Jacob Lee <artdent@gmail.com>",
+    "Matt Labrum"
+  ],
+  "devDependencies": {
+    "@commitlint/cli": "^17.0.3",
+    "@commitlint/config-conventional": "^17.0.3",
+    "@types/jest": "^28.1.6",
+    "@types/react-native": "^0.69.3",
+    "@typescript-eslint/parser": "^5.31.0",
+    "eslint": "^8.20.0",
+    "eslint-config-xo-lass": "^2.0.1",
+    "eslint-plugin-react": "^7.30.1",
+    "eslint-plugin-react-native": "^4.0.0",
+    "fixpack": "^4.0.0",
+    "husky": "^8.0.1",
+    "lint-staged": "^13.0.3",
+    "prettier": "^2.7.1",
+    "react": "18.0.0",
+    "react-native": "^0.69.3",
+    "remark-cli": "^11.0.0",
+    "remark-preset-github": "^4.0.4",
+    "typescript": "^4.7.4",
+    "xo": "^0.51.0"
+  },
+  "homepage": "https://github.com/joinspontaneous/react-native-loading-spinner-overlay",
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm test",
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
+  },
+  "keywords": [
+    "activity",
+    "android",
+    "bar",
+    "full",
+    "indicator",
+    "ios",
+    "loading",
+    "modal",
+    "native",
+    "pop-up",
+    "popup",
+    "progress",
+    "react",
+    "react-native",
+    "screen",
+    "spinner",
+    "view"
+  ],
+  "license": "MIT",
+  "lint-staged": {
+    "linters": {
+      "*.ts": [
+        "xo --fix",
+        "git add"
+      ],
+      "*.md": [
+        "remark . -qfo",
+        "git add"
+      ],
+      "package.json": [
+        "fixpack",
+        "git add"
+      ]
+    }
+  },
+  "main": "lib/index.js",
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*"
+  },
+  "prettier": {
+    "singleQuote": true,
+    "bracketSpacing": true,
+    "trailingComma": "none"
+  },
+  "remarkConfig": {
+    "plugins": [
+      "preset-github"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/joinspontaneous/react-native-loading-spinner-overlay.git"
+  },
+  "scripts": {
+    "build": "npm run test && tsc -p .",
+    "lint": "xo && remark . -qfo",
+    "test": "npm run lint"
+  },
+  "types": "lib",
+  "xo": {
+    "parser": "typescript-eslint",
+    "prettier": true,
+    "space": true,
+    "extends": [
+      "xo-lass",
+      "plugin:react/recommended",
+      "plugin:react-native/all"
+    ],
+    "plugins": [
+      "react",
+      "react-native"
+    ],
+    "parserOptions": {
+      "sourceType": "module"
+    },
+    "ignores": [
+      "config.js",
+      "example/**",
+      "lib"
+    ],
+    "settings": {
+      "react": {
+        "version": "18.x"
+      }
+    }
+  }
+}

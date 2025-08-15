@@ -1,0 +1,15 @@
+import React, { Component } from 'react';
+import type { ReactNode } from 'react';
+export declare const SkipEnteringContext: React.Context<React.MutableRefObject<boolean> | null>;
+interface LayoutAnimationConfigProps {
+    skipEntering?: boolean;
+    skipExiting?: boolean;
+    children: ReactNode;
+}
+export declare class LayoutAnimationConfig extends Component<LayoutAnimationConfigProps> {
+    getMaybeWrappedChildren(): string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | React.ReactFragment | JSX.Element[] | null | undefined;
+    setShouldAnimateExiting(): void;
+    componentWillUnmount(): void;
+    render(): ReactNode;
+}
+export {};

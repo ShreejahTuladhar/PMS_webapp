@@ -1,11 +1,32 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 
+/**
+ * EntryExit component handles the parking entry and exit process for customers.
+ * It manages the UI flow for generating a digital parking ticket (with QR code) on entry,
+ * and processes payment and exit authorization on exit.
+ *
+ * @component
+ * @param {Object} props
+ * @param {'entry'|'exit'} props.mode - Determines if the process is for entry or exit.
+ * @param {Object} props.vehicleData - Vehicle information (licensePlate, type, make, model, year, color).
+ * @param {Object} [props.ticketData] - Existing ticket data (used for exit process).
+ * @param {Function} props.onComplete - Callback invoked when the process completes (returns ticket or exit info).
+ * @param {Function} props.onBack - Callback invoked when the user clicks the back button.
+ *
+ * @example
+ * <EntryExit
+ *   mode="entry"
+ *   vehicleData={{ licensePlate: 'BA 2 PA 1234', type: 'car', make: 'Toyota', model: 'Corolla', year: 2020, color: 'white' }}
+ *   onComplete={handleComplete}
+ *   onBack={handleBack}
+ * />
+ */
 function EntryExit({ mode, vehicleData, ticketData, onComplete, onBack }) {
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
   const [processStep, setProcessStep] = useState('ready'); // ready, processing, success
   const [generatedTicket, setGeneratedTicket] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const isEntry = mode === 'entry';
   const currentTime = new Date();
@@ -20,8 +41,8 @@ function EntryExit({ mode, vehicleData, ticketData, onComplete, onBack }) {
   }) : '';
 
   const handleProcess = async () => {
-    setIsProcessing(true);
     setProcessStep('processing');
+    setIsLoading(true);
 
     // Simulate processing time
     await new Promise(resolve => setTimeout(resolve, 2000));
@@ -52,16 +73,14 @@ function EntryExit({ mode, vehicleData, ticketData, onComplete, onBack }) {
       // Simulate successful entry
       setTimeout(() => {
         setProcessStep('success');
-        setIsProcessing(false);
-        setIsSuccess(true);
+        setIsLoading(false);
       }, 1000);
       
     } else {
       // Process exit
       setTimeout(() => {
         setProcessStep('success');
-        setIsProcessing(false);
-        setIsSuccess(true);
+        setIsLoading(false);
       }, 1000);
     }
   };
@@ -88,7 +107,7 @@ function EntryExit({ mode, vehicleData, ticketData, onComplete, onBack }) {
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-8 relative">
           <div className="text-center relative z-10">
-            <div className="text-5xl mb-4">{isEntry ? '🎫' : '🚀'}</div>
+            <div className="text-5xl mb-4">{isEntry ? '' : ''}</div>
             <h2 className="text-3xl font-bold mb-2">
               {isEntry ? 'Park Entry' : 'Exit Process'}
             </h2>
@@ -114,9 +133,9 @@ function EntryExit({ mode, vehicleData, ticketData, onComplete, onBack }) {
                 <div className="bg-white rounded-xl p-4 mb-6 border border-gray-200">
                   <div className="flex items-center justify-center gap-4">
                     <span className="text-3xl">
-                      {vehicleData.type === 'car' ? '🚗' : 
-                       vehicleData.type === 'motorcycle' ? '🏍️' : 
-                       vehicleData.type === 'suv' ? '🚙' : '🚐'}
+                      {vehicleData.type === 'car' ? '' : 
+                       vehicleData.type === 'motorcycle' ? '' : 
+                       vehicleData.type === 'suv' ? '' : ''}
                     </span>
                     <div className="text-center">
                       <div className="font-bold text-xl text-gray-700">
@@ -155,7 +174,7 @@ function EntryExit({ mode, vehicleData, ticketData, onComplete, onBack }) {
                 className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-12 py-4 rounded-2xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 relative overflow-hidden group"
               >
                 <span className="relative z-10 flex items-center justify-center gap-2">
-                  {isEntry ? '🎯 Generate Ticket & Enter' : '💳 Process Payment & Exit'}
+                  {isEntry ? ' Generate Ticket & Enter' : ' Process Payment & Exit'}
                 </span>
                 <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </button>
@@ -168,7 +187,7 @@ function EntryExit({ mode, vehicleData, ticketData, onComplete, onBack }) {
               <div className="w-20 h-20 mx-auto relative">
                 <div className="w-20 h-20 border-4 border-blue-200 rounded-full animate-spin border-t-blue-500"></div>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-2xl">{isEntry ? '🎫' : '⚡'}</span>
+                  <span className="text-2xl">{isEntry ? '' : '⚡'}</span>
                 </div>
               </div>
               
@@ -198,7 +217,7 @@ function EntryExit({ mode, vehicleData, ticketData, onComplete, onBack }) {
           {processStep === 'success' && isEntry && generatedTicket && (
             <div className="space-y-6">
               <div className="text-center">
-                <div className="text-6xl mb-4">🎉</div>
+                <div className="text-6xl mb-4"></div>
                 <h3 className="text-2xl font-bold text-gray-700 mb-2">
                   Welcome! You're All Set!
                 </h3>
@@ -231,7 +250,6 @@ function EntryExit({ mode, vehicleData, ticketData, onComplete, onBack }) {
                         value={qrData} 
                         size={120}
                         level="H"
-                        includeMargin={false}
                       />
                     </div>
                     <div className="text-sm mt-2 opacity-80">
@@ -266,7 +284,7 @@ function EntryExit({ mode, vehicleData, ticketData, onComplete, onBack }) {
                 onClick={handleComplete}
                 className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300"
               >
-                ✨ Continue to Parking
+                 Continue to Parking
               </button>
             </div>
           )}
@@ -274,7 +292,7 @@ function EntryExit({ mode, vehicleData, ticketData, onComplete, onBack }) {
           {/* Success State - Exit */}
           {processStep === 'success' && !isEntry && (
             <div className="text-center space-y-6">
-              <div className="text-6xl mb-4">🎉</div>
+              <div className="text-6xl mb-4"></div>
               <h3 className="text-2xl font-bold text-gray-700 mb-2">
                 Thank You for Parking with Us!
               </h3>
@@ -298,7 +316,7 @@ function EntryExit({ mode, vehicleData, ticketData, onComplete, onBack }) {
                 onClick={handleComplete}
                 className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300"
               >
-                🏠 Return Home
+                 Return Home
               </button>
             </div>
           )}
@@ -307,5 +325,10 @@ function EntryExit({ mode, vehicleData, ticketData, onComplete, onBack }) {
     </div>
   );
 }
+
+// Move to separate service
+const generateTicket = (vehicleData, currentTime) => {
+  // Ticket generation logic
+};
 
 export default EntryExit;

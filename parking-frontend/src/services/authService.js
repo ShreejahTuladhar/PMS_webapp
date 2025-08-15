@@ -59,7 +59,7 @@ class AuthService {
     }
   }
 
-  async getProfile(token) {
+  async getProfile() {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/me`, {
         method: 'GET',
@@ -87,7 +87,7 @@ class AuthService {
     }
   }
 
-  async logout(token) {
+  async logout() {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/logout`, {
         method: 'POST',

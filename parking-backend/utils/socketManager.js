@@ -23,7 +23,7 @@ const initializeSocket = (server) => {
     // Join location-specific rooms
     socket.on("join_location", (locationId) => {
       socket.join(`location_${locationId}`);
-      console.log(`📍 Socket ${socket.id} joined location ${locationId}`);
+      console.log(` Socket ${socket.id} joined location ${locationId}`);
     });
 
     // Join booking-specific room
@@ -43,7 +43,7 @@ const initializeSocket = (server) => {
     // Leave rooms
     socket.on("leave_location", (locationId) => {
       socket.leave(`location_${locationId}`);
-      console.log(`📍 Socket ${socket.id} left location ${locationId}`);
+      console.log(` Socket ${socket.id} left location ${locationId}`);
     });
 
     socket.on("leave_booking", (bookingId) => {

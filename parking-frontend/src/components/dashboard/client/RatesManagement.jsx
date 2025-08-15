@@ -121,9 +121,9 @@ const RatesManagement = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <span className="text-2xl mr-3">
-                        {vehicle === 'car' ? '🚗' : 
-                         vehicle === 'motorcycle' ? '🏍️' : 
-                         vehicle === 'bicycle' ? '🚲' : '🚙'}
+                        {vehicle === 'car' ? '' : 
+                         vehicle === 'motorcycle' ? '' : 
+                         vehicle === 'bicycle' ? '🚲' : ''}
                       </span>
                       <span className="text-sm font-medium text-gray-900 capitalize">
                         {vehicle}

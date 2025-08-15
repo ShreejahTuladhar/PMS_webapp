@@ -7,8 +7,7 @@ export const authMiddleware = createListenerMiddleware();
 // Initialize auth state from localStorage on app start
 authMiddleware.startListening({
   actionCreator: initializeAuth,
-  effect: async (action, listenerApi) => {
-    const { dispatch } = listenerApi;
+  effect: async () => {
     
     try {
       const token = localStorage.getItem('token');

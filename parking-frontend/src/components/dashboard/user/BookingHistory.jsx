@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { bookingService } from '../../../services';
 
 const BookingHistory = () => {
@@ -14,9 +14,9 @@ const BookingHistory = () => {
 
   useEffect(() => {
     loadBookings();
-  }, [filter]);
+  }, [filter, loadBookings]);
 
-  const loadBookings = async () => {
+  const loadBookings = useCallback(async () => {
     try {
       setLoading(true);
       const response = await bookingService.getUserBookings({
@@ -30,7 +30,7 @@ const BookingHistory = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter]);
 
   const handleCancelBooking = async (bookingId) => {
     try {
