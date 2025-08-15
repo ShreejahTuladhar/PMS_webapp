@@ -23,12 +23,8 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
 
   // Check if user has the required role
   if (allowedRoles.length > 0 && !allowedRoles.includes(user?.role)) {
-    // Redirect to appropriate dashboard based on user role
-    const redirectPath = user?.role === 'client' || user?.role === 'parking_owner' 
-      ? '/client-dashboard' 
-      : '/dashboard';
-    
-    return <Navigate to={redirectPath} replace />;
+    // Redirect to unified dashboard
+    return <Navigate to="/dashboard" replace />;
   }
 
   return children;

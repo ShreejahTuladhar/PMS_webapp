@@ -7,7 +7,7 @@ import RatesManagement from './RatesManagement';
 import BusinessHours from './BusinessHours';
 import PhotoUpload from './PhotoUpload';
 
-const ClientDashboard = () => {
+const ClientDashboard = ({ hideHeader = false }) => {
   const { user, isAuthenticated } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
   const [dashboardData, setDashboardData] = useState({
@@ -152,31 +152,33 @@ const ClientDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="py-6">
-            <div className="md:flex md:items-center md:justify-between">
-              <div className="flex-1 min-w-0">
-                <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
-                  Welcome, {user?.businessName || user?.firstName || 'Business Owner'}! 🏢
-                </h2>
-                <p className="mt-1 text-sm text-gray-500">
-                  Manage your parking business and track performance
-                </p>
-              </div>
-              <div className="mt-4 flex md:mt-0 md:ml-4 space-x-3">
-                <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
-                  💰 View Earnings
-                </button>
-                <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
-                  + Add Space
-                </button>
+    <div className={hideHeader ? "" : "min-h-screen bg-gray-50"}>
+      {!hideHeader && (
+        <div className="bg-white shadow-sm border-b">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="py-6">
+              <div className="md:flex md:items-center md:justify-between">
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+                    Welcome, {user?.businessName || user?.firstName || 'Business Owner'}! 🏢
+                  </h2>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Manage your parking business and track performance
+                  </p>
+                </div>
+                <div className="mt-4 flex md:mt-0 md:ml-4 space-x-3">
+                  <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
+                    💰 View Earnings
+                  </button>
+                  <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                    + Add Space
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Quick Stats */}
