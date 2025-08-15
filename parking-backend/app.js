@@ -67,18 +67,23 @@ app.get("/api", (req, res) => {
     endpoints: {
       auth: "/api/auth",
       users: "/api/users", 
+      admin: "/api/admin",
+      superAdmin: "/api/super-admin",
       locations: "/api/locations",
       bookings: "/api/bookings",
+      payments: "/api/payments",
     },
   });
 });
 
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/setup', require('./routes/setup')); // REMOVE IN PRODUCTION
 // Add this temporary route for seeding
 const { seedRoute } = require('./utils/seedDatabase');
 app.get('/seed-database', seedRoute);
 app.use("/api/users", require("./routes/users")); 
 app.use("/api/admin", require("./routes/admin"));
+app.use("/api/super-admin", require("./routes/superAdmin"));
 app.use("/api/bookings", require("./routes/bookings")); 
 app.use("/api/payments", require("./routes/payments"));
 app.use("/api/locations", require("./routes/location"));

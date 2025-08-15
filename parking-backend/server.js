@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const app = require("./app");
+const systemHealthService = require("./services/systemHealthService");
 
 const PORT = process.env.PORT || 5000;
 
@@ -29,6 +30,10 @@ const startServer = async () => {
       console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
       console.log(`Health Check: http://localhost:${PORT}/health`);
       console.log(`API Info: http://localhost:${PORT}/api`);
+      
+      // Start system health monitoring
+      console.log("Starting system health monitoring...");
+      systemHealthService.startMonitoring(30000); // Monitor every 30 seconds
     });
   } catch (error) {
     console.error("Failed to start server:", error.message);
@@ -37,3 +42,22 @@ const startServer = async () => {
 };
 
 startServer();
+
+// Graceful shutdown
+process.on("SIGTERM", () => {
+  console.log("SIGTERM received. Shutting down gracefully...");
+  systemHealthService.stopMonitoring();
+  mongoose.connection.close(() => {
+    console.log("MongoDB connection closed.");
+    process.exit(0);
+  });
+});
+
+process.on("SIGINT", () => {
+  console.log("SIGINT received. Shutting down gracefully...");
+  systemHealthService.stopMonitoring();
+  mongoose.connection.close(() => {
+    console.log("MongoDB connection closed.");
+    process.exit(0);
+  });
+});
