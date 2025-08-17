@@ -41,18 +41,7 @@ function App() {
                     </ProtectedRoute>
                   } 
                 />
-<<<<<<< HEAD
-                <Route 
-                  path="/super-admin" 
-                  element={
-                    <ProtectedRoute>
-                      <SuperAdminDashboard />
-                    </ProtectedRoute>
-                  } 
-                />
                 <Route path="*" element={<NotFound />} /> 
-=======
->>>>>>> 8654ef5aee37c86942b3385428e2b2764fa505d0
               </Routes>
             </div>
           </Router>
