@@ -4,8 +4,8 @@ require('dotenv').config();
 
 const insertDummyData = async () => {
   try {
-    console.log('🚀 Starting dummy data insertion...');
-    console.log(`📍 Connecting to: ${process.env.MONGODB_URI?.replace(/\/\/.*:.*@/, '//***:***@')}`);
+    console.log(' Starting dummy data insertion...');
+    console.log(` Connecting to: ${process.env.MONGODB_URI?.replace(/\/\/.*:.*@/, '//***:***@')}`);
     
     // Connect to MongoDB
     const options = {
@@ -26,10 +26,10 @@ const insertDummyData = async () => {
     const success = await insertScripts.insertAll(db);
     
     if (success) {
-      console.log('\n🎉 DUMMY DATA INSERTION COMPLETED!');
+      console.log('\n DUMMY DATA INSERTION COMPLETED!');
       console.log('\n📊 Summary:');
       console.log('👥 Users: 5 (including admin accounts)');
-      console.log('📍 Locations: 4 (Ratna Park, New Road, Thamel, Durbar Marg)');
+      console.log(' Locations: 4 (Ratna Park, New Road, Thamel, Durbar Marg)');
       console.log('🅿️ Bookings: 5 (various statuses for demo)');
       
       console.log('\n🔐 Demo Accounts:');
@@ -39,7 +39,7 @@ const insertDummyData = async () => {
       console.log('Parking Admin: admin_ram / password123');
       console.log('Super Admin: super_admin / password123');
       
-      console.log('\n🚀 Your demo environment is ready!');
+      console.log('\n Your demo environment is ready!');
       
       // Show collection counts to verify
       const userCount = await db.collection('users').countDocuments();
@@ -64,9 +64,9 @@ const insertDummyData = async () => {
     console.error(error.message);
     
     if (error.message.includes('authentication failed')) {
-      console.log('💡 Check your MongoDB username and password');
+      console.log('  Check your MongoDB username and password');
     } else if (error.message.includes('ENOTFOUND')) {
-      console.log('💡 Check your MongoDB connection string');
+      console.log('  Check your MongoDB connection string');
     }
     
     process.exit(1);

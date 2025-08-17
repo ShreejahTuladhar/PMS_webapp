@@ -1,0 +1,2688 @@
+{
+  "results": {
+    "successful": [
+      {
+        "location": {
+          "id": "sample_1754929652309_n0eukii77",
+          "name": "Durbar Square Heritage Site Parking Area",
+          "address": "Durbar Square Heritage Site, 15 Galli, Kathmandu, Nepal",
+          "description": "Premium parking facility in Durbar Square Heritage Site area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.704,
+            "longitude": 85.307
+          },
+          "totalSpaces": 43,
+          "availableSpaces": 24,
+          "occupancyPercentage": 43,
+          "hourlyRate": 41,
+          "dailyRate": 328,
+          "monthlyRate": 8200,
+          "operatingHours": {
+            "start": "08:00",
+            "end": "18:00",
+            "is24Hours": false
+          },
+          "isCurrentlyOpen": false,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "lighting",
+            "disabled_access"
+          ],
+          "contactNumber": "+9779843470113",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": false,
+            "truck": false
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 87,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.309Z",
+          "updatedAt": "2025-08-11T16:27:32.309Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Durbar Square Heritage Site",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.309Z",
+            "needsVerification": false
+          }
+        },
+        "insertedId": "689a19f43cf5b16215fcccae"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652309_h4yyyw047",
+          "name": "Durbar Square Heritage Site Parking Zone",
+          "address": "Durbar Square Heritage Site, 1 Marg, Kathmandu, Nepal",
+          "description": "Premium parking facility in Durbar Square Heritage Site area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.707951,
+            "longitude": 85.308635
+          },
+          "totalSpaces": 64,
+          "availableSpaces": 32,
+          "occupancyPercentage": 48,
+          "hourlyRate": 40,
+          "dailyRate": 320,
+          "monthlyRate": 8000,
+          "operatingHours": {
+            "start": "08:00",
+            "end": "18:00",
+            "is24Hours": false
+          },
+          "isCurrentlyOpen": false,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "lighting",
+            "disabled_access"
+          ],
+          "contactNumber": "+9779747487066",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": false,
+            "truck": false
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 88,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.309Z",
+          "updatedAt": "2025-08-11T16:27:32.309Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Durbar Square Heritage Site",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.309Z",
+            "needsVerification": false
+          }
+        },
+        "insertedId": "689a19f43cf5b16215fcccaf"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652309_rqh0nenms",
+          "name": "Safe Park New Road Shopping Center",
+          "address": "New Road Shopping Center, 4 Lane, Kathmandu, Nepal",
+          "description": "Premium parking facility in New Road Shopping Center area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.7016,
+            "longitude": 85.3197
+          },
+          "totalSpaces": 49,
+          "availableSpaces": 25,
+          "occupancyPercentage": 49,
+          "hourlyRate": 26,
+          "dailyRate": 208,
+          "monthlyRate": 5200,
+          "operatingHours": {
+            "start": "07:00",
+            "end": "21:00",
+            "is24Hours": false
+          },
+          "isCurrentlyOpen": false,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "cctv",
+            "covered_parking",
+            "mobile_payment"
+          ],
+          "contactNumber": "+9779642474367",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": false,
+            "truck": false
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 95,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.309Z",
+          "updatedAt": "2025-08-11T16:27:32.309Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "New Road Shopping Center",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.309Z",
+            "needsVerification": false
+          }
+        },
+        "insertedId": "689a19f43cf5b16215fcccb1"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652310_h3v3mer4j",
+          "name": "Quick Park Koteshwor Commercial Hub",
+          "address": "Koteshwor Commercial Hub, 10 Lane, Kathmandu, Nepal",
+          "description": "Premium parking facility in Koteshwor Commercial Hub area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.6776,
+            "longitude": 85.347
+          },
+          "totalSpaces": 101,
+          "availableSpaces": 67,
+          "occupancyPercentage": 33,
+          "hourlyRate": 25,
+          "dailyRate": 200,
+          "monthlyRate": 5000,
+          "operatingHours": {
+            "start": "07:00",
+            "end": "21:00",
+            "is24Hours": false
+          },
+          "isCurrentlyOpen": false,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "cctv",
+            "covered_parking",
+            "mobile_payment",
+            "online_booking",
+            "lighting"
+          ],
+          "contactNumber": "+9779872321804",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": false,
+            "truck": false
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 92,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.310Z",
+          "updatedAt": "2025-08-11T16:27:32.310Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Koteshwor Commercial Hub",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.310Z",
+            "needsVerification": false
+          }
+        },
+        "insertedId": "689a19f43cf5b16215fcccb2"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652309_xknbg7r8q",
+          "name": "Ratna Park Area Car Park",
+          "address": "Ratna Park Area, 2 Marg, Kathmandu, Nepal",
+          "description": "Premium parking facility in Ratna Park Area area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.7064,
+            "longitude": 85.3238
+          },
+          "totalSpaces": 41,
+          "availableSpaces": 25,
+          "occupancyPercentage": 37,
+          "hourlyRate": 23,
+          "dailyRate": 184,
+          "monthlyRate": 4600,
+          "operatingHours": {
+            "start": "06:00",
+            "end": "22:00",
+            "is24Hours": false
+          },
+          "isCurrentlyOpen": false,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "lighting"
+          ],
+          "contactNumber": "+9779899783577",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": false,
+            "truck": false
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 92,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.309Z",
+          "updatedAt": "2025-08-11T16:27:32.309Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Ratna Park Area",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.309Z",
+            "needsVerification": false
+          }
+        },
+        "insertedId": "689a19f43cf5b16215fcccb3"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652307_mzv75y4y8",
+          "name": "Thamel Parking Zone",
+          "address": "Thamel Tourist Hub, 20 Marg, Kathmandu, Nepal",
+          "description": "Premium parking facility in Thamel Tourist Hub area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.7151,
+            "longitude": 85.3107
+          },
+          "totalSpaces": 59,
+          "availableSpaces": 52,
+          "occupancyPercentage": 11,
+          "hourlyRate": 43,
+          "dailyRate": 344,
+          "monthlyRate": 8600,
+          "operatingHours": {
+            "start": "06:00",
+            "end": "22:00",
+            "is24Hours": false
+          },
+          "isCurrentlyOpen": false,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "cctv",
+            "restroom",
+            "lighting",
+            "ev_charging"
+          ],
+          "contactNumber": "+9779788344550",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": false,
+            "truck": false
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 86,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.308Z",
+          "updatedAt": "2025-08-11T16:27:32.308Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Thamel Tourist Hub",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.308Z",
+            "needsVerification": false
+          }
+        },
+        "insertedId": "689a19f43cf5b16215fcccad"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652310_ut5ckzqcc",
+          "name": "Koteshwor Car Park",
+          "address": "Koteshwor Commercial Hub, 10 Lane, Kathmandu, Nepal",
+          "description": "Premium parking facility in Koteshwor Commercial Hub area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.675074,
+            "longitude": 85.349999
+          },
+          "totalSpaces": 56,
+          "availableSpaces": 44,
+          "occupancyPercentage": 20,
+          "hourlyRate": 31,
+          "dailyRate": 248,
+          "monthlyRate": 6200,
+          "operatingHours": {
+            "start": "07:00",
+            "end": "21:00",
+            "is24Hours": false
+          },
+          "isCurrentlyOpen": false,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "cctv",
+            "covered_parking",
+            "mobile_payment"
+          ],
+          "contactNumber": "+9779655438583",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": false,
+            "truck": false
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 97,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.310Z",
+          "updatedAt": "2025-08-11T16:27:32.310Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Koteshwor Commercial Hub",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.310Z",
+            "needsVerification": false
+          }
+        },
+        "insertedId": "689a19f43cf5b16215fcccb4"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652310_9iz7czje0",
+          "name": "Koteshwor Parking Area",
+          "address": "Koteshwor Commercial Hub, 4 Galli, Kathmandu, Nepal",
+          "description": "Premium parking facility in Koteshwor Commercial Hub area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.6776,
+            "longitude": 85.349088
+          },
+          "totalSpaces": 148,
+          "availableSpaces": 106,
+          "occupancyPercentage": 28,
+          "hourlyRate": 40,
+          "dailyRate": 320,
+          "monthlyRate": 8000,
+          "operatingHours": {
+            "start": "07:00",
+            "end": "21:00",
+            "is24Hours": false
+          },
+          "isCurrentlyOpen": false,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "cctv",
+            "covered_parking",
+            "mobile_payment"
+          ],
+          "contactNumber": "+9779779826244",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": false,
+            "truck": false
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 89,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.310Z",
+          "updatedAt": "2025-08-11T16:27:32.310Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Koteshwor Commercial Hub",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.310Z",
+            "needsVerification": false
+          }
+        },
+        "insertedId": "689a19f43cf5b16215fcccb5"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652310_w7jxrtjsm",
+          "name": "Koteshwor Commercial Hub Car Park",
+          "address": "Koteshwor Commercial Hub, 2 Galli, Kathmandu, Nepal",
+          "description": "Premium parking facility in Koteshwor Commercial Hub area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.677533,
+            "longitude": 85.346213
+          },
+          "totalSpaces": 33,
+          "availableSpaces": 19,
+          "occupancyPercentage": 40,
+          "hourlyRate": 35,
+          "dailyRate": 280,
+          "monthlyRate": 7000,
+          "operatingHours": {
+            "start": "07:00",
+            "end": "21:00",
+            "is24Hours": false
+          },
+          "isCurrentlyOpen": false,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "cctv",
+            "covered_parking",
+            "mobile_payment",
+            "bicycle_parking"
+          ],
+          "contactNumber": "+9779876011870",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": true,
+            "truck": false
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 86,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.310Z",
+          "updatedAt": "2025-08-11T16:27:32.310Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Koteshwor Commercial Hub",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.310Z",
+            "needsVerification": false
+          }
+        },
+        "insertedId": "689a19f43cf5b16215fcccb6"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652310_4myvxxooe",
+          "name": "Patan Durbar Square Office Parking",
+          "address": "Patan Durbar Square, 4 Road, Kathmandu, Nepal",
+          "description": "Premium parking facility in Patan Durbar Square area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.6648,
+            "longitude": 85.3188
+          },
+          "totalSpaces": 72,
+          "availableSpaces": 39,
+          "occupancyPercentage": 45,
+          "hourlyRate": 51,
+          "dailyRate": 408,
+          "monthlyRate": 10200,
+          "operatingHours": {
+            "start": "08:00",
+            "end": "18:00",
+            "is24Hours": false
+          },
+          "isCurrentlyOpen": false,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "lighting",
+            "disabled_access"
+          ],
+          "contactNumber": "+9779751289326",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": false,
+            "truck": false
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 85,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.310Z",
+          "updatedAt": "2025-08-11T16:27:32.310Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Patan Durbar Square",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.310Z",
+            "needsVerification": false
+          }
+        },
+        "insertedId": "689a19f43cf5b16215fcccb7"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652311_et800mlqo",
+          "name": "Jawalakhel Market Area Parking Area",
+          "address": "Jawalakhel Market Area, 10 Marg, Kathmandu, Nepal",
+          "description": "Premium parking facility in Jawalakhel Market Area area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.6701,
+            "longitude": 85.3159
+          },
+          "totalSpaces": 89,
+          "availableSpaces": 65,
+          "occupancyPercentage": 27,
+          "hourlyRate": 23,
+          "dailyRate": 184,
+          "monthlyRate": 4600,
+          "operatingHours": {
+            "start": "05:00",
+            "end": "20:00",
+            "is24Hours": false
+          },
+          "isCurrentlyOpen": false,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "lighting",
+            "ev_charging",
+            "covered_parking"
+          ],
+          "contactNumber": "+9779795891556",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": false,
+            "truck": false
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 98,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.311Z",
+          "updatedAt": "2025-08-11T16:27:32.311Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Jawalakhel Market Area",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.311Z",
+            "needsVerification": false
+          }
+        },
+        "insertedId": "689a19f43cf5b16215fcccb8"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652311_qamwi3q83",
+          "name": "Quick Park Jawalakhel Market Area",
+          "address": "Jawalakhel Market Area, 3 Road, Kathmandu, Nepal",
+          "description": "Premium parking facility in Jawalakhel Market Area area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.667447,
+            "longitude": 85.314652
+          },
+          "totalSpaces": 33,
+          "availableSpaces": 16,
+          "occupancyPercentage": 50,
+          "hourlyRate": 14,
+          "dailyRate": 112,
+          "monthlyRate": 2800,
+          "operatingHours": {
+            "start": "05:00",
+            "end": "20:00",
+            "is24Hours": false
+          },
+          "isCurrentlyOpen": false,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "lighting",
+            "restroom",
+            "valet_parking"
+          ],
+          "contactNumber": "+9779853542349",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": false,
+            "truck": false
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 94,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.311Z",
+          "updatedAt": "2025-08-11T16:27:32.311Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Jawalakhel Market Area",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.311Z",
+            "needsVerification": false
+          }
+        },
+        "insertedId": "689a19f43cf5b16215fcccb9"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652311_voc5z0a88",
+          "name": "Lagankhel Transport Hub Street Side Parking",
+          "address": "Lagankhel Transport Hub, 3 Lane, Kathmandu, Nepal",
+          "description": "Premium parking facility in Lagankhel Transport Hub area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.663098,
+            "longitude": 85.327199
+          },
+          "totalSpaces": 190,
+          "availableSpaces": 119,
+          "occupancyPercentage": 37,
+          "hourlyRate": 21,
+          "dailyRate": 168,
+          "monthlyRate": 4200,
+          "operatingHours": {
+            "start": "05:00",
+            "end": "23:00",
+            "is24Hours": false
+          },
+          "isCurrentlyOpen": true,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "cctv",
+            "restroom",
+            "lighting",
+            "bicycle_parking",
+            "covered_parking"
+          ],
+          "contactNumber": "+9779775503066",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": true,
+            "truck": true
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 87,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.311Z",
+          "updatedAt": "2025-08-11T16:27:32.311Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Lagankhel Transport Hub",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.311Z",
+            "needsVerification": false
+          }
+        },
+        "insertedId": "689a19f43cf5b16215fcccbc"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652311_ntlowau5x",
+          "name": "Lagankhel Transport Hub Parking Area",
+          "address": "Lagankhel Transport Hub, 5 Lane, Kathmandu, Nepal",
+          "description": "Premium parking facility in Lagankhel Transport Hub area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.667778,
+            "longitude": 85.32113
+          },
+          "totalSpaces": 212,
+          "availableSpaces": 183,
+          "occupancyPercentage": 13,
+          "hourlyRate": 23,
+          "dailyRate": 184,
+          "monthlyRate": 4600,
+          "operatingHours": {
+            "start": "05:00",
+            "end": "23:00",
+            "is24Hours": false
+          },
+          "isCurrentlyOpen": true,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "cctv",
+            "restroom",
+            "lighting",
+            "ev_charging"
+          ],
+          "contactNumber": "+9779624568849",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": false,
+            "truck": true
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 94,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.311Z",
+          "updatedAt": "2025-08-11T16:27:32.311Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Lagankhel Transport Hub",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.311Z",
+            "needsVerification": false
+          }
+        },
+        "insertedId": "689a19f43cf5b16215fcccbd"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652311_us996nc55",
+          "name": "ParkSathi Pulchowk Engineering Campus",
+          "address": "Pulchowk Engineering Campus, 15 Road, Kathmandu, Nepal",
+          "description": "Premium parking facility in Pulchowk Engineering Campus area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.677404,
+            "longitude": 85.31495
+          },
+          "totalSpaces": 226,
+          "availableSpaces": 156,
+          "occupancyPercentage": 31,
+          "hourlyRate": 20,
+          "dailyRate": 160,
+          "monthlyRate": 4000,
+          "operatingHours": {
+            "start": "07:00",
+            "end": "18:00",
+            "is24Hours": false
+          },
+          "isCurrentlyOpen": false,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "bicycle_parking",
+            "security",
+            "lighting",
+            "restroom"
+          ],
+          "contactNumber": "+9779847933839",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": true,
+            "truck": false
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 85,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.311Z",
+          "updatedAt": "2025-08-11T16:27:32.311Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Pulchowk Engineering Campus",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.311Z",
+            "needsVerification": false
+          }
+        },
+        "insertedId": "689a19f43cf5b16215fcccc0"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652311_l5knemf3y",
+          "name": "Jawalakhel Market Area Mall Parking",
+          "address": "Jawalakhel Market Area, 5 Street, Kathmandu, Nepal",
+          "description": "Premium parking facility in Jawalakhel Market Area area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.673458,
+            "longitude": 85.316779
+          },
+          "totalSpaces": 99,
+          "availableSpaces": 68,
+          "occupancyPercentage": 31,
+          "hourlyRate": 12,
+          "dailyRate": 96,
+          "monthlyRate": 2400,
+          "operatingHours": {
+            "start": "05:00",
+            "end": "20:00",
+            "is24Hours": false
+          },
+          "isCurrentlyOpen": false,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "lighting"
+          ],
+          "contactNumber": "+9779611737477",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": false,
+            "truck": false
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 98,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.311Z",
+          "updatedAt": "2025-08-11T16:27:32.311Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Jawalakhel Market Area",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.311Z",
+            "needsVerification": false
+          }
+        },
+        "insertedId": "689a19f43cf5b16215fcccba"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652311_ilcnz935j",
+          "name": "City Park Sanepa Shopping Complex",
+          "address": "Sanepa Shopping Complex, 5 Galli, Kathmandu, Nepal",
+          "description": "Premium parking facility in Sanepa Shopping Complex area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.684317,
+            "longitude": 85.310569
+          },
+          "totalSpaces": 111,
+          "availableSpaces": 71,
+          "occupancyPercentage": 36,
+          "hourlyRate": 32,
+          "dailyRate": 256,
+          "monthlyRate": 6400,
+          "operatingHours": {
+            "start": "07:00",
+            "end": "21:00",
+            "is24Hours": false
+          },
+          "isCurrentlyOpen": false,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "cctv",
+            "covered_parking",
+            "mobile_payment"
+          ],
+          "contactNumber": "+9779869279902",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": false,
+            "truck": false
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 95,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.311Z",
+          "updatedAt": "2025-08-11T16:27:32.311Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Sanepa Shopping Complex",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.311Z",
+            "needsVerification": false
+          }
+        },
+        "insertedId": "689a19f43cf5b16215fcccc2"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652311_rrw7f0zru",
+          "name": "Pulchowk Engineering Campus Mall Parking",
+          "address": "Pulchowk Engineering Campus, 1 Marg, Kathmandu, Nepal",
+          "description": "Premium parking facility in Pulchowk Engineering Campus area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.68,
+            "longitude": 85.315
+          },
+          "totalSpaces": 203,
+          "availableSpaces": 109,
+          "occupancyPercentage": 46,
+          "hourlyRate": 17,
+          "dailyRate": 136,
+          "monthlyRate": 3400,
+          "operatingHours": {
+            "start": "07:00",
+            "end": "18:00",
+            "is24Hours": false
+          },
+          "isCurrentlyOpen": false,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "bicycle_parking",
+            "security",
+            "lighting"
+          ],
+          "contactNumber": "+9779746646559",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": true,
+            "truck": false
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 90,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.311Z",
+          "updatedAt": "2025-08-11T16:27:32.311Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Pulchowk Engineering Campus",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.311Z",
+            "needsVerification": false
+          }
+        },
+        "insertedId": "689a19f43cf5b16215fcccc3"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652311_hq8j09547",
+          "name": "ParkSathi Sanepa Shopping Complex",
+          "address": "Sanepa Shopping Complex, 4 Lane, Kathmandu, Nepal",
+          "description": "Premium parking facility in Sanepa Shopping Complex area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.681019,
+            "longitude": 85.307767
+          },
+          "totalSpaces": 120,
+          "availableSpaces": 96,
+          "occupancyPercentage": 19,
+          "hourlyRate": 34,
+          "dailyRate": 272,
+          "monthlyRate": 6800,
+          "operatingHours": {
+            "start": "07:00",
+            "end": "21:00",
+            "is24Hours": false
+          },
+          "isCurrentlyOpen": false,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "cctv",
+            "covered_parking",
+            "mobile_payment"
+          ],
+          "contactNumber": "+9779826616623",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": false,
+            "truck": false
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 97,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.311Z",
+          "updatedAt": "2025-08-11T16:27:32.311Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Sanepa Shopping Complex",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.311Z",
+            "needsVerification": false
+          }
+        },
+        "insertedId": "689a19f43cf5b16215fcccc4"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652311_dom8h7dzg",
+          "name": "ParkSathi Kupondole Heights",
+          "address": "Kupondole Heights, 4 Marg, Kathmandu, Nepal",
+          "description": "Premium parking facility in Kupondole Heights area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.689,
+            "longitude": 85.308
+          },
+          "totalSpaces": 13,
+          "availableSpaces": 8,
+          "occupancyPercentage": 35,
+          "hourlyRate": 10,
+          "dailyRate": 80,
+          "monthlyRate": 2000,
+          "operatingHours": {
+            "start": "00:00",
+            "end": "23:59",
+            "is24Hours": true
+          },
+          "isCurrentlyOpen": true,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "lighting"
+          ],
+          "contactNumber": "+9779712719915",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": false,
+            "truck": false
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 98,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.311Z",
+          "updatedAt": "2025-08-11T16:27:32.311Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Kupondole Heights",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.311Z",
+            "needsVerification": false
+          }
+        },
+        "insertedId": "689a19f43cf5b16215fcccc5"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652311_tsmssvgmk",
+          "name": "Kupondole Heights Building Parking",
+          "address": "Kupondole Heights, 10 Street, Kathmandu, Nepal",
+          "description": "Premium parking facility in Kupondole Heights area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.68792,
+            "longitude": 85.30779
+          },
+          "totalSpaces": 32,
+          "availableSpaces": 28,
+          "occupancyPercentage": 12,
+          "hourlyRate": 8,
+          "dailyRate": 64,
+          "monthlyRate": 1600,
+          "operatingHours": {
+            "start": "00:00",
+            "end": "23:59",
+            "is24Hours": true
+          },
+          "isCurrentlyOpen": true,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "lighting"
+          ],
+          "contactNumber": "+9779632282888",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": false,
+            "truck": false
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 93,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.311Z",
+          "updatedAt": "2025-08-11T16:27:32.311Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Kupondole Heights",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.311Z",
+            "needsVerification": false
+          }
+        },
+        "insertedId": "689a19f43cf5b16215fcccc6"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652311_4n42kbq9o",
+          "name": "Sinamangal Parking Zone",
+          "address": "Sinamangal Airport Area, 20 Marg, Kathmandu, Nepal",
+          "description": "Premium parking facility in Sinamangal Airport Area area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.6966,
+            "longitude": 85.3591
+          },
+          "totalSpaces": 292,
+          "availableSpaces": 204,
+          "occupancyPercentage": 30,
+          "hourlyRate": 30,
+          "dailyRate": 240,
+          "monthlyRate": 6000,
+          "operatingHours": {
+            "start": "05:00",
+            "end": "23:00",
+            "is24Hours": false
+          },
+          "isCurrentlyOpen": true,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "cctv",
+            "restroom",
+            "lighting",
+            "valet_parking"
+          ],
+          "contactNumber": "+9779768501832",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": false,
+            "truck": true
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 92,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.311Z",
+          "updatedAt": "2025-08-11T16:27:32.311Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Sinamangal Airport Area",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.311Z",
+            "needsVerification": false
+          }
+        },
+        "insertedId": "689a19f43cf5b16215fcccc7"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652311_5ddw31pht",
+          "name": "Sanepa Shopping Complex Car Park",
+          "address": "Sanepa Shopping Complex, 3 Road, Kathmandu, Nepal",
+          "description": "Premium parking facility in Sanepa Shopping Complex area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.685316,
+            "longitude": 85.306969
+          },
+          "totalSpaces": 89,
+          "availableSpaces": 77,
+          "occupancyPercentage": 13,
+          "hourlyRate": 23,
+          "dailyRate": 184,
+          "monthlyRate": 4600,
+          "operatingHours": {
+            "start": "07:00",
+            "end": "21:00",
+            "is24Hours": false
+          },
+          "isCurrentlyOpen": false,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "cctv",
+            "covered_parking",
+            "mobile_payment"
+          ],
+          "contactNumber": "+9779688169602",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": false,
+            "truck": false
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 93,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.311Z",
+          "updatedAt": "2025-08-11T16:27:32.311Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Sanepa Shopping Complex",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.311Z",
+            "needsVerification": false
+          }
+        },
+        "insertedId": "689a19f43cf5b16215fcccc8"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652311_uecbabrl2",
+          "name": "Tinkune Junction Building Parking",
+          "address": "Tinkune Junction, 5 Street, Kathmandu, Nepal",
+          "description": "Premium parking facility in Tinkune Junction area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.6889,
+            "longitude": 85.3508
+          },
+          "totalSpaces": 97,
+          "availableSpaces": 58,
+          "occupancyPercentage": 40,
+          "hourlyRate": 22,
+          "dailyRate": 176,
+          "monthlyRate": 4400,
+          "operatingHours": {
+            "start": "05:00",
+            "end": "23:00",
+            "is24Hours": false
+          },
+          "isCurrentlyOpen": true,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "lighting",
+            "restroom"
+          ],
+          "contactNumber": "+9779683231658",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": false,
+            "truck": false
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 87,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.311Z",
+          "updatedAt": "2025-08-11T16:27:32.311Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Tinkune Junction",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.311Z",
+            "needsVerification": false
+          }
+        },
+        "insertedId": "689a19f43cf5b16215fcccca"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652311_3unrxvkby",
+          "name": "Tinkune Junction Parking",
+          "address": "Tinkune Junction, 10 Road, Kathmandu, Nepal",
+          "description": "Premium parking facility in Tinkune Junction area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.685925,
+            "longitude": 85.350283
+          },
+          "totalSpaces": 45,
+          "availableSpaces": 28,
+          "occupancyPercentage": 36,
+          "hourlyRate": 18,
+          "dailyRate": 144,
+          "monthlyRate": 3600,
+          "operatingHours": {
+            "start": "05:00",
+            "end": "23:00",
+            "is24Hours": false
+          },
+          "isCurrentlyOpen": true,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "lighting",
+            "restroom",
+            "cctv"
+          ],
+          "contactNumber": "+9779679775760",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": false,
+            "truck": false
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 98,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.311Z",
+          "updatedAt": "2025-08-11T16:27:32.311Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Tinkune Junction",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.311Z",
+            "needsVerification": false
+          }
+        },
+        "insertedId": "689a19f43cf5b16215fccccb"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652311_x12tppj7p",
+          "name": "Easy Park Kalimati Vegetable Market",
+          "address": "Kalimati Vegetable Market, 15 Road, Kathmandu, Nepal",
+          "description": "Premium parking facility in Kalimati Vegetable Market area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.695,
+            "longitude": 85.29
+          },
+          "totalSpaces": 94,
+          "availableSpaces": 81,
+          "occupancyPercentage": 13,
+          "hourlyRate": 15,
+          "dailyRate": 120,
+          "monthlyRate": 3000,
+          "operatingHours": {
+            "start": "05:00",
+            "end": "20:00",
+            "is24Hours": false
+          },
+          "isCurrentlyOpen": false,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "lighting",
+            "valet_parking",
+            "disabled_access"
+          ],
+          "contactNumber": "+9779752561609",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": false,
+            "truck": false
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 96,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.311Z",
+          "updatedAt": "2025-08-11T16:27:32.311Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Kalimati Vegetable Market",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.311Z",
+            "needsVerification": false
+          }
+        },
+        "insertedId": "689a19f43cf5b16215fccccc"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652312_6pqg3mi7e",
+          "name": "Balaju Industrial Area Open Air Parking",
+          "address": "Balaju Industrial Area, 3 Marg, Kathmandu, Nepal",
+          "description": "Premium parking facility in Balaju Industrial Area area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.728343,
+            "longitude": 85.296374
+          },
+          "totalSpaces": 86,
+          "availableSpaces": 55,
+          "occupancyPercentage": 36,
+          "hourlyRate": 14,
+          "dailyRate": 112,
+          "monthlyRate": 2800,
+          "operatingHours": {
+            "start": "06:00",
+            "end": "19:00",
+            "is24Hours": false
+          },
+          "isCurrentlyOpen": false,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "cctv",
+            "ev_charging"
+          ],
+          "contactNumber": "+9779614419258",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": false,
+            "truck": true
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 90,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.312Z",
+          "updatedAt": "2025-08-11T16:27:32.312Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Balaju Industrial Area",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.312Z",
+            "needsVerification": false
+          }
+        },
+        "insertedId": "689a19f43cf5b16215fcccce"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652312_18h8atmwt",
+          "name": "Balaju Industrial Area Parking",
+          "address": "Balaju Industrial Area, 10 Lane, Kathmandu, Nepal",
+          "description": "Premium parking facility in Balaju Industrial Area area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.730499,
+            "longitude": 85.301941
+          },
+          "totalSpaces": 105,
+          "availableSpaces": 79,
+          "occupancyPercentage": 24,
+          "hourlyRate": 12,
+          "dailyRate": 96,
+          "monthlyRate": 2400,
+          "operatingHours": {
+            "start": "06:00",
+            "end": "19:00",
+            "is24Hours": false
+          },
+          "isCurrentlyOpen": false,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "cctv"
+          ],
+          "contactNumber": "+9779645161855",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": false,
+            "truck": true
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 92,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.312Z",
+          "updatedAt": "2025-08-11T16:27:32.312Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Balaju Industrial Area",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.312Z",
+            "needsVerification": false
+          }
+        },
+        "insertedId": "689a19f43cf5b16215fccccf"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652311_8j67b4aze",
+          "name": "Sinamangal Airport Area Parking Zone",
+          "address": "Sinamangal Airport Area, 3 Street, Kathmandu, Nepal",
+          "description": "Premium parking facility in Sinamangal Airport Area area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.696058,
+            "longitude": 85.360195
+          },
+          "totalSpaces": 160,
+          "availableSpaces": 96,
+          "occupancyPercentage": 40,
+          "hourlyRate": 19,
+          "dailyRate": 152,
+          "monthlyRate": 3800,
+          "operatingHours": {
+            "start": "05:00",
+            "end": "23:00",
+            "is24Hours": false
+          },
+          "isCurrentlyOpen": true,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "cctv",
+            "restroom",
+            "lighting"
+          ],
+          "contactNumber": "+9779759219966",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": false,
+            "truck": true
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 86,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.311Z",
+          "updatedAt": "2025-08-11T16:27:32.311Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Sinamangal Airport Area",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.311Z",
+            "needsVerification": false
+          }
+        },
+        "insertedId": "689a19f43cf5b16215fcccc9"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652312_5hb3nrhjw",
+          "name": "Putalisadak Government Area Parking Area",
+          "address": "Putalisadak Government Area, 1 Lane, Kathmandu, Nepal",
+          "description": "Premium parking facility in Putalisadak Government Area area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.708279,
+            "longitude": 85.326317
+          },
+          "totalSpaces": 84,
+          "availableSpaces": 67,
+          "occupancyPercentage": 20,
+          "hourlyRate": 25,
+          "dailyRate": 200,
+          "monthlyRate": 5000,
+          "operatingHours": {
+            "start": "08:00",
+            "end": "17:00",
+            "is24Hours": false
+          },
+          "isCurrentlyOpen": false,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "cctv",
+            "disabled_access",
+            "covered_parking"
+          ],
+          "contactNumber": "+9779796771822",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": false,
+            "truck": false
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 89,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.312Z",
+          "updatedAt": "2025-08-11T16:27:32.312Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Putalisadak Government Area",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.312Z",
+            "needsVerification": false
+          }
+        },
+        "insertedId": "689a19f43cf5b16215fcccd2"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652311_fs8z8onb3",
+          "name": "Easy Park Lagankhel Transport Hub",
+          "address": "Lagankhel Transport Hub, 2 Galli, Kathmandu, Nepal",
+          "description": "Premium parking facility in Lagankhel Transport Hub area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.6667,
+            "longitude": 85.3247
+          },
+          "totalSpaces": 114,
+          "availableSpaces": 83,
+          "occupancyPercentage": 27,
+          "hourlyRate": 27,
+          "dailyRate": 216,
+          "monthlyRate": 5400,
+          "operatingHours": {
+            "start": "05:00",
+            "end": "23:00",
+            "is24Hours": false
+          },
+          "isCurrentlyOpen": true,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "cctv",
+            "restroom",
+            "lighting"
+          ],
+          "contactNumber": "+9779768404277",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": false,
+            "truck": true
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 98,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.311Z",
+          "updatedAt": "2025-08-11T16:27:32.311Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Lagankhel Transport Hub",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.311Z",
+            "needsVerification": false
+          }
+        },
+        "insertedId": "689a19f43cf5b16215fcccd3"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652312_hp30rktnd",
+          "name": "Satdobato Car Park",
+          "address": "Satdobato Commercial Area, 10 Road, Kathmandu, Nepal",
+          "description": "Premium parking facility in Satdobato Commercial Area area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.6587,
+            "longitude": 85.3247
+          },
+          "totalSpaces": 103,
+          "availableSpaces": 75,
+          "occupancyPercentage": 26,
+          "hourlyRate": 21,
+          "dailyRate": 168,
+          "monthlyRate": 4200,
+          "operatingHours": {
+            "start": "07:00",
+            "end": "21:00",
+            "is24Hours": false
+          },
+          "isCurrentlyOpen": false,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "cctv",
+            "covered_parking",
+            "mobile_payment",
+            "restroom"
+          ],
+          "contactNumber": "+9779818250477",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": false,
+            "truck": false
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 89,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.312Z",
+          "updatedAt": "2025-08-11T16:27:32.312Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Satdobato Commercial Area",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.312Z",
+            "needsVerification": false
+          }
+        },
+        "insertedId": "689a19f43cf5b16215fcccd4"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652312_9x9qbenzr",
+          "name": "Satdobato Parking Zone",
+          "address": "Satdobato Commercial Area, 3 Road, Kathmandu, Nepal",
+          "description": "Premium parking facility in Satdobato Commercial Area area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.660728,
+            "longitude": 85.323208
+          },
+          "totalSpaces": 48,
+          "availableSpaces": 26,
+          "occupancyPercentage": 45,
+          "hourlyRate": 40,
+          "dailyRate": 320,
+          "monthlyRate": 8000,
+          "operatingHours": {
+            "start": "07:00",
+            "end": "21:00",
+            "is24Hours": false
+          },
+          "isCurrentlyOpen": false,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "cctv",
+            "covered_parking",
+            "mobile_payment"
+          ],
+          "contactNumber": "+9779614594934",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": false,
+            "truck": false
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 85,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.312Z",
+          "updatedAt": "2025-08-11T16:27:32.312Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Satdobato Commercial Area",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.312Z",
+            "needsVerification": false
+          }
+        },
+        "insertedId": "689a19f43cf5b16215fcccd5"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652312_2vb03e148",
+          "name": "Satdobato Parking",
+          "address": "Satdobato Commercial Area, 10 Galli, Kathmandu, Nepal",
+          "description": "Premium parking facility in Satdobato Commercial Area area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.661656,
+            "longitude": 85.322242
+          },
+          "totalSpaces": 138,
+          "availableSpaces": 105,
+          "occupancyPercentage": 23,
+          "hourlyRate": 21,
+          "dailyRate": 168,
+          "monthlyRate": 4200,
+          "operatingHours": {
+            "start": "07:00",
+            "end": "21:00",
+            "is24Hours": false
+          },
+          "isCurrentlyOpen": false,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "cctv",
+            "covered_parking",
+            "mobile_payment"
+          ],
+          "contactNumber": "+9779676149084",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": false,
+            "truck": false
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 94,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.312Z",
+          "updatedAt": "2025-08-11T16:27:32.312Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Satdobato Commercial Area",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.312Z",
+            "needsVerification": false
+          }
+        },
+        "insertedId": "689a19f43cf5b16215fcccd6"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652312_i2jrm7wuk",
+          "name": "Imadol Market Hub Parking Zone",
+          "address": "Imadol Market Hub, 1 Road, Kathmandu, Nepal",
+          "description": "Premium parking facility in Imadol Market Hub area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.655,
+            "longitude": 85.328
+          },
+          "totalSpaces": 65,
+          "availableSpaces": 53,
+          "occupancyPercentage": 18,
+          "hourlyRate": 25,
+          "dailyRate": 200,
+          "monthlyRate": 5000,
+          "operatingHours": {
+            "start": "05:00",
+            "end": "20:00",
+            "is24Hours": false
+          },
+          "isCurrentlyOpen": false,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "lighting",
+            "cctv"
+          ],
+          "contactNumber": "+9779658798255",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": false,
+            "truck": false
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 94,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.312Z",
+          "updatedAt": "2025-08-11T16:27:32.312Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Imadol Market Hub",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.312Z",
+            "needsVerification": false
+          }
+        },
+        "insertedId": "689a19f43cf5b16215fcccd7"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652312_c5p46x0lk",
+          "name": "Maharajgunj Medical Campus Office Parking",
+          "address": "Maharajgunj Medical Campus, 5 Road, Kathmandu, Nepal",
+          "description": "Premium parking facility in Maharajgunj Medical Campus area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.74,
+            "longitude": 85.33
+          },
+          "totalSpaces": 112,
+          "availableSpaces": 96,
+          "occupancyPercentage": 14,
+          "hourlyRate": 23,
+          "dailyRate": 184,
+          "monthlyRate": 4600,
+          "operatingHours": {
+            "start": "00:00",
+            "end": "23:59",
+            "is24Hours": true
+          },
+          "isCurrentlyOpen": true,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "disabled_access",
+            "security",
+            "covered_parking",
+            "ev_charging"
+          ],
+          "contactNumber": "+9779877109779",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": false,
+            "truck": false
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 88,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.312Z",
+          "updatedAt": "2025-08-11T16:27:32.312Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Maharajgunj Medical Campus",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.312Z",
+            "needsVerification": false
+          }
+        },
+        "insertedId": "689a19f43cf5b16215fcccd0"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652312_tmgrd6b0h",
+          "name": "Putalisadak Parking",
+          "address": "Putalisadak Government Area, 15 Street, Kathmandu, Nepal",
+          "description": "Premium parking facility in Putalisadak Government Area area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.7095,
+            "longitude": 85.3269
+          },
+          "totalSpaces": 72,
+          "availableSpaces": 61,
+          "occupancyPercentage": 14,
+          "hourlyRate": 17,
+          "dailyRate": 136,
+          "monthlyRate": 3400,
+          "operatingHours": {
+            "start": "08:00",
+            "end": "17:00",
+            "is24Hours": false
+          },
+          "isCurrentlyOpen": false,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "cctv",
+            "disabled_access",
+            "restroom"
+          ],
+          "contactNumber": "+9779868653227",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": false,
+            "truck": false
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 96,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.312Z",
+          "updatedAt": "2025-08-11T16:27:32.312Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Putalisadak Government Area",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.312Z",
+            "needsVerification": false
+          }
+        },
+        "insertedId": "689a19f43cf5b16215fcccd1"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652311_ct9km9d6i",
+          "name": "Bhaktapur Parking",
+          "address": "Bhaktapur Durbar Square, 20 Marg, Kathmandu, Nepal",
+          "description": "Premium parking facility in Bhaktapur Durbar Square area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.671,
+            "longitude": 85.4298
+          },
+          "totalSpaces": 69,
+          "availableSpaces": 41,
+          "occupancyPercentage": 40,
+          "hourlyRate": 33,
+          "dailyRate": 264,
+          "monthlyRate": 6600,
+          "operatingHours": {
+            "start": "08:00",
+            "end": "18:00",
+            "is24Hours": false
+          },
+          "isCurrentlyOpen": false,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "lighting",
+            "disabled_access"
+          ],
+          "contactNumber": "+9779788822940",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": false,
+            "truck": false
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 90,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.311Z",
+          "updatedAt": "2025-08-11T16:27:32.311Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Bhaktapur Durbar Square",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.311Z",
+            "needsVerification": false
+          }
+        },
+        "insertedId": "689a19f43cf5b16215fcccd9"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652312_k552der6j",
+          "name": "Balaju Industrial Area Building Parking",
+          "address": "Balaju Industrial Area, 5 Lane, Kathmandu, Nepal",
+          "description": "Premium parking facility in Balaju Industrial Area area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.730651,
+            "longitude": 85.297537
+          },
+          "totalSpaces": 63,
+          "availableSpaces": 44,
+          "occupancyPercentage": 30,
+          "hourlyRate": 22,
+          "dailyRate": 176,
+          "monthlyRate": 4400,
+          "operatingHours": {
+            "start": "06:00",
+            "end": "19:00",
+            "is24Hours": false
+          },
+          "isCurrentlyOpen": false,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "cctv"
+          ],
+          "contactNumber": "+9779821954033",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": false,
+            "truck": true
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 96,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.312Z",
+          "updatedAt": "2025-08-11T16:27:32.312Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Balaju Industrial Area",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.312Z",
+            "needsVerification": false
+          }
+        },
+        "insertedId": "689a19f43cf5b16215fcccda"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652312_iczo6rhap",
+          "name": "ParkSathi Anamnagar Residential",
+          "address": "Anamnagar Residential, 15 Marg, Kathmandu, Nepal",
+          "description": "Premium parking facility in Anamnagar Residential area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.695,
+            "longitude": 85.32
+          },
+          "totalSpaces": 42,
+          "availableSpaces": 35,
+          "occupancyPercentage": 16,
+          "hourlyRate": 10,
+          "dailyRate": 80,
+          "monthlyRate": 2000,
+          "operatingHours": {
+            "start": "00:00",
+            "end": "23:59",
+            "is24Hours": true
+          },
+          "isCurrentlyOpen": true,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "lighting",
+            "car_wash",
+            "mobile_payment"
+          ],
+          "contactNumber": "+9779743297759",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": false,
+            "truck": false
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 98,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.312Z",
+          "updatedAt": "2025-08-11T16:27:32.312Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Anamnagar Residential",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.312Z",
+            "needsVerification": false
+          }
+        },
+        "insertedId": "689a19f43cf5b16215fcccdb"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652312_01r7pl3z8",
+          "name": "Imadol Market Hub Heritage Site Parking",
+          "address": "Imadol Market Hub, 5 Marg, Kathmandu, Nepal",
+          "description": "Premium parking facility in Imadol Market Hub area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.656689,
+            "longitude": 85.330284
+          },
+          "totalSpaces": 65,
+          "availableSpaces": 53,
+          "occupancyPercentage": 18,
+          "hourlyRate": 16,
+          "dailyRate": 128,
+          "monthlyRate": 3200,
+          "operatingHours": {
+            "start": "05:00",
+            "end": "20:00",
+            "is24Hours": false
+          },
+          "isCurrentlyOpen": false,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "lighting",
+            "bicycle_parking"
+          ],
+          "contactNumber": "+9779637558558",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": true,
+            "truck": false
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 85,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.312Z",
+          "updatedAt": "2025-08-11T16:27:32.312Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Imadol Market Hub",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.312Z",
+            "needsVerification": false
+          }
+        },
+        "insertedId": "689a19f43cf5b16215fcccd8"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652311_xrmpj8q9f",
+          "name": "Safe Park Sanepa Shopping Complex",
+          "address": "Sanepa Shopping Complex, 2 Road, Kathmandu, Nepal",
+          "description": "Premium parking facility in Sanepa Shopping Complex area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.683,
+            "longitude": 85.31
+          },
+          "totalSpaces": 145,
+          "availableSpaces": 90,
+          "occupancyPercentage": 38,
+          "hourlyRate": 31,
+          "dailyRate": 248,
+          "monthlyRate": 6200,
+          "operatingHours": {
+            "start": "07:00",
+            "end": "21:00",
+            "is24Hours": false
+          },
+          "isCurrentlyOpen": false,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "cctv",
+            "covered_parking",
+            "mobile_payment",
+            "online_booking"
+          ],
+          "contactNumber": "+9779839963838",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": false,
+            "truck": false
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 96,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.311Z",
+          "updatedAt": "2025-08-11T16:27:32.311Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Sanepa Shopping Complex",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.311Z",
+            "needsVerification": false
+          }
+        },
+        "insertedId": "689a19f43cf5b16215fcccc1"
+      }
+    ],
+    "failed": [
+      {
+        "location": {
+          "id": "sample_1754929652309_4jg14ubij",
+          "name": "Durbar Square Heritage Site Parking Area",
+          "address": "Durbar Square Heritage Site, 20 Galli, Kathmandu, Nepal",
+          "description": "Premium parking facility in Durbar Square Heritage Site area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.702412,
+            "longitude": 85.310481
+          },
+          "totalSpaces": 35,
+          "availableSpaces": 30,
+          "occupancyPercentage": 14,
+          "hourlyRate": 56,
+          "dailyRate": 448,
+          "monthlyRate": 11200,
+          "operatingHours": {
+            "start": "08:00",
+            "end": "18:00",
+            "is24Hours": false
+          },
+          "isCurrentlyOpen": false,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "lighting",
+            "disabled_access"
+          ],
+          "contactNumber": "+9779776072872",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": false,
+            "truck": false
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 94,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.309Z",
+          "updatedAt": "2025-08-11T16:27:32.309Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Durbar Square Heritage Site",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.309Z",
+            "needsVerification": false
+          }
+        },
+        "error": "E11000 duplicate key error collection: parking_management.locations index: location_unique_index dup key: { coordinates.latitude: null, coordinates.longitude: null, name: \"Durbar Square Heritage Site Parking Area\" }"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652311_4ryku64ko",
+          "name": "Jawalakhel Market Area Parking Area",
+          "address": "Jawalakhel Market Area, 5 Road, Kathmandu, Nepal",
+          "description": "Premium parking facility in Jawalakhel Market Area area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.667196,
+            "longitude": 85.316289
+          },
+          "totalSpaces": 61,
+          "availableSpaces": 54,
+          "occupancyPercentage": 11,
+          "hourlyRate": 15,
+          "dailyRate": 120,
+          "monthlyRate": 3000,
+          "operatingHours": {
+            "start": "05:00",
+            "end": "20:00",
+            "is24Hours": false
+          },
+          "isCurrentlyOpen": false,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "lighting"
+          ],
+          "contactNumber": "+9779895732934",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": false,
+            "truck": false
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 91,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.311Z",
+          "updatedAt": "2025-08-11T16:27:32.311Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Jawalakhel Market Area",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.311Z",
+            "needsVerification": false
+          }
+        },
+        "error": "E11000 duplicate key error collection: parking_management.locations index: location_unique_index dup key: { coordinates.latitude: null, coordinates.longitude: null, name: \"Jawalakhel Market Area Parking Area\" }"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652309_le3x63euz",
+          "name": "Safe Park Baneshwor Business District",
+          "address": "Baneshwor Business District, 20 Street, Kathmandu, Nepal",
+          "description": "Premium parking facility in Baneshwor Business District area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.6893,
+            "longitude": 85.3436
+          },
+          "totalSpaces": 84,
+          "availableSpaces": 43,
+          "occupancyPercentage": 48,
+          "hourlyRate": 23,
+          "dailyRate": 184,
+          "monthlyRate": 4600,
+          "operatingHours": {
+            "start": "06:30",
+            "end": "20:00",
+            "is24Hours": false
+          },
+          "isCurrentlyOpen": false,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "cctv",
+            "valet_parking",
+            "ev_charging"
+          ],
+          "contactNumber": "+9779632460746",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": false,
+            "truck": false
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 85,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.309Z",
+          "updatedAt": "2025-08-11T16:27:32.309Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Baneshwor Business District",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.309Z",
+            "needsVerification": false
+          }
+        },
+        "error": "E11000 duplicate key error collection: parking_management.locations index: location_unique_index dup key: { coordinates.latitude: null, coordinates.longitude: null, name: \"Safe Park Baneshwor Business District\" }"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652309_sy3y10him",
+          "name": "Durbar Square Heritage Site Market Parking",
+          "address": "Durbar Square Heritage Site, 10 Street, Kathmandu, Nepal",
+          "description": "Premium parking facility in Durbar Square Heritage Site area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.703631,
+            "longitude": 85.309119
+          },
+          "totalSpaces": 61,
+          "availableSpaces": 45,
+          "occupancyPercentage": 25,
+          "hourlyRate": 30,
+          "dailyRate": 240,
+          "monthlyRate": 6000,
+          "operatingHours": {
+            "start": "08:00",
+            "end": "18:00",
+            "is24Hours": false
+          },
+          "isCurrentlyOpen": false,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "lighting",
+            "disabled_access",
+            "cctv",
+            "restroom",
+            "valet_parking"
+          ],
+          "contactNumber": "+9779761924536",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": false,
+            "truck": false
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 85,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.309Z",
+          "updatedAt": "2025-08-11T16:27:32.309Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Durbar Square Heritage Site",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.309Z",
+            "needsVerification": false
+          }
+        },
+        "error": "E11000 duplicate key error collection: parking_management.locations index: location_unique_index dup key: { coordinates.latitude: null, coordinates.longitude: null, name: \"Durbar Square Heritage Site Market Parking\" }"
+      },
+      {
+        "location": {
+          "id": "sample_1754929652312_fwy064xb0",
+          "name": "Safe Park Balaju Industrial Area",
+          "address": "Balaju Industrial Area, 20 Galli, Kathmandu, Nepal",
+          "description": "Premium parking facility in Balaju Industrial Area area with modern amenities and secure environment.",
+          "coordinates": {
+            "latitude": 27.73,
+            "longitude": 85.3
+          },
+          "totalSpaces": 48,
+          "availableSpaces": 41,
+          "occupancyPercentage": 14,
+          "hourlyRate": 21,
+          "dailyRate": 168,
+          "monthlyRate": 4200,
+          "operatingHours": {
+            "start": "06:00",
+            "end": "19:00",
+            "is24Hours": false
+          },
+          "isCurrentlyOpen": false,
+          "currentStatus": "active",
+          "isActive": true,
+          "amenities": [
+            "security",
+            "cctv",
+            "disabled_access",
+            "mobile_payment"
+          ],
+          "contactNumber": "+9779634704896",
+          "vehicleTypes": {
+            "car": true,
+            "motorcycle": true,
+            "bicycle": false,
+            "truck": true
+          },
+          "source": "sample_data",
+          "dataQuality": {
+            "score": 97,
+            "level": "high",
+            "needsVerification": false
+          },
+          "verificationStatus": "verified",
+          "createdAt": "2025-08-11T16:27:32.312Z",
+          "updatedAt": "2025-08-11T16:27:32.312Z",
+          "originalScrapedData": {
+            "source": "sample_generator",
+            "searchKeyword": "sample_data",
+            "searchCenter": "Balaju Industrial Area",
+            "confidence": 0.95,
+            "scrapedAt": "2025-08-11T16:27:32.312Z",
+            "needsVerification": false
+          }
+        },
+        "error": "E11000 duplicate key error collection: parking_management.locations index: location_unique_index dup key: { coordinates.latitude: null, coordinates.longitude: null, name: \"Safe Park Balaju Industrial Area\" }"
+      }
+    ],
+    "duplicates": [],
+    "summary": {
+      "totalAttempted": 47,
+      "successfulInsertions": 42,
+      "failedInsertions": 5,
+      "duplicatesSkipped": 0
+    }
+  },
+  "config": {
+    "databaseName": "parking_management",
+    "collectionName": "locations",
+    "batchSize": 50
+  },
+  "completedAt": "2025-08-11T16:27:32.972Z"
+}

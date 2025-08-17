@@ -1,0 +1,21 @@
+.dropdownEnter {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+.dropdownEnterActive {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 200ms ease-out, transform 200ms ease-out;
+}
+
+.dropdownExit {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.dropdownExitActive {
+  opacity: 0;
+  transform: scale(0.95);
+  transition: opacity 200ms ease-in, transform 200ms ease-in;
+}

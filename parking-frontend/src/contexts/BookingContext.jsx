@@ -1,6 +1,7 @@
-import { createContext, useContext, useReducer } from 'react';
+import { createContext, useReducer } from 'react';
 
 const BookingContext = createContext();
+export { BookingContext };
 
 const initialState = {
   currentBooking: null,
@@ -23,12 +24,12 @@ function bookingReducer(state, action) {
         bookingStep: 'payment',
       };
     
-    case 'CONFIRM_BOOKING':
+    case 'CONFIRM_BOOKING': {
       const confirmedBooking = {
         ...state.currentBooking,
         status: 'confirmed',
         confirmationTime: new Date().toISOString(),
-        qrCode: `QR${Date.now()}${Math.random().toString(36).substr(2, 9)}`,
+        qrCode: `QR${Date.now()}${Math.random().toString(36).substring(2, 11)}`,
       };
       
       return {
@@ -47,6 +48,7 @@ function bookingReducer(state, action) {
         },
         bookingStep: 'confirmed',
       };
+    }
     
     case 'START_NAVIGATION':
       return {
@@ -132,10 +134,3 @@ export function BookingProvider({ children }) {
   );
 }
 
-export function useBooking() {
-  const context = useContext(BookingContext);
-  if (!context) {
-    throw new Error('useBooking must be used within a BookingProvider');
-  }
-  return context;
-}

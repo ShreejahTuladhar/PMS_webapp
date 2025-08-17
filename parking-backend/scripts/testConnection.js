@@ -3,8 +3,8 @@ require('dotenv').config();
 
 const testConnection = async () => {
   try {
-    console.log('🔍 Testing MongoDB Atlas connection...');
-    console.log(`📍 Connection URI: ${process.env.MONGODB_URI?.replace(/\/\/.*:.*@/, '//***:***@')}`);
+    console.log(' Testing MongoDB Atlas connection...');
+    console.log(` Connection URI: ${process.env.MONGODB_URI?.replace(/\/\/.*:.*@/, '//***:***@')}`);
     
     const options = {
       maxPoolSize: 10,
@@ -16,7 +16,7 @@ const testConnection = async () => {
     const conn = await mongoose.connect(process.env.MONGODB_URI, options);
     
     console.log('✅ MongoDB Atlas connection successful!');
-    console.log(`🏠 Host: ${conn.connection.host}`);
+    console.log(` Host: ${conn.connection.host}`);
     console.log(`🗄️  Database: ${conn.connection.name}`);
     console.log(`⚡ Ready State: ${conn.connection.readyState === 1 ? 'Connected' : 'Not Connected'}`);
     
@@ -33,13 +33,13 @@ const testConnection = async () => {
     console.error(error.message);
     
     if (error.message.includes('authentication failed')) {
-      console.log('💡 Check your username and password in the connection string');
+      console.log('  Check your username and password in the connection string');
     } else if (error.message.includes('bad auth')) {
-      console.log('💡 Make sure your database user has proper permissions');
+      console.log('  Make sure your database user has proper permissions');
     } else if (error.message.includes('ENOTFOUND')) {
-      console.log('💡 Check your cluster URL and network connectivity');
+      console.log('  Check your cluster URL and network connectivity');
     } else if (error.message.includes('IP not whitelisted')) {
-      console.log('💡 Add your IP address to MongoDB Atlas network access whitelist');
+      console.log('  Add your IP address to MongoDB Atlas network access whitelist');
     }
     
     process.exit(1);

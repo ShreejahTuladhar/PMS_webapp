@@ -44,12 +44,12 @@ const PhotoUpload = () => {
   const [uploading, setUploading] = useState(false);
 
   const categories = [
-    { value: 'entrance', label: 'Entrance/Exit', icon: '🚪' },
-    { value: 'parking_area', label: 'Parking Area', icon: '🅿️' },
-    { value: 'security', label: 'Security Features', icon: '🔒' },
-    { value: 'amenities', label: 'Amenities', icon: '🏢' },
-    { value: 'signage', label: 'Signage', icon: '🪧' },
-    { value: 'accessibility', label: 'Accessibility', icon: '♿' }
+    { value: 'entrance', label: 'Entrance/Exit', icon: '' },
+    { value: 'parking_area', label: 'Parking Area', icon: '' },
+    { value: 'security', label: 'Security Features', icon: '' },
+    { value: 'amenities', label: 'Amenities', icon: '' },
+    { value: 'signage', label: 'Signage', icon: '' },
+    { value: 'accessibility', label: 'Accessibility', icon: '' }
   ];
 
   const handleDrag = (e) => {

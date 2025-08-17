@@ -6,7 +6,7 @@ class ErrorBoundary extends Component {
     this.state = { hasError: false, error: null, errorInfo: null };
   }
 
-  static getDerivedStateFromError(error) {
+  static getDerivedStateFromError() {
     return { hasError: true };
   }
 
@@ -16,7 +16,7 @@ class ErrorBoundary extends Component {
       errorInfo,
     });
 
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.error('ErrorBoundary caught an error:', error, errorInfo);
     }
   }
@@ -27,7 +27,7 @@ class ErrorBoundary extends Component {
         <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
           <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6">
             <div className="text-center">
-              <div className="text-6xl mb-4">💥</div>
+              <div className="text-6xl mb-4">error</div>
               <h1 className="text-2xl font-bold text-gray-800 mb-2">
                 Oops! Something went wrong
               </h1>
@@ -51,7 +51,7 @@ class ErrorBoundary extends Component {
                 </button>
               </div>
 
-              {process.env.NODE_ENV === 'development' && this.state.error && (
+              {import.meta.env.DEV && this.state.error && (
                 <details className="mt-6 text-left">
                   <summary className="cursor-pointer text-sm text-gray-500 hover:text-gray-700">
                     Show Error Details (Dev Mode)

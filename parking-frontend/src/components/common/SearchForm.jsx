@@ -33,7 +33,7 @@ function SearchForm({ onSearch, onRadiusChange, radius, loading: externalLoading
               onSearch(locationData);
               resolve(locationData);
             },
-            (error) => {
+            () => {
               reject(new Error('Unable to get your location. Please check location permissions.'));
             },
             {
@@ -80,7 +80,7 @@ function SearchForm({ onSearch, onRadiusChange, radius, loading: externalLoading
                 </>
               ) : (
                 <>
-                  <span className="text-lg">📍</span>
+                  <span className="text-lg"></span>
                   <span className="hidden sm:inline">Use Current</span>
                 </>
               )}
@@ -98,7 +98,7 @@ function SearchForm({ onSearch, onRadiusChange, radius, loading: externalLoading
                 </>
               ) : (
                 <>
-                  <span className="text-lg">🔍</span>
+                  <span className="text-lg"></span>
                   <span className="hidden sm:inline">Search</span>
                 </>
               )}

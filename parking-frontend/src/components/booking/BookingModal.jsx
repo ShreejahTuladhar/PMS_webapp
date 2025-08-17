@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
-import { useBooking } from '../../contexts/BookingContext';
+import { useAuth } from '../../hooks/useAuth';
+import { useBooking } from '../../hooks/useBooking';
 
 function BookingModal({ isOpen, onClose, parkingSpot }) {
   const { user } = useAuth();

@@ -10,7 +10,7 @@ export const inspectAuthStorage = () => {
   const token = localStorage.getItem('token');
   const user = localStorage.getItem('user');
   
-  console.log('🔍 Auth Storage Inspection:');
+  console.log(' Auth Storage Inspection:');
   console.log('Token:', token ? `${token.substring(0, 20)}...` : 'None');
   console.log('User:', user ? JSON.parse(user) : 'None');
   
@@ -18,7 +18,7 @@ export const inspectAuthStorage = () => {
 };
 
 // Auto-run inspection in development
-if (process.env.NODE_ENV === 'development') {
+if (import.meta.env.MODE === 'development') {
   window.clearAuthStorage = clearAuthStorage;
   window.inspectAuthStorage = inspectAuthStorage;
   console.log('🛠️  Auth debugging utilities available: clearAuthStorage(), inspectAuthStorage()');

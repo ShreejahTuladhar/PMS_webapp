@@ -3,6 +3,7 @@ export { default as authService } from './authService';
 export { default as bookingService } from './bookingService';
 export { default as locationService } from './locationService';
 export { default as userService } from './userService';
+export { default as analyticsService } from './analyticsService';
 export { default as api, apiHelpers } from './api';
 
 // Service types for TypeScript (if needed later)

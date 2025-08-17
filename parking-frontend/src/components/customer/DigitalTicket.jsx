@@ -21,7 +21,6 @@ function DigitalTicket({ ticketData, vehicleData, onExit, onSupport }) {
   const minutes = parkingDuration % 60;
   
   const currentCost = Math.ceil(parkingDuration / 60) * ticketData.pricing.hourlyRate;
-  const estimatedExitTime = new Date(entryTime.getTime() + (hours + 1) * 60 * 60 * 1000);
 
   const qrData = JSON.stringify({
     ticketId: ticketData.id,
@@ -46,10 +45,10 @@ function DigitalTicket({ ticketData, vehicleData, onExit, onSupport }) {
   };
 
   const getStatusMessage = () => {
-    if (hours < 1) return 'Just parked 🌟';
-    if (hours < 2) return 'All good 👍';
-    if (hours < 4) return 'Getting longer 🕒';
-    return 'Long stay 🚗';
+    if (hours < 1) return 'Just parked ';
+    if (hours < 2) return 'All good ';
+    if (hours < 4) return 'Getting longer ';
+    return 'Long stay ';
   };
 
   return (
@@ -78,10 +77,10 @@ function DigitalTicket({ ticketData, vehicleData, onExit, onSupport }) {
           {/* Vehicle Info */}
           <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
             <div className="flex items-center gap-3">
-              <span className="text-3xl">
-                {vehicleData.type === 'car' ? '🚗' : 
-                 vehicleData.type === 'motorcycle' ? '🏍️' : 
-                 vehicleData.type === 'suv' ? '🚙' : '🚐'}
+              <span className="text-3xl font-bold text-blue-600">
+                {vehicleData.type === 'car' ? 'CAR' :
+                 vehicleData.type === 'motorcycle' ? 'BIKE' :
+                 vehicleData.type === 'suv' ? 'SUV' : 'VEHICLE'} 
               </span>
               <div>
                 <div className="font-bold text-xl">{vehicleData.licensePlate}</div>
@@ -109,7 +108,7 @@ function DigitalTicket({ ticketData, vehicleData, onExit, onSupport }) {
                 />
               ) : (
                 <div className="w-[120px] h-[120px] bg-gradient-to-br from-blue-100 to-yellow-100 rounded-xl flex items-center justify-center">
-                  <div className="text-4xl text-blue-600">📱</div>
+                  <div className="text-4xl text-blue-600"></div>
                 </div>
               )}
             </button>
@@ -153,7 +152,7 @@ function DigitalTicket({ ticketData, vehicleData, onExit, onSupport }) {
       {/* Parking Information Card */}
       <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 mb-6">
         <h3 className="font-bold text-gray-700 mb-4 flex items-center gap-2">
-          📍 Parking Location
+           Parking Location
         </h3>
         
         <div className="space-y-3">
@@ -194,7 +193,7 @@ function DigitalTicket({ ticketData, vehicleData, onExit, onSupport }) {
         {hours >= 3 && (
           <div className="mt-3 p-3 bg-yellow-100 rounded-xl border border-yellow-200">
             <div className="text-sm text-yellow-800">
-              💡 <strong>Friendly Reminder:</strong> You've been parked for {hours} hours. 
+                <strong>Friendly Reminder:</strong> You've been parked for {hours} hours. 
               Consider extending your parking if you need more time!
             </div>
           </div>
@@ -217,7 +216,7 @@ function DigitalTicket({ ticketData, vehicleData, onExit, onSupport }) {
               </>
             ) : (
               <>
-                ⏰ Extend Parking Time
+                 Extend Parking Time
               </>
             )}
           </span>
@@ -230,7 +229,7 @@ function DigitalTicket({ ticketData, vehicleData, onExit, onSupport }) {
           className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-4 rounded-2xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 relative overflow-hidden group"
         >
           <span className="relative z-10 flex items-center justify-center gap-2">
-            🚀 Ready to Exit & Pay
+             Ready to Exit & Pay
           </span>
           <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
         </button>
@@ -240,31 +239,31 @@ function DigitalTicket({ ticketData, vehicleData, onExit, onSupport }) {
           onClick={onSupport}
           className="w-full bg-white border-2 border-gray-200 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-50 hover:border-gray-300 transition-all duration-300"
         >
-          💬 Need Help? Contact Support
+           Need Help? Contact Support
         </button>
       </div>
 
       {/* Quick Tips */}
       <div className="mt-8 bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
         <h3 className="font-bold text-gray-700 mb-4 flex items-center gap-2">
-          💡 Quick Tips
+            Quick Tips
         </h3>
         
         <div className="space-y-3 text-sm text-gray-600">
           <div className="flex items-start gap-3">
-            <span className="text-green-500 mt-0.5">✓</span>
+            <span className="text-green-500 mt-0.5">•</span>
             <span>Keep this ticket active until you exit the parking area</span>
           </div>
           <div className="flex items-start gap-3">
-            <span className="text-green-500 mt-0.5">✓</span>
+            <span className="text-green-500 mt-0.5">•</span>
             <span>Show the QR code at the exit gate for quick processing</span>
           </div>
           <div className="flex items-start gap-3">
-            <span className="text-green-500 mt-0.5">✓</span>
+            <span className="text-green-500 mt-0.5">•</span>
             <span>Payment will be processed automatically when you exit</span>
           </div>
           <div className="flex items-start gap-3">
-            <span className="text-green-500 mt-0.5">✓</span>
+            <span className="text-green-500 mt-0.5">•</span>
             <span>Contact support anytime if you need assistance</span>
           </div>
         </div>

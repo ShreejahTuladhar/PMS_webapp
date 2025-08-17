@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline - ParkSathi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .offline-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 400px;
+            width: 100%;
+        }
+        
+        .offline-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 30px;
+            background: #f3f4f6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+        }
+        
+        .offline-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 15px;
+        }
+        
+        .offline-subtitle {
+            font-size: 16px;
+            color: #6b7280;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+        
+        .retry-button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-right: 10px;
+        }
+        
+        .retry-button:hover {
+            background: #2563eb;
+        }
+        
+        .offline-button {
+            background: #6b7280;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .offline-button:hover {
+            background: #4b5563;
+        }
+        
+        .features-list {
+            text-align: left;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f9fafb;
+            border-radius: 12px;
+        }
+        
+        .features-list h3 {
+            color: #1f2937;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .features-list ul {
+            list-style: none;
+        }
+        
+        .features-list li {
+            color: #6b7280;
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .features-list li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-offline {
+            background: #ef4444;
+        }
+        
+        .status-online {
+            background: #10b981;
+        }
+        
+        .connection-status {
+            font-size: 14px;
+            color: #6b7280;
+            margin-top: 20px;
+        }
+        
+        @media (max-width: 480px) {
+            .offline-container {
+                padding: 30px 20px;
+            }
+            
+            .offline-title {
+                font-size: 20px;
+            }
+            
+            .retry-button, .offline-button {
+                width: 100%;
+                margin: 5px 0;
+            }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <div class="offline-icon pulse">
+            🅿️
+        </div>
+        
+        <h1 class="offline-title">You're Offline</h1>
+        <p class="offline-subtitle">
+            Don't worry! ParkSathi works offline too. You can still access cached parking data and view your recent searches.
+        </p>
+        
+        <div class="features-list">
+            <h3>Available Offline:</h3>
+            <ul>
+                <li>View cached parking locations</li>
+                <li>Access your booking history</li>
+                <li>Browse recent searches</li>
+                <li>View saved favorite spots</li>
+            </ul>
+        </div>
+        
+        <button class="retry-button" onclick="retryConnection()">
+            Try Again
+        </button>
+        <button class="offline-button" onclick="goOfflineMode()">
+            Continue Offline
+        </button>
+        
+        <div class="connection-status">
+            <span class="status-indicator status-offline" id="statusIndicator"></span>
+            <span id="statusText">Connection lost</span>
+        </div>
+    </div>
+
+    <script>
+        // Check connection status
+        function updateConnectionStatus() {
+            const indicator = document.getElementById('statusIndicator');
+            const statusText = document.getElementById('statusText');
+            
+            if (navigator.onLine) {
+                indicator.className = 'status-indicator status-online';
+                statusText.textContent = 'Back online!';
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                indicator.className = 'status-indicator status-offline';
+                statusText.textContent = 'Connection lost';
+            }
+        }
+        
+        // Listen for connection changes
+        window.addEventListener('online', updateConnectionStatus);
+        window.addEventListener('offline', updateConnectionStatus);
+        
+        function retryConnection() {
+            if (navigator.onLine) {
+                window.location.href = '/';
+            } else {
+                // Show message that still offline
+                const statusText = document.getElementById('statusText');
+                statusText.textContent = 'Still offline - please check your connection';
+                setTimeout(() => {
+                    statusText.textContent = 'Connection lost';
+                }, 3000);
+            }
+        }
+        
+        function goOfflineMode() {
+            // Try to load the cached app
+            window.location.href = '/?offline=true';
+        }
+        
+        // Periodically check connection
+        setInterval(() => {
+            if (navigator.onLine) {
+                updateConnectionStatus();
+            }
+        }, 5000);
+        
+        // Initialize status
+        updateConnectionStatus();
+        
+        // Register service worker if not already registered
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+                .then(registration => {
+                    console.log('SW registered:', registration);
+                })
+                .catch(error => {
+                    console.log('SW registration failed:', error);
+                });
+        }
+    </script>
+</body>
+</html>

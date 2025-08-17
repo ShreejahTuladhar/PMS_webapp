@@ -20,7 +20,7 @@ async function testAPI() {
       authToken = loginResponse.data.token;
       console.log('✅ Login successful!');
       console.log(`👤 User: ${loginResponse.data.user.fullName}`);
-      console.log(`🎫 Token received: ${authToken.substring(0, 20)}...`);
+      console.log(` Token received: ${authToken.substring(0, 20)}...`);
     } catch (error) {
       console.log('❌ Login failed:', error.response?.data?.message || error.message);
       return;
@@ -35,13 +35,13 @@ async function testAPI() {
       
       console.log('✅ Profile retrieved successfully!');
       console.log(`📧 Email: ${profileResponse.data.user.email}`);
-      console.log(`🚗 Vehicles: ${profileResponse.data.user.vehicles.length}`);
+      console.log(` Vehicles: ${profileResponse.data.user.vehicles.length}`);
     } catch (error) {
       console.log('❌ Profile retrieval failed:', error.response?.data?.message || error.message);
     }
     
     // Test 3: Get parking locations
-    console.log('\n📍 3. Testing parking locations retrieval...');
+    console.log('\n 3. Testing parking locations retrieval...');
     try {
       const locationsResponse = await axios.get(`${BASE_URL}/api/locations`);
       
@@ -87,14 +87,14 @@ async function testAPI() {
       console.log('❌ Admin login failed:', error.response?.data?.message || error.message);
     }
     
-    console.log('\n🎉 API Demo Testing Completed!');
-    console.log('\n📋 Demo Data Summary:');
+    console.log('\n API Demo Testing Completed!');
+    console.log('\n Demo Data Summary:');
     console.log('• 5 Users (3 customers, 1 parking admin, 1 super admin)');
     console.log('• 4 Parking locations in Kathmandu');
     console.log('• 5 Sample bookings with different statuses');
     console.log('• All endpoints are working with demo data');
     
-    console.log('\n🚀 Ready for stakeholder demo!');
+    console.log('\n Ready for stakeholder demo!');
     
   } catch (error) {
     console.error('❌ Unexpected error during API testing:', error.message);

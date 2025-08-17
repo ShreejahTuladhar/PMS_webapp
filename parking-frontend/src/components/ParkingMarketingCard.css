@@ -1,0 +1,352 @@
+/* Parking Marketing Card Styles */
+.parking-marketing-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  position: relative;
+  border: 2px solid transparent;
+}
+
+.parking-marketing-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+/* Category-based border colors */
+.parking-marketing-card.heritage:hover { border-color: #8B5CF6; }
+.parking-marketing-card.religious:hover { border-color: #F59E0B; }
+.parking-marketing-card.educational:hover { border-color: #10B981; }
+.parking-marketing-card.commercial:hover { border-color: #3B82F6; }
+.parking-marketing-card.tourist:hover { border-color: #EF4444; }
+.parking-marketing-card.transportation:hover { border-color: #6B7280; }
+.parking-marketing-card.medical:hover { border-color: #EC4899; }
+.parking-marketing-card.government:hover { border-color: #1F2937; }
+.parking-marketing-card.industrial:hover { border-color: #374151; }
+.parking-marketing-card.viewpoints:hover { border-color: #059669; }
+.parking-marketing-card.neighborhoods:hover { border-color: #7C3AED; }
+
+/* Compact version */
+.parking-marketing-card.compact {
+  max-width: 300px;
+}
+
+.parking-marketing-card.compact .card-features {
+  display: none;
+}
+
+.parking-marketing-card.compact .card-amenities {
+  margin-bottom: 0.5rem;
+}
+
+/* Card Header */
+.card-header {
+  position: relative;
+}
+
+.card-image-container {
+  position: relative;
+  height: 180px;
+  overflow: hidden;
+}
+
+.card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.parking-marketing-card:hover .card-image {
+  transform: scale(1.1);
+}
+
+/* Badges */
+.availability-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: white;
+}
+
+.availability-badge.available {
+  background: #10B981;
+}
+
+.availability-badge.moderate-demand {
+  background: #F59E0B;
+}
+
+.availability-badge.high-demand {
+  background: #EF4444;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.category-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: white;
+  backdrop-filter: blur(8px);
+}
+
+.category-badge.heritage { background: rgba(139, 92, 246, 0.9); }
+.category-badge.religious { background: rgba(245, 158, 11, 0.9); }
+.category-badge.educational { background: rgba(16, 185, 129, 0.9); }
+.category-badge.commercial { background: rgba(59, 130, 246, 0.9); }
+.category-badge.tourist { background: rgba(239, 68, 68, 0.9); }
+.category-badge.transportation { background: rgba(107, 114, 128, 0.9); }
+.category-badge.medical { background: rgba(236, 72, 153, 0.9); }
+.category-badge.government { background: rgba(31, 41, 55, 0.9); }
+.category-badge.industrial { background: rgba(55, 65, 81, 0.9); }
+.category-badge.viewpoints { background: rgba(5, 150, 105, 0.9); }
+.category-badge.neighborhoods { background: rgba(124, 58, 237, 0.9); }
+
+.premium-badge {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  padding: 0.3rem 0.6rem;
+  background: linear-gradient(45deg, #FFD700, #FFA500);
+  color: #000;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: bold;
+  text-shadow: none;
+}
+
+/* Card Body */
+.card-body {
+  padding: 1.5rem;
+}
+
+.card-title-section {
+  margin-bottom: 1rem;
+}
+
+.card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1F2937;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.3;
+}
+
+.card-location {
+  font-size: 0.9rem;
+  color: #6B7280;
+  margin: 0;
+}
+
+/* Pricing */
+.card-pricing {
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.price-main {
+  display: flex;
+  align-items: baseline;
+  gap: 0.3rem;
+  margin-bottom: 0.5rem;
+}
+
+.price-value {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #059669;
+}
+
+.price-unit {
+  font-size: 0.9rem;
+  color: #6B7280;
+}
+
+.price-discount {
+  font-size: 0.8rem;
+  color: #10B981;
+  font-weight: 600;
+}
+
+.price-package {
+  font-size: 0.8rem;
+  color: #3B82F6;
+  font-weight: 600;
+}
+
+/* Features */
+.card-features {
+  margin-bottom: 1rem;
+}
+
+.feature-tag {
+  display: inline-block;
+  font-size: 0.75rem;
+  background: #F3F4F6;
+  color: #374151;
+  padding: 0.3rem 0.6rem;
+  border-radius: 12px;
+  margin: 0.2rem 0.3rem 0.2rem 0;
+}
+
+/* Amenities */
+.card-amenities {
+  margin-bottom: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.amenity-icon-small {
+  width: 28px;
+  height: 28px;
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.amenity-icon-small:hover {
+  background: #EBF8FF;
+  border-color: #3B82F6;
+  transform: scale(1.1);
+}
+
+.amenities-more {
+  font-size: 0.7rem;
+  color: #6B7280;
+  font-weight: 600;
+  background: #F3F4F6;
+  padding: 0.2rem 0.5rem;
+  border-radius: 10px;
+}
+
+/* Status */
+.card-status {
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.status-icon {
+  font-size: 0.9rem;
+}
+
+.status-text {
+  font-size: 0.8rem;
+  color: #6B7280;
+}
+
+/* Peak Hours Warning */
+.peak-hours-warning {
+  background: #FEF3C7;
+  color: #92400E;
+  padding: 0.5rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+/* Card Footer */
+.card-footer {
+  padding: 0 1.5rem 1.5rem 1.5rem;
+  display: flex;
+  gap: 0.8rem;
+}
+
+.btn {
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex: 1;
+}
+
+.btn-secondary {
+  background: #F3F4F6;
+  color: #374151;
+}
+
+.btn-secondary:hover {
+  background: #E5E7EB;
+}
+
+.btn-primary {
+  background: #3B82F6;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #2563EB;
+  transform: translateY(-1px);
+}
+
+/* Special Offer Ribbon */
+.special-offer-ribbon {
+  position: absolute;
+  top: 20px;
+  right: -35px;
+  background: linear-gradient(45deg, #EF4444, #DC2626);
+  color: white;
+  padding: 0.3rem 2.5rem;
+  font-size: 0.7rem;
+  font-weight: bold;
+  transform: rotate(45deg);
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .card-title {
+    font-size: 1rem;
+  }
+  
+  .price-value {
+    font-size: 1.5rem;
+  }
+  
+  .card-body {
+    padding: 1rem;
+  }
+  
+  .card-footer {
+    padding: 0 1rem 1rem 1rem;
+    flex-direction: column;
+  }
+  
+  .btn {
+    padding: 0.8rem 1rem;
+  }
+}

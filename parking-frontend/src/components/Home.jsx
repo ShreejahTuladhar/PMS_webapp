@@ -1,15 +1,17 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { useBooking } from '../contexts/BookingContext';
+import { useAuth } from '../hooks/useAuth';
+import { useBooking } from '../hooks/useBooking';
 import SearchSection from './SearchSection';
 import MapView from './MapView';
 import ParkingList from './ParkingList';
+import PremiumLocationBanner from './PremiumLocationBanner';
 import AuthModal from './auth/AuthModal';
 import BookingModal from './booking/BookingModal';
 import BookingConfirmation from './booking/BookingConfirmation';
 import Footer from './Footer';
-import { locationService } from '../services';
+import { locationService, analyticsService } from '../services';
+import searchHistory from '../utils/searchHistory';
 
 function Home() {
   const { isAuthenticated } = useAuth();
@@ -67,58 +69,176 @@ function Home() {
     koteshwor: { lat: 27.6776, lng: 85.3470 },
     lagankhel: { lat: 27.6667, lng: 85.3247 },
     jawalakhel: { lat: 27.6701, lng: 85.3159 },
-    patan: { lat: 27.6648, lng: 85.3188 }
+    patan: { lat: 27.6648, lng: 85.3188 },
+    satdobato: { lat: 27.6587, lng: 85.3247 },
+    imadol: { lat: 27.6550, lng: 85.3280 },
+    swayambhunath: { lat: 27.7148, lng: 85.2906 }
   };
 
-  const handleSearch = async (location) => {
+  const handleSearch = async (location, searchType = 'manual') => {
+    // Validate search parameters before proceeding
+    if (!location) {
+      console.warn('Search called without location parameter');
+      return;
+    }
+    
+    if (typeof location === 'string' && !location.trim()) {
+      console.warn('Search called with empty string');
+      return;
+    }
+    
+    if (typeof location === 'object' && (!location.lat || !location.lng)) {
+      console.warn('Search called with invalid location object:', location);
+      return;
+    }
+    
     console.log('Searching for parking near:', location);
     
-    let searchLat, searchLng, searchLoc;
+    let searchLat, searchLng, searchLoc, searchQuery;
     
     if (typeof location === 'string') {
-      // Try to match with known Kathmandu areas
-      const locationLower = location.toLowerCase();
-      let matchedArea = null;
+      // Validate string input
+      const locationTrimmed = location.trim();
+      if (!locationTrimmed) {
+        console.warn('Empty search string provided');
+        return;
+      }
       
-      for (const [areaName, coords] of Object.entries(kathmanduAreas)) {
-        if (locationLower.includes(areaName.toLowerCase()) || 
-            areaName.toLowerCase().includes(locationLower)) {
-          matchedArea = coords;
-          break;
+      // Try to get coordinates from extracted location data first
+      let defaultCoords = kathmanduAreas.ratnapark; // Default fallback
+      
+      try {
+        const coordsResult = await locationService.getCoordinatesForLocationName(locationTrimmed);
+        if (coordsResult.success && coordsResult.coordinates) {
+          defaultCoords = coordsResult.coordinates;
+          console.log(`🎯 Using extracted coordinates for "${locationTrimmed}":`, defaultCoords);
+        } else {
+          // Fall back to kathmanduAreas matching
+          const locationLower = locationTrimmed.toLowerCase();
+          for (const [areaName, coords] of Object.entries(kathmanduAreas)) {
+            if (locationLower.includes(areaName.toLowerCase()) || 
+                areaName.toLowerCase().includes(locationLower)) {
+              defaultCoords = coords;
+              console.log(`🗺️ Using kathmanduAreas coordinates for "${locationTrimmed}":`, defaultCoords);
+              break;
+            }
+          }
+        }
+      } catch (error) {
+        console.warn('Error getting coordinates from extracted data:', error);
+        // Fall back to kathmanduAreas matching
+        const locationLower = locationTrimmed.toLowerCase();
+        for (const [areaName, coords] of Object.entries(kathmanduAreas)) {
+          if (locationLower.includes(areaName.toLowerCase()) || 
+              areaName.toLowerCase().includes(locationLower)) {
+            defaultCoords = coords;
+            break;
+          }
         }
       }
       
-      // If no match found, default to central Kathmandu (Ratna Park)
-      const defaultCoords = matchedArea || kathmanduAreas.ratnapark;
-      
       searchLat = defaultCoords.lat;
       searchLng = defaultCoords.lng;
+      searchQuery = locationTrimmed;
       searchLoc = {
-        address: location,
+        address: locationTrimmed,
         lat: searchLat,
         lng: searchLng,
         isCurrentLocation: false
       };
     } else {
       // Location is already an object with coordinates
+      // Validate coordinates
+      if (!location.lat || !location.lng || 
+          isNaN(location.lat) || isNaN(location.lng) ||
+          location.lat < -90 || location.lat > 90 ||
+          location.lng < -180 || location.lng > 180) {
+        console.warn('Invalid coordinates provided:', location);
+        return;
+      }
+      
       searchLat = location.lat;
       searchLng = location.lng;
+      searchQuery = location.address || 'Current Location';
       searchLoc = location;
     }
     
     setLoading(true);
+    const searchStartTime = Date.now();
     
     try {
-      // Fetch all parking locations from the database
-      console.log('📍 Fetching parking locations from database...');
-      const response = await locationService.getAllParkingSpots({ 
-        limit: 50,
-        isActive: true 
-      });
+      let response = null;
+      let usedFallback = false;
       
-      if (response.success) {
+      // Try backend search API first, but fallback immediately if it fails
+      console.log('Attempting backend search API...');
+      try {
+        response = await locationService.searchParkingSpots(
+          { lat: searchLat, lng: searchLng },
+          searchRadius,
+          {
+            isActive: true,
+            limit: 50,
+            sortBy: 'distance'
+          }
+        );
+        
+        // Check if the response indicates an error even with success flag
+        if (!response.success || response.error) {
+          throw new Error(response.error || 'Backend search API returned error');
+        }
+        
+        // Check if no results were found, might indicate backend database is empty or search issue
+        const resultSpots = response.parkingSpots || response.data || [];
+        if (resultSpots.length === 0) {
+          console.warn('Backend search returned 0 results, trying fallback method to get all locations');
+          throw new Error('No results from backend search, using fallback');
+        }
+      } catch (searchError) {
+        console.warn('Backend search API not available, using fallback method:', searchError.message);
+        usedFallback = true;
+        
+        // Fallback to getAllParkingSpots with client-side filtering
+        console.log('🔄 Using fallback: getAllParkingSpots with client-side filtering');
+        response = await locationService.getAllParkingSpots({ 
+          limit: 100, // Increase limit to get more locations
+          // Remove isActive filter to get all locations and filter client-side
+        });
+        console.log('📦 Fallback response:', response);
+      }
+      
+      const searchDuration = Date.now() - searchStartTime;
+      
+      if (response && response.success) {
+        // Handle different response formats
+        let parkingSpots = response.parkingSpots || response.data || [];
+        console.log(`🏁 Raw parking spots received: ${parkingSpots.length}`, parkingSpots);
+        
+        if (usedFallback) {
+          // Apply client-side filtering for fallback
+          console.log('Applying client-side filtering for fallback...');
+          console.log(`📍 Search coordinates: ${searchLat}, ${searchLng}, radius: ${searchRadius}km`);
+          
+          parkingSpots = parkingSpots.map(spot => {
+            const distance = calculateDistance(searchLat, searchLng, 
+              spot.coordinates?.latitude || spot.coordinates?.lat || 0, 
+              spot.coordinates?.longitude || spot.coordinates?.lng || 0);
+            console.log(`📏 Distance to ${spot.name}: ${distance.toFixed(2)}km`);
+            return {
+              ...spot,
+              distance
+            };
+          })
+          .filter(spot => {
+            const withinRadius = spot.distance <= searchRadius;
+            console.log(`✅ ${spot.name} within ${searchRadius}km: ${withinRadius}`);
+            return withinRadius;
+          })
+          .sort((a, b) => a.distance - b.distance);
+        }
+        
         // Transform database format to match expected format
-        const parkingLocations = response.parkingSpots.map(spot => ({
+        const parkingLocations = parkingSpots.map(spot => ({
           id: spot.id,
           name: spot.name,
           address: spot.address,
@@ -137,6 +257,10 @@ function Home() {
           currentStatus: spot.currentStatus,
           contactNumber: spot.contactNumber,
           description: spot.description,
+          // Calculate distance if not provided by API
+          distance: spot.distance || calculateDistance(searchLat, searchLng, 
+            spot.coordinates?.latitude || spot.coordinates?.lat || 0, 
+            spot.coordinates?.longitude || spot.coordinates?.lng || 0),
           // Add vehicle types for compatibility
           vehicleTypes: {
             car: spot.hourlyRate,
@@ -162,29 +286,57 @@ function Home() {
           expectedOpening: null
         }));
         
-        console.log(`📊 Fetched ${parkingLocations.length} parking locations`);
+        console.log(`🎯 Final result: Found ${parkingLocations.length} locations within ${searchRadius}km using ${usedFallback ? 'fallback method' : 'backend search'}`);
+        console.log('🗺️ Parking locations to display on map:', parkingLocations);
         
-        // Calculate distances and filter by radius
-        const parkingWithDistances = parkingLocations.map(parking => ({
-          ...parking,
-          distance: calculateDistance(searchLat, searchLng, parking.coordinates.lat, parking.coordinates.lng)
-        }));
+        // Track successful search
+        searchHistory.addRecentSearch(searchQuery, searchLoc);
+        analyticsService.trackSearch({
+          query: searchQuery,
+          location: searchLoc,
+          radius: searchRadius,
+          resultsCount: parkingLocations.length,
+          searchType: searchType
+        });
         
-        const filteredResults = parkingWithDistances
-          .filter(spot => spot.distance <= searchRadius)
-          .sort((a, b) => a.distance - b.distance); // Sort by distance
+        // Track search performance
+        analyticsService.trackSearchPerformance({
+          query: searchQuery,
+          duration: searchDuration,
+          resultsCount: parkingLocations.length,
+          endpoint: usedFallback ? '/locations' : '/locations/search',
+          success: true
+        });
         
-        console.log(`🎯 Found ${filteredResults.length} locations within ${searchRadius}km`);
-        
-        setSearchResults(filteredResults);
+        setSearchResults(parkingLocations);
       } else {
-        console.error('Failed to fetch locations:', response.error);
-        // Fallback to empty results
+        console.error('Search failed:', response?.error || 'Unknown error');
+        
+        // Track failed search
+        analyticsService.trackSearchPerformance({
+          query: searchQuery,
+          duration: Date.now() - searchStartTime,
+          resultsCount: 0,
+          endpoint: usedFallback ? '/locations' : '/locations/search',
+          success: false,
+          error: response?.error || 'Unknown error'
+        });
+        
         setSearchResults([]);
       }
     } catch (error) {
-      console.error('Error searching parking locations:', error);
-      // Show error to user
+      console.error('Error during search operation:', error);
+      
+      // Track search error
+      analyticsService.trackSearchPerformance({
+        query: searchQuery,
+        duration: Date.now() - searchStartTime,
+        resultsCount: 0,
+        endpoint: '/locations/search',
+        success: false,
+        error: error.message
+      });
+      
       setSearchResults([]);
     } finally {
       setLoading(false);
@@ -200,15 +352,35 @@ function Home() {
     
     // Re-search with new radius if we have a previous search location
     if (searchLocation) {
-      handleSearch(searchLocation);
+      handleSearch(searchLocation, 'radius_change');
     }
   };
 
   const handleSpotSelect = (spot) => {
     setSelectedSpot(spot);
+    
+    // Track spot interaction
+    analyticsService.trackSpotInteraction({
+      spotId: spot.id,
+      spotName: spot.name,
+      type: 'view',
+      searchQuery: searchLocation?.address || 'Unknown',
+      position: searchResults.findIndex(s => s.id === spot.id),
+      userId: isAuthenticated ? 'user' : null
+    });
   };
 
   const handleBooking = (spot) => {
+    // Track booking attempt
+    analyticsService.trackSpotInteraction({
+      spotId: spot.id,
+      spotName: spot.name,
+      type: 'book',
+      searchQuery: searchLocation?.address || 'Unknown',
+      position: searchResults.findIndex(s => s.id === spot.id),
+      userId: isAuthenticated ? 'user' : null
+    });
+    
     if (!isAuthenticated) {
       setIsLoginModalOpen(true);
       return;
@@ -279,9 +451,16 @@ function Home() {
           <div className="container mx-auto px-4 py-8">
             {searchResults.length > 0 ? (
               <>
+                {/* Premium Location Banner */}
+                <PremiumLocationBanner 
+                  parkingSpots={searchResults}
+                  onBookNow={handleBooking}
+                  onViewDetails={handleSpotSelect}
+                />
+
                 <div className="mb-6 text-center">
                   <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                    <span className="text-green-600">🅿️</span> Parking Spots Near You • नजिकैको पार्किङ
+                    Parking Spots Near You
                   </h2>
                   <p className="text-gray-600">
                     Found {searchResults.length} friendly parking spots within {searchRadius}km of where you want to go
@@ -305,6 +484,7 @@ function Home() {
                       onBooking={handleBooking}
                       selectedSpot={selectedSpot}
                       onLoginRequired={handleLoginRequired}
+                      onSpotSelect={handleSpotSelect}
                     />
                   </div>
                 </div>
@@ -339,9 +519,9 @@ function Home() {
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-yellow-100 to-blue-100 rounded-full blur-2xl opacity-50 animate-pulse"></div>
                 
                 <div className="relative z-10">
-                  <div className="text-6xl mb-4">🚗</div>
+                  <div className="text-6xl mb-4"></div>
                   <h2 className="text-4xl font-bold text-gray-700 mb-4">
-                    पार्किङ चाहिन्छ? <span className="text-orange-600">आउनुहोस्!</span>
+                    Need Parking? <span className="text-orange-600">Let's Go!</span>
                   </h2>
                   <p className="text-lg text-gray-600 mb-8">
                     Need Parking? Come on in! • Our friendly, local parking helper makes it super easy!
@@ -352,22 +532,21 @@ function Home() {
                     className="inline-flex items-center gap-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-12 py-4 rounded-2xl font-bold text-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 relative overflow-hidden group"
                   >
                     <span className="relative z-10 flex items-center gap-3">
-                      ✨ Start Parking Journey
+                      Start Parking Journey
                     </span>
                     <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   </Link>
                   
                   <div className="flex items-center justify-center gap-8 mt-6 text-sm text-gray-600">
                     <div className="flex items-center gap-2">
-                      <span className="text-green-500">✓</span>
                       <span>30-second setup</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-green-500">✓</span>
+                      <span className="text-green-500">•</span>
                       <span>Digital ticket</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-green-500">✓</span>
+                      <span className="text-green-500">•</span>
                       <span>Instant entry</span>
                     </div>
                   </div>
@@ -377,7 +556,7 @@ function Home() {
 
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-800 mb-4">
-              <span className="text-green-600">🏠</span> Why Choose ParkSathi? <span className="text-orange-600">किन छान्ने?</span>
+              Why Choose ParkSathi?
             </h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
               Made by Nepali neighbors for Nepali neighbors! Our simple, friendly parking helper makes finding and booking spots easy and affordable across our beautiful valley.
@@ -387,25 +566,24 @@ function Home() {
           <div className="grid md:grid-cols-3 gap-8">
             <div className="text-center p-6">
               <div className="bg-green-100 rounded-full p-4 inline-block mb-4">
-                <span className="text-2xl">🔍</span>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Easy Finding • सजिलो खोजी</h3>
+              <h3 className="text-xl font-semibold mb-2">Easy Finding</h3>
               <p className="text-gray-600">Find parking spots near you with our simple search. Just type where you're going and we'll help you find a good spot!</p>
             </div>
 
             <div className="text-center p-6">
               <div className="bg-orange-100 rounded-full p-4 inline-block mb-4">
-                <span className="text-2xl">💰</span>
+              
               </div>
-              <h3 className="text-xl font-semibold mb-2">Fair Prices • उचित मूल्य</h3>
+              <h3 className="text-xl font-semibold mb-2">Fair Prices</h3>
               <p className="text-gray-600">No hidden fees, no tricks! We keep prices fair and honest so parking doesn't hurt your wallet.</p>
             </div>
 
             <div className="text-center p-6">
               <div className="bg-blue-100 rounded-full p-4 inline-block mb-4">
-                <span className="text-2xl">🤝</span>
+              
               </div>
-              <h3 className="text-xl font-semibold mb-2">Friendly Service • मित्रवत् सेवा</h3>
+              <h3 className="text-xl font-semibold mb-2">Friendly Service</h3>
               <p className="text-gray-600">Real people helping real neighbors! Get your parking ticket quickly with our simple, caring service.</p>
             </div>
           </div>
@@ -416,7 +594,7 @@ function Home() {
       {/* Enhanced AuthModal with slide-in animation */}
       <AuthModal 
         isOpen={isLoginModalOpen} 
-        onClose={closeLoginModal} 
+        onClose={closeLoginModal}
         defaultTab="login"
       />
       

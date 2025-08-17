@@ -20,8 +20,8 @@ api.interceptors.request.use(
     }
     
     // Log requests in development
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`🚀 ${config.method?.toUpperCase()} ${config.url}`, {
+    if (import.meta.env.MODE === 'development') {
+      console.log(` ${config.method?.toUpperCase()} ${config.url}`, {
         data: config.data,
         params: config.params,
       });
@@ -39,7 +39,7 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => {
     // Log successful responses in development
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.MODE === 'development') {
       console.log(`✅ ${response.config.method?.toUpperCase()} ${response.config.url}`, response.data);
     }
     return response;
