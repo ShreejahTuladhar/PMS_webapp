@@ -48,7 +48,7 @@ class LocationService {
     }
   }
 
-  async searchParkingSpots(location, radius = 5, filters = {}) {
+  async searchParkingSpots(location, radius = 0.5, filters = {}) {
     try {
       // Validate input parameters before making API call
       if (!location || typeof location !== 'object') {
@@ -116,7 +116,7 @@ class LocationService {
     }
   }
 
-  async getNearbyParkingSpots(lat, lng, radius = 5) {
+  async getNearbyParkingSpots(lat, lng, radius = 0.5) {
     try {
       // Use the same corrected approach as searchParkingSpots
       const result = await apiHelpers.get('/locations', {
@@ -147,37 +147,107 @@ class LocationService {
     }
   }
 
-  async getPopularSpots(params = {}) {
-    // Since /locations/popular endpoint doesn't exist, use the main locations endpoint
-    // and implement client-side "popularity" based on available data
+  async searchParkingSpotsByText(searchText, radius = 0.5, filters = {}) {
     try {
-      console.info('Using main locations endpoint for popular spots (no dedicated popular endpoint)');
+      // Validate input parameters
+      if (!searchText || typeof searchText !== 'string' || !searchText.trim()) {
+        return {
+          success: false,
+          error: 'Invalid search text: must be a non-empty string',
+        };
+      }
       
-      const result = await apiHelpers.get('/locations', { 
+      if (radius <= 0 || radius > 50) {
+        return {
+          success: false,
+          error: 'Invalid radius: must be between 0 and 50 km',
+        };
+      }
+      
+      // Backend expects maxDistance in meters and search parameter
+      const params = {
+        search: searchText.trim(),
+        maxDistance: radius * 1000, // Convert km to meters
+        available: filters.isActive || true,
+        limit: filters.limit || 50,
+        page: filters.page || 1,
+        ...filters,
+      };
+
+      // Remove frontend-specific parameters that backend doesn't recognize
+      delete params.isActive;
+      delete params.sortBy; // Backend handles sorting for text searches
+
+      console.log('🔍 Text Search Parameters being sent to backend:', params);
+      const result = await apiHelpers.get('/locations', { params });
+      console.log('📡 Backend Response:', result);
+      
+      if (result.success) {
+        return {
+          success: true,
+          parkingSpots: result.data.data || result.data.locations || result.data,
+          searchInfo: result.data.searchInfo, // Backend provides search metadata
+          searchText,
+          radius,
+          pagination: result.data.pagination,
+        };
+      } else {
+        return {
+          success: false,
+          error: result.error,
+        };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message || 'Failed to search parking spots by text',
+      };
+    }
+  }
+
+  async getPopularSpots(params = {}) {
+    try {
+      console.info('Using dedicated /locations/popular endpoint');
+      
+      const result = await apiHelpers.get('/locations/popular', { 
         params: {
-          limit: params.limit || 20,
-          available: true,
+          limit: params.limit || 10,
           ...params
         }
       });
       
       if (result.success) {
-        let locations = result.data.data || result.data.locations || result.data;
-        
-        // Sort by a combination of factors to simulate "popularity"
-        // Priority: higher availability, lower price, better location stats if available
-        locations = locations.sort((a, b) => {
-          // Simple popularity heuristic: locations with more total spaces might be more popular
-          const aPopularity = (a.totalSpaces || 0) + (a.stats?.totalBookings || 0);
-          const bPopularity = (b.totalSpaces || 0) + (b.stats?.totalBookings || 0);
-          return bPopularity - aPopularity;
-        });
-        
         return {
           success: true,
-          parkingSpots: locations,
+          parkingSpots: result.data.data || result.data,
         };
       } else {
+        // Fallback to main locations endpoint if popular endpoint fails
+        console.warn('Popular endpoint failed, falling back to main endpoint');
+        const fallbackResult = await apiHelpers.get('/locations', { 
+          params: {
+            limit: params.limit || 10,
+            available: true,
+            ...params
+          }
+        });
+        
+        if (fallbackResult.success) {
+          let locations = fallbackResult.data.data || fallbackResult.data.locations || fallbackResult.data;
+          
+          // Sort by a combination of factors to simulate "popularity"
+          locations = locations.sort((a, b) => {
+            const aPopularity = (a.totalSpaces || 0) + (a.stats?.totalBookings || 0);
+            const bPopularity = (b.totalSpaces || 0) + (b.stats?.totalBookings || 0);
+            return bPopularity - aPopularity;
+          });
+          
+          return {
+            success: true,
+            parkingSpots: locations,
+          };
+        }
+        
         return {
           success: false,
           error: result.error,

@@ -6,10 +6,16 @@ export const BaseDashboard = ({
   userType = 'user',
   loadDataFunction,
   initialDashboardState,
-  additionalTabs = []
+  additionalTabs = [],
+  activeTab: externalActiveTab,
+  onTabChange: externalOnTabChange
 }) => {
   const { user, isAuthenticated } = useAuth();
-  const [activeTab, setActiveTab] = useState('overview');
+  const [internalActiveTab, setInternalActiveTab] = useState('overview');
+  
+  // Use external activeTab if provided, otherwise use internal state
+  const activeTab = externalActiveTab !== undefined ? externalActiveTab : internalActiveTab;
+  const setActiveTab = externalOnTabChange || setInternalActiveTab;
   const [dashboardData, setDashboardData] = useState({
     loading: true,
     ...initialDashboardState

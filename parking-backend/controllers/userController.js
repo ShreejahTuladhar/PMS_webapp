@@ -37,12 +37,18 @@ const getProfile = async (req, res) => {
           lastName: user.lastName,
           fullName: user.fullName,
           phoneNumber: user.phoneNumber,
+          dateOfBirth: user.dateOfBirth,
+          gender: user.gender,
+          address: user.address,
+          city: user.city,
+          emergencyContact: user.emergencyContact,
           role: user.role,
           isActive: user.isActive,
           vehicles: user.vehicles,
           assignedLocations: user.assignedLocations,
           lastLogin: user.lastLogin,
           accountCreatedAt: user.accountCreatedAt,
+          preferences: user.preferences,
         },
         statistics: userStats,
       },
@@ -71,7 +77,17 @@ const updateProfile = async (req, res) => {
       });
     }
 
-    const { firstName, lastName, phoneNumber, email } = req.body;
+    const { 
+      firstName, 
+      lastName, 
+      phoneNumber, 
+      email, 
+      dateOfBirth, 
+      gender, 
+      address, 
+      city, 
+      emergencyContact 
+    } = req.body;
 
     // Check if email is already taken by another user
     if (email && email !== req.user.email) {
@@ -88,14 +104,23 @@ const updateProfile = async (req, res) => {
       }
     }
 
+    const updateData = {
+      firstName,
+      lastName,
+      phoneNumber,
+      email: email ? email.toLowerCase() : req.user.email,
+    };
+
+    // Add optional fields if provided
+    if (dateOfBirth !== undefined) updateData.dateOfBirth = dateOfBirth;
+    if (gender !== undefined) updateData.gender = gender;
+    if (address !== undefined) updateData.address = address;
+    if (city !== undefined) updateData.city = city;
+    if (emergencyContact !== undefined) updateData.emergencyContact = emergencyContact;
+
     const user = await User.findByIdAndUpdate(
       req.user.id,
-      {
-        firstName,
-        lastName,
-        phoneNumber,
-        email: email ? email.toLowerCase() : req.user.email,
-      },
+      updateData,
       {
         new: true,
         runValidators: true,
@@ -451,6 +476,351 @@ const changePassword = async (req, res) => {
   }
 };
 
+// @desc    Get user statistics for dashboard
+// @route   GET /api/users/stats
+// @access  Private
+const getUserStats = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const stats = await getUserStatistics(userId);
+    
+    // Get favorite location (most booked location)
+    const favoriteLocationResult = await Booking.aggregate([
+      { $match: { userId: req.user._id } },
+      { $group: { _id: "$locationId", count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 1 },
+      { 
+        $lookup: {
+          from: "parkinglocations",
+          localField: "_id",
+          foreignField: "_id",
+          as: "location"
+        }
+      }
+    ]);
+
+    const favoriteLocation = favoriteLocationResult.length > 0 
+      ? favoriteLocationResult[0].location[0]?.name || ''
+      : '';
+
+    // Calculate total hours parked
+    const totalHoursResult = await Booking.aggregate([
+      { $match: { userId: req.user._id, status: "completed" } },
+      {
+        $group: {
+          _id: null,
+          totalHours: {
+            $sum: {
+              $divide: [
+                { $subtract: ["$endTime", "$startTime"] },
+                3600000
+              ]
+            }
+          }
+        }
+      }
+    ]);
+
+    const totalHoursParked = totalHoursResult.length > 0 
+      ? Math.round(totalHoursResult[0].totalHours) 
+      : 0;
+
+    // Calculate average booking value
+    const averageBookingValue = stats.totalBookings > 0 
+      ? Math.round(stats.totalSpent / stats.totalBookings)
+      : 0;
+
+    // Calculate saved amount (mock calculation - 10% of total spent)
+    const savedAmount = Math.round(stats.totalSpent * 0.1);
+
+    res.json({
+      success: true,
+      totalBookings: stats.totalBookings,
+      totalSpent: stats.totalSpent,
+      savedAmount: savedAmount,
+      averageBookingValue: averageBookingValue,
+      totalHoursParked: totalHoursParked,
+      favoriteLocation: favoriteLocation
+    });
+  } catch (error) {
+    console.error("Get user stats error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching user statistics",
+      error: error.message,
+    });
+  }
+};
+
+// @desc    Get user vehicles
+// @route   GET /api/users/vehicles
+// @access  Private
+const getUserVehicles = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('vehicles');
+    
+    res.json({
+      success: true,
+      vehicles: user.vehicles || []
+    });
+  } catch (error) {
+    console.error("Get user vehicles error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching vehicles",
+      error: error.message,
+    });
+  }
+};
+
+// @desc    Get user transaction history
+// @route   GET /api/users/transactions
+// @access  Private
+const getTransactionHistory = async (req, res) => {
+  try {
+    const { page = 1, limit = 10, status, dateRange } = req.query;
+    const skip = (page - 1) * limit;
+
+    // Build date filter
+    let dateFilter = {};
+    if (dateRange) {
+      const now = new Date();
+      switch (dateRange) {
+        case '7days':
+          dateFilter = { $gte: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000) };
+          break;
+        case '30days':
+          dateFilter = { $gte: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000) };
+          break;
+        case '90days':
+          dateFilter = { $gte: new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000) };
+          break;
+        case '1year':
+          dateFilter = { $gte: new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000) };
+          break;
+      }
+    }
+
+    let filter = { userId: req.user.id };
+    if (Object.keys(dateFilter).length > 0) {
+      filter.createdAt = dateFilter;
+    }
+    if (status && status !== 'all') {
+      filter.status = status;
+    }
+
+    // For now, use booking data as transaction data
+    // In a real app, you'd have a separate transactions collection
+    const transactions = await Booking.find(filter)
+      .populate("locationId", "name address")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    const total = await Booking.countDocuments(filter);
+
+    // Transform bookings to transaction format
+    const transactionData = transactions.map(booking => ({
+      id: booking._id,
+      transactionId: `TXN${booking._id.toString().slice(-8).toUpperCase()}`,
+      bookingId: `BK${booking._id.toString().slice(-6).toUpperCase()}`,
+      amount: booking.totalAmount,
+      type: 'payment',
+      status: booking.status === 'completed' ? 'completed' : 
+              booking.status === 'cancelled' ? 'refunded' : 'pending',
+      description: `Parking at ${booking.locationId?.name || 'Unknown Location'}`,
+      paymentMethod: booking.paymentMethod || 'Credit Card',
+      createdAt: booking.createdAt,
+      date: booking.createdAt
+    }));
+
+    res.json({
+      success: true,
+      transactions: transactionData,
+      pagination: {
+        current: parseInt(page),
+        pages: Math.ceil(total / limit),
+        total,
+        hasNext: page * limit < total,
+        hasPrev: page > 1,
+      }
+    });
+  } catch (error) {
+    console.error("Get transaction history error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching transaction history",
+      error: error.message,
+    });
+  }
+};
+
+// @desc    Get user favorite locations
+// @route   GET /api/users/favorites
+// @access  Private
+const getFavoriteLocations = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).populate('favoriteLocations');
+    
+    res.json({
+      success: true,
+      favorites: user.favoriteLocations || []
+    });
+  } catch (error) {
+    console.error("Get favorite locations error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching favorite locations",
+      error: error.message,
+    });
+  }
+};
+
+// @desc    Add favorite location
+// @route   POST /api/users/favorites
+// @access  Private
+const addFavoriteLocation = async (req, res) => {
+  try {
+    const { locationId } = req.body;
+    
+    const user = await User.findById(req.user.id);
+    
+    if (user.favoriteLocations && user.favoriteLocations.includes(locationId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Location is already in favorites"
+      });
+    }
+
+    if (!user.favoriteLocations) {
+      user.favoriteLocations = [];
+    }
+    
+    user.favoriteLocations.push(locationId);
+    await user.save();
+    
+    res.json({
+      success: true,
+      message: "Location added to favorites"
+    });
+  } catch (error) {
+    console.error("Add favorite location error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error adding favorite location",
+      error: error.message,
+    });
+  }
+};
+
+// @desc    Remove favorite location
+// @route   DELETE /api/users/favorites/:locationId
+// @access  Private
+const removeFavoriteLocation = async (req, res) => {
+  try {
+    const { locationId } = req.params;
+    
+    const user = await User.findById(req.user.id);
+    
+    if (!user.favoriteLocations || !user.favoriteLocations.includes(locationId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Location is not in favorites"
+      });
+    }
+    
+    user.favoriteLocations = user.favoriteLocations.filter(
+      id => id.toString() !== locationId
+    );
+    await user.save();
+    
+    res.json({
+      success: true,
+      message: "Location removed from favorites"
+    });
+  } catch (error) {
+    console.error("Remove favorite location error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error removing favorite location",
+      error: error.message,
+    });
+  }
+};
+
+// @desc    Export user data
+// @route   GET /api/users/export
+// @access  Private
+const exportUserData = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id)
+      .populate('favoriteLocations')
+      .select('-password');
+    
+    const bookings = await Booking.find({ userId: req.user.id })
+      .populate('locationId', 'name address');
+    
+    const userData = {
+      profile: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        phoneNumber: user.phoneNumber,
+        role: user.role,
+        vehicles: user.vehicles,
+        favoriteLocations: user.favoriteLocations,
+        accountCreatedAt: user.accountCreatedAt,
+        lastLogin: user.lastLogin
+      },
+      bookings: bookings,
+      exportDate: new Date().toISOString()
+    };
+    
+    res.json({
+      success: true,
+      data: userData
+    });
+  } catch (error) {
+    console.error("Export user data error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error exporting user data",
+      error: error.message,
+    });
+  }
+};
+
+// @desc    Update user preferences
+// @route   PUT /api/users/preferences
+// @access  Private
+const updatePreferences = async (req, res) => {
+  try {
+    const preferences = req.body;
+    
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { preferences: preferences },
+      { new: true, runValidators: true }
+    ).select('preferences');
+    
+    res.json({
+      success: true,
+      message: "Preferences updated successfully",
+      preferences: user.preferences
+    });
+  } catch (error) {
+    console.error("Update preferences error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error updating preferences",
+      error: error.message,
+    });
+  }
+};
+
 // Helper function to get user statistics
 const getUserStatistics = async (userId) => {
   try {
@@ -508,4 +878,12 @@ module.exports = {
   removeVehicle,
   getUserBookings,
   changePassword,
+  getUserStats,
+  getUserVehicles,
+  getTransactionHistory,
+  getFavoriteLocations,
+  addFavoriteLocation,
+  removeFavoriteLocation,
+  exportUserData,
+  updatePreferences,
 };

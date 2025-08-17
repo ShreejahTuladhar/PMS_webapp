@@ -10,33 +10,42 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-// Create custom parking markers
-const createParkingIcon = (availability) => {
-  const color = availability > 0 ? '#10B981' : '#EF4444'; // green or red
+// Get parking indicator - always returns 'P' for all parking locations
+const getParkingIndicator = () => {
+  return 'P';
+};
+
+// Create custom parking markers with professional design
+const createParkingIcon = (availability, spot) => {
+  const color = availability > 0 ? '#059669' : '#DC2626'; // Professional green or red
+  const abbreviation = getParkingIndicator();
+  
   const iconHtml = `
     <div style="
-      background-color: ${color};
+      background: linear-gradient(135deg, ${color}, ${color}dd);
       border: 2px solid white;
-      border-radius: 50%;
-      width: 30px;
-      height: 30px;
+      border-radius: 8px;
+      width: 28px;
+      height: 28px;
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
-      font-weight: bold;
-      font-size: 12px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      font-weight: 600;
+      font-size: 10px;
+      font-family: system-ui, -apple-system, sans-serif;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      letter-spacing: -0.5px;
     ">
-      P
+      ${abbreviation}
     </div>
   `;
   
   return L.divIcon({
     html: iconHtml,
     className: 'custom-parking-marker',
-    iconSize: [30, 30],
-    iconAnchor: [15, 15],
+    iconSize: [28, 28],
+    iconAnchor: [14, 14],
   });
 };
 
@@ -45,13 +54,22 @@ const createCurrentLocationIcon = () => {
   const iconHtml = `
     <div style="position: relative;">
       <div style="
-        background: linear-gradient(135deg, #3B82F6, #1D4ED8);
-        border: 3px solid white;
+        background: linear-gradient(135deg, #2563EB, #1D4ED8);
+        border: 2px solid white;
         border-radius: 50%;
         width: 20px;
         height: 20px;
-        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
-      "></div>
+        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 8px;
+        font-family: system-ui, -apple-system, sans-serif;
+      ">
+        YOU
+      </div>
       <div style="
         position: absolute;
         top: 50%;
@@ -59,25 +77,25 @@ const createCurrentLocationIcon = () => {
         transform: translate(-50%, -50%);
         width: 40px;
         height: 40px;
-        border: 2px solid #3B82F6;
+        border: 2px solid #2563EB;
         border-radius: 50%;
-        background: rgba(59, 130, 246, 0.1);
-        animation: pulse 2s infinite;
+        background: rgba(37, 99, 235, 0.08);
+        animation: locationPulse 2.5s infinite;
       "></div>
     </div>
     <style>
-      @keyframes pulse {
+      @keyframes locationPulse {
         0% {
+          transform: translate(-50%, -50%) scale(0.7);
           opacity: 1;
-          transform: translate(-50%, -50%) scale(1);
         }
-        50% {
-          opacity: 0.5;
-          transform: translate(-50%, -50%) scale(1.2);
+        70% {
+          transform: translate(-50%, -50%) scale(1.3);
+          opacity: 0;
         }
         100% {
-          opacity: 1;
-          transform: translate(-50%, -50%) scale(1);
+          transform: translate(-50%, -50%) scale(0.7);
+          opacity: 0;
         }
       }
     </style>
@@ -318,7 +336,7 @@ const MapView = ({ parkingSpots, radius, center, onSpotSelect, onBooking }) => {
             <Marker
               key={spot.id}
               position={spot.coordinates}
-              icon={createParkingIcon(spot.availability)}
+              icon={createParkingIcon(spot.availability, spot)}
               eventHandlers={{
                 click: () => handleSpotClick(spot),
               }}

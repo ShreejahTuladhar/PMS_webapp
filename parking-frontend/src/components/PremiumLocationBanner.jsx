@@ -1,6 +1,6 @@
 import React from 'react';
 import ParkingProfileBanner from './ParkingProfileBanner';
-import specialOffersService from '../services/specialOffersService';
+// import specialOffersService from '../services/specialOffersService'; // Removed promotional offers
 import landmarkImagesService from '../services/landmarkImagesService';
 import './PremiumLocationBanner.css';
 
@@ -21,15 +21,11 @@ const PremiumLocationBanner = ({ parkingSpots, onBookNow, onViewDetails }) => {
     })
     .map(spot => ({
       ...spot,
-      hasActiveOffers: specialOffersService.hasActiveOffers(spot),
-      bestOffer: specialOffersService.getBestOffer(spot),
+      hasActiveOffers: false, // Removed promotional offers
       locationImages: landmarkImagesService.getLocationImages(spot)
     }))
     .sort((a, b) => {
-      // Priority: offers > availability > rating
-      if (a.hasActiveOffers && !b.hasActiveOffers) return -1;
-      if (!a.hasActiveOffers && b.hasActiveOffers) return 1;
-      
+      // Priority: availability > rating
       const availabilityA = (a.availableSpaces / a.totalSpaces) || 0;
       const availabilityB = (b.availableSpaces / b.totalSpaces) || 0;
       
@@ -52,12 +48,7 @@ const PremiumLocationBanner = ({ parkingSpots, onBookNow, onViewDetails }) => {
           </span>
         </div>
         
-        {premiumLocations.some(loc => loc.hasActiveOffers) && (
-          <div className="premium-offers-badge">
-            <span className="offers-icon">🎁</span>
-            <span>Special Offers Available</span>
-          </div>
-        )}
+        {/* Special offers badge removed */}
       </div>
 
       <div className="premium-locations-grid">
@@ -92,22 +83,7 @@ const PremiumLocationBanner = ({ parkingSpots, onBookNow, onViewDetails }) => {
               </button>
             </div>
 
-            {/* Special Offer Highlight */}
-            {location.bestOffer && (
-              <div className="offer-highlight">
-                <div className="offer-flash">
-                  {location.bestOffer.icon} LIMITED TIME
-                </div>
-                <div className="offer-details">
-                  <div className="offer-savings">
-                    Save ₹{location.hourlyRate - (location.bestOffer.discountedPrice || location.hourlyRate)}/hour
-                  </div>
-                  <div className="offer-description">
-                    {location.bestOffer.title}
-                  </div>
-                </div>
-              </div>
-            )}
+            {/* Special offer highlight removed */}
 
             {/* Quick Stats */}
             <div className="premium-quick-stats">
@@ -145,8 +121,8 @@ const PremiumLocationBanner = ({ parkingSpots, onBookNow, onViewDetails }) => {
             <span className="benefit-text">Premium Amenities</span>
           </div>
           <div className="benefit-item">
-            <span className="benefit-icon">🎁</span>
-            <span className="benefit-text">Exclusive Special Offers</span>
+            <span className="benefit-icon">⭐</span>
+            <span className="benefit-text">Enhanced Experience</span>
           </div>
         </div>
       </div>

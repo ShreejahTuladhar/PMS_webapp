@@ -1,4 +1,5 @@
 const Booking = require("../models/Booking");
+const ParkingLocation = require("../models/ParkingLocation");
 const paypal = require("paypal-rest-sdk");
 const crypto = require("crypto");
 const { validationResult } = require("express-validator");

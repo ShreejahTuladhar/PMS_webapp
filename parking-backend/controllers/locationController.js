@@ -14,7 +14,7 @@ const getLocations = async (req, res) => {
       available,
       latitude,
       longitude,
-      maxDistance = 5000,
+      maxDistance = 5000, // Default to 5km for area searches
       spaceType,
       priceRange,
       amenities,
@@ -23,13 +23,84 @@ const getLocations = async (req, res) => {
     const skip = (page - 1) * limit;
     let filter = { isActive: true };
     let sort = { name: 1 };
+    let searchCenter = null;
 
-    // Search by name or address
+    // Enhanced search functionality
     if (search) {
-      filter.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { address: { $regex: search, $options: "i" } },
-      ];
+      const searchTerm = search.trim();
+      let matchingLocation = null;
+      
+      // Strategy 1: Try area name search in address field first (highest priority for area searches)
+      const addressRegex = new RegExp(`^${searchTerm}`, 'i');
+      matchingLocation = await ParkingLocation.findOne({
+        isActive: true,
+        address: addressRegex
+      });
+      
+      // Strategy 2: If no exact address match, try partial address matching
+      if (!matchingLocation) {
+        matchingLocation = await ParkingLocation.findOne({
+          isActive: true,
+          address: { $regex: searchTerm, $options: "i" }
+        });
+      }
+      
+      // Strategy 3: If no address match, try exact prefix match in name field
+      if (!matchingLocation) {
+        const prefixRegex = new RegExp(`^${searchTerm}`, 'i');
+        matchingLocation = await ParkingLocation.findOne({
+          isActive: true,
+          name: prefixRegex
+        });
+      }
+      
+      // Strategy 4: If still no match, try matching within the placename part of name
+      if (!matchingLocation) {
+        const locations = await ParkingLocation.find({
+          isActive: true,
+          name: { $regex: searchTerm, $options: "i" }
+        });
+        
+        // Find location where search term appears in the placename part
+        matchingLocation = locations.find(location => {
+          const placename = location.name.split(',')[0].trim();
+          return placename.toLowerCase().includes(searchTerm.toLowerCase());
+        });
+      }
+      
+      if (matchingLocation) {
+        // Handle both GeoJSON and lat/lon coordinate formats
+        let lat, lon;
+        const coords = matchingLocation.get('coordinates');
+        if (coords && coords.type === 'Point' && Array.isArray(coords.coordinates)) {
+          // GeoJSON format: { type: 'Point', coordinates: [longitude, latitude] }
+          lon = coords.coordinates[0];
+          lat = coords.coordinates[1];
+        } else if (coords && coords.latitude && coords.longitude) {
+          // Object format: { latitude: num, longitude: num }
+          lat = coords.latitude;
+          lon = coords.longitude;
+        } else {
+          // Fallback: check for direct latitude/longitude properties
+          lat = matchingLocation.latitude || matchingLocation.get('latitude');
+          lon = matchingLocation.longitude || matchingLocation.get('longitude');
+        }
+        
+        // Use the matching location as search center
+        searchCenter = {
+          latitude: lat,
+          longitude: lon,
+          foundLocation: matchingLocation
+        };
+        console.log(`🎯 Found search center for "${searchTerm}": ${matchingLocation.name} at ${matchingLocation.address} (${lat}, ${lon})`);
+      } else {
+        // Fallback to regular text search
+        filter.$or = [
+          { address: { $regex: searchTerm, $options: "i" } },
+          { name: { $regex: searchTerm, $options: "i" } },
+        ];
+        console.log(`🔍 Using fallback text search for "${searchTerm}"`);
+      }
     }
 
     // Filter by availability
@@ -60,20 +131,192 @@ const getLocations = async (req, res) => {
 
     let query = ParkingLocation.find(filter);
 
-    // Geolocation-based search
-    if (latitude && longitude) {
-      query = ParkingLocation.find({
-        ...filter,
-        coordinates: {
-          $near: {
-            $geometry: {
-              type: "Point",
-              coordinates: [parseFloat(longitude), parseFloat(latitude)],
-            },
-            $maxDistance: parseInt(maxDistance),
-          },
-        },
-      });
+    // Geolocation-based search - prioritize searchCenter from placename match
+    if (searchCenter || (latitude && longitude)) {
+      const searchLat = searchCenter ? searchCenter.latitude : parseFloat(latitude);
+      const searchLon = searchCenter ? searchCenter.longitude : parseFloat(longitude);
+      
+      // For search center (placename match), we want to include similar locations in the area
+      if (searchCenter && search) {
+        // Strategy: First prioritize text matches, then add nearby locations if radius is large enough
+        const textSearchFilter = {
+          isActive: true,
+          $or: [
+            { address: { $regex: search.trim(), $options: "i" } },
+            { name: { $regex: search.trim(), $options: "i" } },
+          ]
+        };
+        
+        // Get all matching text results first
+        const allMatchingResults = await ParkingLocation.find(textSearchFilter);
+        
+        // Filter text matches by distance
+        const maxDistanceKm = parseInt(maxDistance) / 1000; // Convert to km for calculation
+        const textMatches = allMatchingResults.filter(location => {
+          // Handle both GeoJSON and lat/lon coordinate formats
+          let lat, lon;
+          const coords = location.toObject().coordinates;
+          if (coords && coords.type === 'Point' && Array.isArray(coords.coordinates)) {
+            lon = coords.coordinates[0];
+            lat = coords.coordinates[1];
+          } else if (coords && coords.latitude && coords.longitude) {
+            lat = coords.latitude;
+            lon = coords.longitude;
+          } else {
+            lat = location.latitude;
+            lon = location.longitude;
+          }
+          
+          const distance = calculateDistance(
+            searchLat, searchLon,
+            lat, lon
+          ) / 1000; // calculateDistance returns meters, convert to km
+          return distance <= maxDistanceKm;
+        });
+        
+        console.log(`📝 Found ${textMatches.length} text matches within ${maxDistanceKm}km for "${search}"`);
+        
+        // If radius is larger than 1km, also include nearby locations that don't match text
+        let allResults = textMatches;
+        if (maxDistanceKm > 1.0) {
+          console.log(`🔍 Large radius (${maxDistanceKm}km), including nearby locations...`);
+          
+          // Get all locations within radius
+          const allLocations = await ParkingLocation.find({ isActive: true });
+          const nearbyLocations = allLocations.filter(location => {
+            // Handle both GeoJSON and lat/lon coordinate formats
+            let lat, lon;
+            const coords = location.toObject().coordinates;
+            if (coords && coords.type === 'Point' && Array.isArray(coords.coordinates)) {
+              lon = coords.coordinates[0];
+              lat = coords.coordinates[1];
+            } else if (coords && coords.latitude && coords.longitude) {
+              lat = coords.latitude;
+              lon = coords.longitude;
+            } else {
+              lat = location.latitude;
+              lon = location.longitude;
+            }
+            
+            const distance = calculateDistance(
+              searchLat, searchLon,
+              lat, lon
+            ) / 1000;
+            return distance <= maxDistanceKm;
+          });
+          
+          // Combine text matches with nearby locations (avoid duplicates)
+          const textMatchIds = new Set(textMatches.map(loc => loc._id.toString()));
+          const additionalNearby = nearbyLocations.filter(loc => 
+            !textMatchIds.has(loc._id.toString())
+          );
+          
+          allResults = [...textMatches, ...additionalNearby];
+          console.log(`📍 Added ${additionalNearby.length} additional nearby locations`);
+        }
+        
+        // Sort all results by distance
+        const sortedResults = allResults.sort((a, b) => {
+          // Handle both GeoJSON and lat/lon coordinate formats for location A
+          let latA, lonA;
+          const coordsA = a.toObject().coordinates;
+          if (coordsA && coordsA.type === 'Point' && Array.isArray(coordsA.coordinates)) {
+            lonA = coordsA.coordinates[0];
+            latA = coordsA.coordinates[1];
+          } else if (coordsA && coordsA.latitude && coordsA.longitude) {
+            latA = coordsA.latitude;
+            lonA = coordsA.longitude;
+          } else {
+            latA = a.latitude;
+            lonA = a.longitude;
+          }
+          
+          // Handle both GeoJSON and lat/lon coordinate formats for location B
+          let latB, lonB;
+          const coordsB = b.toObject().coordinates;
+          if (coordsB && coordsB.type === 'Point' && Array.isArray(coordsB.coordinates)) {
+            lonB = coordsB.coordinates[0];
+            latB = coordsB.coordinates[1];
+          } else if (coordsB && coordsB.latitude && coordsB.longitude) {
+            latB = coordsB.latitude;
+            lonB = coordsB.longitude;
+          } else {
+            latB = b.latitude;
+            lonB = b.longitude;
+          }
+          
+          const distanceA = calculateDistance(searchLat, searchLon, latA, lonA);
+          const distanceB = calculateDistance(searchLat, searchLon, latB, lonB);
+          return distanceA - distanceB;
+        });
+        
+        // Create a query that matches the filtered IDs
+        const resultIds = sortedResults.map(loc => loc._id);
+        query = ParkingLocation.find({ _id: { $in: resultIds } });
+      } else {
+        // Regular geolocation search - also use manual distance calculation
+        const allResults = await ParkingLocation.find({ ...filter });
+        
+        // Filter by distance and sort
+        const maxDistanceKm = parseInt(maxDistance) / 1000; // Convert to km
+        const nearbyResults = allResults.filter(location => {
+          // Handle both GeoJSON and lat/lon coordinate formats
+          let lat, lon;
+          const coords = location.toObject().coordinates;
+          if (coords && coords.type === 'Point' && Array.isArray(coords.coordinates)) {
+            lon = coords.coordinates[0];
+            lat = coords.coordinates[1];
+          } else if (coords && coords.latitude && coords.longitude) {
+            lat = coords.latitude;
+            lon = coords.longitude;
+          } else {
+            lat = location.latitude;
+            lon = location.longitude;
+          }
+          
+          const distance = calculateDistance(
+            searchLat, searchLon,
+            lat, lon
+          ) / 1000; // Convert to km
+          return distance <= maxDistanceKm;
+        }).sort((a, b) => {
+          // Handle both GeoJSON and lat/lon coordinate formats for location A
+          let latA, lonA;
+          const coordsA = a.toObject().coordinates;
+          if (coordsA && coordsA.type === 'Point' && Array.isArray(coordsA.coordinates)) {
+            lonA = coordsA.coordinates[0];
+            latA = coordsA.coordinates[1];
+          } else if (coordsA && coordsA.latitude && coordsA.longitude) {
+            latA = coordsA.latitude;
+            lonA = coordsA.longitude;
+          } else {
+            latA = a.latitude;
+            lonA = a.longitude;
+          }
+          
+          // Handle both GeoJSON and lat/lon coordinate formats for location B
+          let latB, lonB;
+          const coordsB = b.toObject().coordinates;
+          if (coordsB && coordsB.type === 'Point' && Array.isArray(coordsB.coordinates)) {
+            lonB = coordsB.coordinates[0];
+            latB = coordsB.coordinates[1];
+          } else if (coordsB && coordsB.latitude && coordsB.longitude) {
+            latB = coordsB.latitude;
+            lonB = coordsB.longitude;
+          } else {
+            latB = b.latitude;
+            lonB = b.longitude;
+          }
+          
+          const distanceA = calculateDistance(searchLat, searchLon, latA, lonA);
+          const distanceB = calculateDistance(searchLat, searchLon, latB, lonB);
+          return distanceA - distanceB;
+        });
+        
+        // Create a query that matches the filtered IDs
+        const nearbyIds = nearbyResults.map(loc => loc._id);
+        query = ParkingLocation.find({ _id: { $in: nearbyIds } });
+      }
       sort = {}; // Remove default sorting for geo queries
     }
 
@@ -89,25 +332,69 @@ const getLocations = async (req, res) => {
     const total = await ParkingLocation.countDocuments(filter);
 
     // Add additional computed fields
-    const enhancedLocations = locations.map((location) => ({
-      ...location.toObject(),
-      distance:
-        latitude && longitude
-          ? calculateDistance(
-              latitude,
-              longitude,
-              location.coordinates.latitude,
-              location.coordinates.longitude
-            )
-          : null,
-      isCurrentlyOpen: location.isCurrentlyOpen(),
-      occupancyPercentage: location.occupancyPercentage,
-      availableSpaceTypes: location.availableSpaceTypes,
-    }));
+    const searchLat = searchCenter ? searchCenter.latitude : (latitude ? parseFloat(latitude) : null);
+    const searchLon = searchCenter ? searchCenter.longitude : (longitude ? parseFloat(longitude) : null);
+    
+    const enhancedLocations = locations.map((location) => {
+      let distance = null;
+      let transformedCoordinates = null;
+      
+      // Handle both GeoJSON and lat/lon coordinate formats
+      let lat, lon;
+      const coords = location.toObject().coordinates;
+      if (coords && coords.type === 'Point' && Array.isArray(coords.coordinates)) {
+        lon = coords.coordinates[0];
+        lat = coords.coordinates[1];
+      } else if (coords && coords.latitude && coords.longitude) {
+        lat = coords.latitude;
+        lon = coords.longitude;
+      } else {
+        lat = location.latitude;
+        lon = location.longitude;
+      }
+      
+      // Transform coordinates to frontend-expected format
+      if (lat && lon) {
+        transformedCoordinates = {
+          lat: lat,
+          lng: lon
+        };
+        
+        if (searchLat && searchLon) {
+          distance = calculateDistance(searchLat, searchLon, lat, lon);
+        }
+      }
+      
+      const locationObj = location.toObject();
+      return {
+        ...locationObj,
+        coordinates: transformedCoordinates, // Override with frontend-friendly format
+        distance,
+        isCurrentlyOpen: location.isCurrentlyOpen(),
+        occupancyPercentage: location.occupancyPercentage,
+        availableSpaceTypes: location.availableSpaceTypes,
+        discountedRate: location.discountedRate,
+        thumbnail: location.images && location.images.length > 0 ? location.images[0] : "/images/default-parking.jpg",
+      };
+    });
 
     res.json({
       success: true,
       count: locations.length,
+      searchInfo: {
+        searchTerm: search,
+        searchCenter: searchCenter ? {
+          latitude: searchCenter.latitude,
+          longitude: searchCenter.longitude,
+          foundLocation: {
+            id: searchCenter.foundLocation._id,
+            name: searchCenter.foundLocation.name,
+            address: searchCenter.foundLocation.address
+          }
+        } : null,
+        radius: parseInt(maxDistance),
+        radiusKm: (parseInt(maxDistance) / 1000).toFixed(1)
+      },
       pagination: {
         current: parseInt(page),
         pages: Math.ceil(total / limit),
@@ -171,13 +458,37 @@ const getLocationById = async (req, res) => {
       };
     });
 
+    // Transform coordinates to frontend-expected format
+    let transformedCoordinates = null;
+    const coords = location.toObject().coordinates;
+    if (coords && coords.type === 'Point' && Array.isArray(coords.coordinates)) {
+      transformedCoordinates = {
+        lat: coords.coordinates[1],
+        lng: coords.coordinates[0]
+      };
+    } else if (coords && coords.latitude && coords.longitude) {
+      transformedCoordinates = {
+        lat: coords.latitude,
+        lng: coords.longitude
+      };
+    } else if (location.latitude && location.longitude) {
+      transformedCoordinates = {
+        lat: location.latitude,
+        lng: location.longitude
+      };
+    }
+
+    const locationObj = location.toObject();
     const enhancedLocation = {
-      ...location.toObject(),
+      ...locationObj,
+      coordinates: transformedCoordinates, // Override with frontend-friendly format
       spaces: enhancedSpaces,
       isCurrentlyOpen: location.isCurrentlyOpen(),
       occupancyPercentage: location.occupancyPercentage,
       availableSpaceTypes: location.availableSpaceTypes,
       activeBookingsCount: activeBookings.length,
+      discountedRate: location.discountedRate,
+      thumbnail: location.images && location.images.length > 0 ? location.images[0] : "/images/default-parking.jpg",
     };
 
     res.json({
@@ -626,6 +937,172 @@ const getPeriodInMs = (period) => {
   return periods[period] || periods["7d"];
 };
 
+// @desc    Get popular parking locations
+// @route   GET /api/locations/popular
+// @access  Public
+const getPopularLocations = async (req, res) => {
+  try {
+    const { limit = 10 } = req.query;
+
+    // Get popular locations based on booking count and rating
+    const popularLocations = await ParkingLocation.aggregate([
+      {
+        $match: {
+          isActive: true,
+          currentStatus: "open"
+        }
+      },
+      {
+        $addFields: {
+          // Calculate popularity score based on stats
+          popularityScore: {
+            $add: [
+              { $multiply: ["$stats.totalBookings", 0.6] }, // 60% weight for bookings
+              { $multiply: ["$stats.averageOccupancy", 0.3] }, // 30% weight for occupancy
+              { $multiply: ["$availableSpaces", 0.1] } // 10% weight for capacity
+            ]
+          },
+          placeName: {
+            $arrayElemAt: [
+              { $split: ["$name", ","] },
+              0
+            ]
+          }
+        }
+      },
+      {
+        $sort: {
+          popularityScore: -1,
+          "stats.totalBookings": -1,
+          name: 1
+        }
+      },
+      {
+        $limit: parseInt(limit)
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          placeName: 1,
+          address: 1,
+          coordinates: 1,
+          totalSpaces: 1,
+          availableSpaces: 1,
+          hourlyRate: 1,
+          operatingHours: 1,
+          amenities: 1,
+          currentStatus: 1,
+          stats: 1,
+          popularityScore: 1
+        }
+      }
+    ]);
+
+    // Add computed fields
+    const enhancedPopularLocations = popularLocations.map((location) => ({
+      ...location,
+      occupancyPercentage: location.totalSpaces > 0 
+        ? Math.round(((location.totalSpaces - location.availableSpaces) / location.totalSpaces) * 100)
+        : 0,
+      isCurrentlyOpen: true, // Already filtered for open status
+      category: 'popular'
+    }));
+
+    res.json({
+      success: true,
+      message: "Popular parking locations retrieved successfully",
+      count: enhancedPopularLocations.length,
+      data: enhancedPopularLocations,
+    });
+  } catch (error) {
+    console.error("Get popular locations error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error retrieving popular parking locations",
+      error: error.message,
+    });
+  }
+};
+
+// @desc    Search locations by placename suggestions
+// @route   GET /api/locations/search/suggestions
+// @access  Public
+const getLocationSuggestions = async (req, res) => {
+  try {
+    const { q, limit = 5 } = req.query;
+
+    if (!q || q.trim().length < 2) {
+      return res.json({
+        success: true,
+        data: [],
+        message: "Query too short, minimum 2 characters required"
+      });
+    }
+
+    const suggestions = await ParkingLocation.aggregate([
+      {
+        $match: {
+          isActive: true,
+          name: { $regex: q.trim(), $options: "i" }
+        }
+      },
+      {
+        $addFields: {
+          placeName: {
+            $arrayElemAt: [
+              { $split: ["$name", ","] },
+              0
+            ]
+          },
+          relevanceScore: {
+            $cond: {
+              if: { $regexMatch: { input: "$name", regex: `^${q.trim()}`, options: "i" } },
+              then: 2, // Higher score for exact prefix match
+              else: 1  // Lower score for partial match
+            }
+          }
+        }
+      },
+      {
+        $sort: {
+          relevanceScore: -1,
+          "stats.totalBookings": -1,
+          name: 1
+        }
+      },
+      {
+        $limit: parseInt(limit)
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          placeName: 1,
+          coordinates: 1,
+          totalSpaces: 1,
+          availableSpaces: 1,
+          currentStatus: 1
+        }
+      }
+    ]);
+
+    res.json({
+      success: true,
+      query: q,
+      count: suggestions.length,
+      data: suggestions,
+    });
+  } catch (error) {
+    console.error("Get location suggestions error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error retrieving location suggestions",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   getLocations,
   getLocationById,
@@ -634,4 +1111,6 @@ module.exports = {
   updateSpaceStatus,
   getLocationStats,
   deleteLocation,
+  getPopularLocations,
+  getLocationSuggestions,
 };

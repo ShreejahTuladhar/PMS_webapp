@@ -8,6 +8,14 @@ const {
   removeVehicle,
   getUserBookings,
   changePassword,
+  getUserStats,
+  getUserVehicles,
+  getTransactionHistory,
+  getFavoriteLocations,
+  addFavoriteLocation,
+  removeFavoriteLocation,
+  exportUserData,
+  updatePreferences,
 } = require("../controllers/userController");
 const { authenticateToken } = require("../middleware/auth");
 
@@ -47,6 +55,45 @@ const updateProfileValidation = [
     .withMessage("Please provide a valid email")
     .normalizeEmail()
     .toLowerCase(),
+
+  body("dateOfBirth")
+    .optional()
+    .isISO8601()
+    .withMessage("Please provide a valid date of birth"),
+
+  body("gender")
+    .optional()
+    .isIn(["male", "female", "other", "prefer_not_to_say"])
+    .withMessage("Gender must be male, female, other, or prefer_not_to_say"),
+
+  body("address")
+    .optional()
+    .isLength({ max: 200 })
+    .withMessage("Address cannot exceed 200 characters")
+    .trim(),
+
+  body("city")
+    .optional()
+    .isLength({ max: 100 })
+    .withMessage("City cannot exceed 100 characters")
+    .trim(),
+
+  body("emergencyContact.name")
+    .optional()
+    .isLength({ max: 100 })
+    .withMessage("Emergency contact name cannot exceed 100 characters")
+    .trim(),
+
+  body("emergencyContact.phoneNumber")
+    .optional()
+    .matches(/^[+]?[\d\s\-\(\)]+$/)
+    .withMessage("Invalid emergency contact phone number format")
+    .trim(),
+
+  body("emergencyContact.relationship")
+    .optional()
+    .isIn(["spouse", "parent", "sibling", "child", "friend", "other"])
+    .withMessage("Relationship must be spouse, parent, sibling, child, friend, or other"),
 ];
 
 const addVehicleValidation = [
@@ -179,17 +226,35 @@ const bookingQueryValidation = [
 // Routes - All require authentication
 router.use(authenticateToken);
 
+// Dashboard statistics
+router.get("/stats", getUserStats);
+
 // Profile management
 router.get("/profile", getProfile);
 router.put("/profile", updateProfileValidation, updateProfile);
 
 // Vehicle management
+router.get("/vehicles", getUserVehicles);
 router.post("/vehicles", addVehicleValidation, addVehicle);
 router.put("/vehicles/:vehicleId", updateVehicleValidation, updateVehicle);
 router.delete("/vehicles/:vehicleId", vehicleIdValidation, removeVehicle);
 
 // Booking history
 router.get("/bookings", bookingQueryValidation, getUserBookings);
+
+// Transaction history
+router.get("/transactions", getTransactionHistory);
+
+// Favorite locations
+router.get("/favorites", getFavoriteLocations);
+router.post("/favorites", addFavoriteLocation);
+router.delete("/favorites/:locationId", removeFavoriteLocation);
+
+// Data export
+router.get("/export", exportUserData);
+
+// Preferences
+router.put("/preferences", updatePreferences);
 
 // Password management
 router.put("/change-password", changePasswordValidation, changePassword);

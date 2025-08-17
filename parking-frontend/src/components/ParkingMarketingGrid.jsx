@@ -1,6 +1,6 @@
 import React from 'react';
 import ParkingMarketingCard from './ParkingMarketingCard';
-import specialOffersService from '../services/specialOffersService';
+// import specialOffersService from '../services/specialOffersService'; // Removed promotional offers
 import './ParkingMarketingGrid.css';
 
 /**
@@ -15,35 +15,24 @@ const ParkingMarketingGrid = ({
   sortBy = 'distance' 
 }) => {
 
-  // Enhance parking spots with special offers
-  const enhancedSpots = parkingSpots.map(spot => {
-    const offers = specialOffersService.generateSpecialOffers(spot);
-    const bestOffer = specialOffersService.getBestOffer(spot);
-    const isPeakHours = specialOffersService.isCurrentlyPeakHours(spot);
-    const surgeInfo = specialOffersService.getPeakHoursSurgeInfo(spot);
-
-    return {
-      ...spot,
-      specialOffers: offers,
-      bestOffer,
-      isPeakHours,
-      surgeInfo,
-      hasActiveOffers: offers.length > 0
-    };
-  });
+  // Removed special offers functionality
+  const enhancedSpots = parkingSpots.map(spot => ({
+    ...spot,
+    hasActiveOffers: false
+  }));
 
   // Sort spots based on criteria
   const sortedSpots = [...enhancedSpots].sort((a, b) => {
     switch (sortBy) {
       case 'price': {
-        const priceA = a.bestOffer ? a.bestOffer.discountedPrice || a.hourlyRate : a.hourlyRate;
-        const priceB = b.bestOffer ? b.bestOffer.discountedPrice || b.hourlyRate : b.hourlyRate;
+        const priceA = a.hourlyRate || a.discountedRate || 0;
+        const priceB = b.hourlyRate || b.discountedRate || 0;
         return priceA - priceB;
       }
       case 'availability':
         return (b.availableSpaces / b.totalSpaces) - (a.availableSpaces / a.totalSpaces);
       case 'offers':
-        return b.specialOffers.length - a.specialOffers.length;
+        return 0; // No offers functionality
       case 'category':
         return a.category?.localeCompare(b.category || '') || 0;
       default:
@@ -51,11 +40,9 @@ const ParkingMarketingGrid = ({
     }
   });
 
-  // Group spots by offers for better visual presentation
-  const spotsWithOffers = sortedSpots.filter(spot => spot.hasActiveOffers);
-  const spotsWithoutOffers = sortedSpots.filter(spot => !spot.hasActiveOffers);
-  
-  const orderedSpots = [...spotsWithOffers, ...spotsWithoutOffers];
+  // Removed offers grouping functionality
+  const spotsWithOffers = [];
+  const orderedSpots = sortedSpots;
 
   if (parkingSpots.length === 0) {
     return (
@@ -71,17 +58,7 @@ const ParkingMarketingGrid = ({
 
   return (
     <div className="parking-marketing-grid">
-      {/* Special Offers Summary */}
-      {spotsWithOffers.length > 0 && (
-        <div className="offers-summary">
-          <div className="offers-header">
-            <span className="offers-icon">🎁</span>
-            <span className="offers-text">
-              {spotsWithOffers.length} location{spotsWithOffers.length !== 1 ? 's' : ''} with special offers available!
-            </span>
-          </div>
-        </div>
-      )}
+      {/* Special offers summary removed */}
 
       {/* Marketing Cards Grid */}
       <div className="marketing-cards-container">
@@ -102,40 +79,7 @@ const ParkingMarketingGrid = ({
                 isCompact={false}
               />
 
-              {/* Special Offer Overlay */}
-              {spot.bestOffer && (
-                <div className={`special-offer-overlay ${spot.bestOffer.color}`}>
-                  <div className="offer-content">
-                    <div className="offer-badge">
-                      {spot.bestOffer.icon} {spot.bestOffer.badge}
-                    </div>
-                    <div className="offer-title">{spot.bestOffer.title}</div>
-                    {spot.bestOffer.validUntil && (
-                      <div className="offer-expiry">
-                        Expires in: {specialOffersService.formatTimeRemaining(
-                          (spot.bestOffer.validUntil.getTime() - new Date().getTime()) / 60000
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Peak Hours Warning */}
-              {spot.isPeakHours && spot.surgeInfo && (
-                <div className="peak-hours-overlay">
-                  <div className="peak-warning">
-                    ⚡ Peak Hours - ₹{spot.surgeInfo.surgePrice}/hr
-                  </div>
-                </div>
-              )}
-
-              {/* Priority Badge for Featured Locations */}
-              {index < 3 && spot.hasActiveOffers && (
-                <div className="priority-badge">
-                  ⭐ FEATURED
-                </div>
-              )}
+              {/* Promotional overlays removed */}
             </div>
           ))}
         </div>
@@ -149,8 +93,8 @@ const ParkingMarketingGrid = ({
             <span className="stat-label">Total Locations</span>
           </div>
           <div className="stat-item">
-            <span className="stat-number">{spotsWithOffers.length}</span>
-            <span className="stat-label">Special Offers</span>
+            <span className="stat-number">{parkingSpots.filter(s => s.availableSpaces > 0).length}</span>
+            <span className="stat-label">Available Now</span>
           </div>
           <div className="stat-item">
             <span className="stat-number">

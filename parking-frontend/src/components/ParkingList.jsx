@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import ParkingMarketingGrid from './ParkingMarketingGrid';
-import specialOffersService from '../services/specialOffersService';
+// import specialOffersService from '../services/specialOffersService'; // Removed promotional offers
 
 const ParkingList = ({ parkingSpots, onBooking, selectedSpot, onLoginRequired, onSpotSelect }) => {
   const [sortBy, setSortBy] = useState('distance');
@@ -118,10 +118,8 @@ const ParkingList = ({ parkingSpots, onBooking, selectedSpot, onLoginRequired, o
     return 'text-red-600 bg-red-100';
   };
 
-  // Count special offers
-  const spotsWithOffers = parkingSpots.filter(spot => 
-    specialOffersService.hasActiveOffers(spot)
-  ).length;
+  // Count special offers - removed promotional offers functionality
+  const spotsWithOffers = 0;
 
   return (
     <div className="bg-white rounded-lg shadow-md">
@@ -180,7 +178,6 @@ const ParkingList = ({ parkingSpots, onBooking, selectedSpot, onLoginRequired, o
                 <option value="rating">Rating</option>
                 {hasMarketingData && (
                   <>
-                    <option value="offers">Special Offers</option>
                     <option value="category">Category</option>
                   </>
                 )}
@@ -204,10 +201,8 @@ const ParkingList = ({ parkingSpots, onBooking, selectedSpot, onLoginRequired, o
       ) : (
         <div ref={listContainerRef} className="divide-y divide-gray-200 max-h-96 overflow-y-auto">
           {sortedSpots.map((spot) => {
-            // Add special offers to each spot for list view
-            const offers = specialOffersService.generateSpecialOffers(spot);
-            const bestOffer = specialOffersService.getBestOffer(spot);
-            const enhancedSpot = { ...spot, specialOffers: offers, bestOffer };
+            // Removed special offers functionality
+            const enhancedSpot = { ...spot };
             
             const isSelected = selectedSpot?.id === enhancedSpot.id;
             const isHighlighted = highlightedSpot === enhancedSpot.id;
@@ -235,11 +230,7 @@ const ParkingList = ({ parkingSpots, onBooking, selectedSpot, onLoginRequired, o
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <h4 className="font-semibold text-gray-800 mb-1">{enhancedSpot.name}</h4>
-                    {enhancedSpot.bestOffer && (
-                      <span className={`px-2 py-1 text-xs rounded-full text-white bg-${enhancedSpot.bestOffer.color}-500`}>
-                        {enhancedSpot.bestOffer.badge}
-                      </span>
-                    )}
+                    {/* Removed promotional offer badges */}
                   </div>
                   <button
                     onClick={(e) => {
@@ -285,23 +276,10 @@ const ParkingList = ({ parkingSpots, onBooking, selectedSpot, onLoginRequired, o
               </div>
 
               <div className="text-right">
-                {enhancedSpot.bestOffer && enhancedSpot.bestOffer.discountedPrice ? (
-                  <div>
-                    <div className="text-lg font-bold text-green-600 mb-1">
-                      रु {enhancedSpot.bestOffer.discountedPrice}/hr
-                      <span className="text-sm text-gray-400 line-through ml-2">
-                        रु {enhancedSpot.hourlyRate}
-                      </span>
-                    </div>
-                    <div className="text-xs text-green-600 font-medium">
-                      Save रु {enhancedSpot.hourlyRate - enhancedSpot.bestOffer.discountedPrice}/hr
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-lg font-bold text-blue-600 mb-1">
-                    रु {enhancedSpot.hourlyRate}/hr
-                  </div>
-                )}
+                {/* Removed promotional pricing display */}
+                <div className="text-lg font-bold text-blue-600 mb-1">
+                  रु {enhancedSpot.hourlyRate || enhancedSpot.discountedRate}/hr
+                </div>
                 {enhancedSpot.vehicleTypes?.motorcycle && (
                   <div className="text-sm text-gray-600">
                     रु {enhancedSpot.vehicleTypes.motorcycle}/hr (motorcycle)
@@ -347,31 +325,7 @@ const ParkingList = ({ parkingSpots, onBooking, selectedSpot, onLoginRequired, o
               </button>
             </div>
 
-            {/* Enhanced Special Offers Display */}
-            {enhancedSpot.bestOffer && (
-              <div className={`mt-2 p-3 bg-gradient-to-r rounded-lg text-sm`} 
-                   style={{
-                     background: `linear-gradient(135deg, var(--color-${enhancedSpot.bestOffer.color === 'green' ? 'success' : enhancedSpot.bestOffer.color === 'red' ? 'error' : 'warning'}), rgba(255,255,255,0.9))`
-                   }}>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="font-bold text-white flex items-center gap-2">
-                      {enhancedSpot.bestOffer.icon} {enhancedSpot.bestOffer.title}
-                    </div>
-                    <div className="text-white opacity-90 text-xs mt-1">
-                      {enhancedSpot.bestOffer.description}
-                    </div>
-                  </div>
-                  {enhancedSpot.bestOffer.validUntil && (
-                    <div className="text-white text-xs opacity-80 text-right">
-                      Expires in: {specialOffersService.formatTimeRemaining(
-                        (enhancedSpot.bestOffer.validUntil.getTime() - new Date().getTime()) / 60000
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
+            {/* Special offers display removed */}
           </div>
           );
           })}

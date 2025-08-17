@@ -10,7 +10,7 @@ import {
     XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer 
 } from 'recharts';
 import { useAuth } from '../../../hooks/useAuth';
-import { analyticsService } from '../../../services/analyticsService';
+// Analytics service removed - using static data for now
 import LoadingSpinner from '../../common/LoadingSpinner';
 
 const AdminAnalyticsDashboard = () => {
@@ -29,33 +29,56 @@ const AdminAnalyticsDashboard = () => {
     const [locations, setLocations] = useState([]);
     const [autoRefresh, setAutoRefresh] = useState(true);
 
-    // Real-time data refresh
+    // Real-time data refresh - using mock data
     const fetchRealTimeData = useCallback(async () => {
         try {
-            const realTimeData = await analyticsService.getRealTimeDashboard();
+            const realTimeData = {
+                activeBookings: 42,
+                totalRevenue: 15750,
+                occupancyRate: 78,
+                averageSessionTime: 125
+            };
             setAnalytics(prev => ({ ...prev, realTime: realTimeData }));
         } catch (error) {
             console.error('Failed to fetch real-time data:', error);
         }
     }, []);
 
-    // Comprehensive analytics fetch
+    // Comprehensive analytics fetch - using mock data
     const fetchAnalytics = useCallback(async () => {
         setLoading(true);
         try {
-            const [
-                revenueData,
-                utilizationData,
-                peakHoursData,
-                userBehaviorData,
-                locationsData
-            ] = await Promise.all([
-                analyticsService.getRevenueAnalytics(timeRange, selectedLocation === 'all' ? null : selectedLocation),
-                analyticsService.getUtilizationAnalytics(selectedLocation === 'all' ? null : selectedLocation, timeRange),
-                analyticsService.getPeakHoursAnalysis(selectedLocation === 'all' ? null : selectedLocation),
-                analyticsService.getUserBehaviorAnalytics(timeRange),
-                analyticsService.getAllLocations()
-            ]);
+            // Mock data for analytics
+            const revenueData = {
+                data: [
+                    { date: '2025-08-10', revenue: 2500, bookings: 45 },
+                    { date: '2025-08-11', revenue: 3200, bookings: 58 },
+                    { date: '2025-08-12', revenue: 2800, bookings: 52 }
+                ],
+                summary: { total: 8500, growth: 12.5 }
+            };
+            
+            const utilizationData = [
+                { hour: '08:00', utilization: 45 },
+                { hour: '12:00', utilization: 78 },
+                { hour: '18:00', utilization: 92 }
+            ];
+            
+            const peakHoursData = [
+                { hour: '08:00-09:00', bookings: 15 },
+                { hour: '17:00-18:00', bookings: 25 }
+            ];
+            
+            const userBehaviorData = {
+                avgSessionTime: 125,
+                returnUsers: 68,
+                newUsers: 32
+            };
+            
+            const locationsData = [
+                { id: 'all', name: 'All Locations' },
+                { id: '1', name: 'Ratna Park' }
+            ];
 
             setAnalytics(prev => ({
                 ...prev,

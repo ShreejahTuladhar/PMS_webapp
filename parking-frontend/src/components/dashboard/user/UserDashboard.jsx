@@ -1,11 +1,50 @@
+import { useState } from 'react';
 import { BaseDashboard } from '../base/BaseDashboard';
 import BookingHistory from './BookingHistory';
 import PaymentPortal from './PaymentPortal';
 import UserProfile from './UserProfile';
 import UserActivity from './UserActivity';
+import TransactionHistory from './TransactionHistory';
+import VehicleManagement from './VehicleManagement';
+import FavoriteLocations from './FavoriteLocations';
+import SmartQuickActions from './SmartQuickActions';
+import DigitalTicketModal from './DigitalTicketModal';
+import SupportModal from './SupportModal';
+import ParkingSearchMap from '../../search/ParkingSearchMap';
 import { bookingService, userService } from '../../../services';
 
 const UserDashboard = () => {
+  const [activeTab, setActiveTab] = useState('overview');
+  const [showDigitalTicket, setShowDigitalTicket] = useState(false);
+  const [showSupport, setShowSupport] = useState(false);
+  const [showParkingSearch, setShowParkingSearch] = useState(false);
+  const [selectedBookingId, setSelectedBookingId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Handle modal opening from quick actions
+  const handleModalOpen = (modalType, params = {}) => {
+    switch (modalType) {
+      case 'digital_ticket':
+        setSelectedBookingId(params.bookingId || null);
+        setShowDigitalTicket(true);
+        break;
+      case 'support':
+        setShowSupport(true);
+        break;
+      case 'parking_search':
+        setSearchQuery(params.query || '');
+        setShowParkingSearch(true);
+        break;
+      default:
+        console.warn('Unknown modal type:', modalType);
+    }
+  };
+
+  // Handle tab changes from quick actions
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId);
+  };
+
   const loadUserData = async (setDashboardData) => {
     try {
       setDashboardData(prev => ({ ...prev, loading: true }));
@@ -49,12 +88,15 @@ const UserDashboard = () => {
   ];
 
   return (
-    <BaseDashboard
-      userType="user"
-      loadDataFunction={loadUserData}
-      initialDashboardState={initialState}
-      additionalTabs={additionalTabs}
-    >
+    <>
+      <BaseDashboard
+        userType="user"
+        loadDataFunction={loadUserData}
+        initialDashboardState={initialState}
+        additionalTabs={additionalTabs}
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+      >
       {{
         headerActions: (
           <div className="mt-4 flex md:mt-0 md:ml-4">
@@ -188,92 +230,19 @@ const UserDashboard = () => {
                   )}
                 </div>
 
-                {/* Quick Actions */}
-                <div className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-6">Quick Actions</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <button className="group p-6 bg-gradient-to-br from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 rounded-xl text-center transition-all duration-200 hover:shadow-md">
-                      <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
-                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                      </div>
-                      <p className="text-sm font-semibold text-blue-800">Find Parking</p>
-                      <p className="text-xs text-blue-600 mt-1">Search nearby spots</p>
-                    </button>
-                    <button className="group p-6 bg-gradient-to-br from-green-50 to-green-100 hover:from-green-100 hover:to-green-200 rounded-xl text-center transition-all duration-200 hover:shadow-md">
-                      <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
-                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                        </svg>
-                      </div>
-                      <p className="text-sm font-semibold text-green-800">Add Payment</p>
-                      <p className="text-xs text-green-600 mt-1">Manage cards</p>
-                    </button>
-                    <button className="group p-6 bg-gradient-to-br from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 rounded-xl text-center transition-all duration-200 hover:shadow-md">
-                      <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
-                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                        </svg>
-                      </div>
-                      <p className="text-sm font-semibold text-purple-800">Digital Ticket</p>
-                      <p className="text-xs text-purple-600 mt-1">Mobile parking pass</p>
-                    </button>
-                    <button className="group p-6 bg-gradient-to-br from-orange-50 to-orange-100 hover:from-orange-100 hover:to-orange-200 rounded-xl text-center transition-all duration-200 hover:shadow-md">
-                      <div className="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
-                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      </div>
-                      <p className="text-sm font-semibold text-orange-800">Get Support</p>
-                      <p className="text-xs text-orange-600 mt-1">Help & assistance</p>
-                    </button>
-                  </div>
-                </div>
+                {/* Smart Quick Actions */}
+                <SmartQuickActions 
+                  onTabChange={handleTabChange}
+                  onModalOpen={handleModalOpen}
+                />
               </div>
             );
           }
           
           if (activeTab === 'bookings') return <BookingHistory />;
-          if (activeTab === 'transactions') return (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h3 className="text-2xl font-bold text-gray-900">Transaction History</h3>
-                <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
-                  Export History
-                </button>
-              </div>
-              <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <p className="text-gray-600">Transaction history will be displayed here.</p>
-              </div>
-            </div>
-          );
-          if (activeTab === 'vehicles') return (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h3 className="text-2xl font-bold text-gray-900">Vehicle Details</h3>
-                <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
-                  + Add Vehicle
-                </button>
-              </div>
-              <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <p className="text-gray-600">Your registered vehicles will appear here.</p>
-              </div>
-            </div>
-          );
-          if (activeTab === 'favorites') return (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h3 className="text-2xl font-bold text-gray-900">Favorite Parking Locations</h3>
-                <button className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition">
-                  Manage Favorites
-                </button>
-              </div>
-              <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <p className="text-gray-600">Your favorite parking locations will be listed here.</p>
-              </div>
-            </div>
-          );
+          if (activeTab === 'transactions') return <TransactionHistory />;
+          if (activeTab === 'vehicles') return <VehicleManagement />;
+          if (activeTab === 'favorites') return <FavoriteLocations />;
           if (activeTab === 'payments') return <PaymentPortal />;
           if (activeTab === 'profile') return <UserProfile />;
           if (activeTab === 'activity') return <UserActivity />;
@@ -282,6 +251,25 @@ const UserDashboard = () => {
         }
       }}
     </BaseDashboard>
+
+      {/* Modals */}
+      <DigitalTicketModal
+        isOpen={showDigitalTicket}
+        onClose={() => setShowDigitalTicket(false)}
+        bookingId={selectedBookingId}
+      />
+      
+      <SupportModal
+        isOpen={showSupport}
+        onClose={() => setShowSupport(false)}
+      />
+
+      <ParkingSearchMap
+        isOpen={showParkingSearch}
+        onClose={() => setShowParkingSearch(false)}
+        initialSearchQuery={searchQuery}
+      />
+    </>
   );
 };
 

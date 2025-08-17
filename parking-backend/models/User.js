@@ -50,6 +50,45 @@ const userSchema = new mongoose.Schema(
       trim: true,
       match: [/^[+]?[\d\s\-\(\)]+$/, "Please provide a valid phone number"],
     },
+    dateOfBirth: {
+      type: Date,
+    },
+    gender: {
+      type: String,
+      enum: {
+        values: ["male", "female", "other", "prefer_not_to_say"],
+        message: "Gender must be male, female, other, or prefer_not_to_say",
+      },
+    },
+    address: {
+      type: String,
+      trim: true,
+      maxlength: [200, "Address cannot exceed 200 characters"],
+    },
+    city: {
+      type: String,
+      trim: true,
+      maxlength: [100, "City cannot exceed 100 characters"],
+    },
+    emergencyContact: {
+      name: {
+        type: String,
+        trim: true,
+        maxlength: [100, "Emergency contact name cannot exceed 100 characters"],
+      },
+      phoneNumber: {
+        type: String,
+        trim: true,
+        match: [/^[+]?[\d\s\-\(\)]+$/, "Please provide a valid emergency contact phone number"],
+      },
+      relationship: {
+        type: String,
+        enum: {
+          values: ["spouse", "parent", "sibling", "child", "friend", "other"],
+          message: "Relationship must be spouse, parent, sibling, child, friend, or other",
+        },
+      },
+    },
     role: {
       type: String,
       enum: {
@@ -91,6 +130,40 @@ const userSchema = new mongoose.Schema(
         ref: "ParkingLocation",
       },
     ], // Only for parking_admin role
+    favoriteLocations: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "ParkingLocation",
+      },
+    ], // User's favorite parking locations
+    preferences: {
+      emailNotifications: {
+        type: Boolean,
+        default: true,
+      },
+      smsNotifications: {
+        type: Boolean,
+        default: false,
+      },
+      pushNotifications: {
+        type: Boolean,
+        default: true,
+      },
+      marketingEmails: {
+        type: Boolean,
+        default: false,
+      },
+      currency: {
+        type: String,
+        enum: ["NPR", "USD", "EUR"],
+        default: "NPR",
+      },
+      theme: {
+        type: String,
+        enum: ["light", "dark"],
+        default: "light",
+      },
+    },
     isActive: {
       type: Boolean,
       default: true,

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import searchHistory from '../utils/searchHistory';
-import { analyticsService, locationService } from '../services';
+import { locationService } from '../services';
 import { EnhancedSearch, highlightMatch } from '../utils/searchUtils';
 
 // Kathmandu area coordinates (moved from deleted data file)
@@ -288,10 +288,6 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
   };
 
   const handleRecentSearchClick = async (recentSearch) => {
-    // Track recent search click analytics
-    const daysDiff = Math.floor((Date.now() - recentSearch.timestamp) / (1000 * 60 * 60 * 24));
-    analyticsService.trackRecentSearchClick(recentSearch.query, daysDiff);
-    
     setLocation(recentSearch.query);
     setShowRecentSearches(false);
     setShowSuggestions(false);
@@ -346,9 +342,6 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
   };
 
   const handleQuickSearch = async (locationName, index) => {
-    // Track popular search click analytics
-    analyticsService.trackPopularSearchClick(locationName, index);
-    
     setLocation(locationName);
     setShowSuggestions(false);
     setShowRecentSearches(false);
@@ -663,10 +656,10 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
                     onChange={(e) => onRadiusChange(Number(e.target.value))}
                     className="input-premium w-full px-6 py-4 text-lg font-medium text-gray-800 appearance-none cursor-pointer"
                   >
+                    <option value={0.5}>0.5 km - Ultra Near</option>
                     <option value={1}>1 km - Nearby</option>
                     <option value={2}>2 km - Normal</option>
                     <option value={3}>3 km - Wide</option>
-                    <option value={4}>4 km - Far</option>
                     <option value={5}>5 km - Anywhere</option>
                   </select>
                   <div className="absolute right-5 top-1/2 transform -translate-y-1/2 pointer-events-none">

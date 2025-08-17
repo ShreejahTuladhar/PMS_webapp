@@ -226,12 +226,6 @@ async function doBackgroundSync() {
       await syncBooking(booking);
     }
     
-    // Sync analytics events
-    const offlineEvents = await getOfflineAnalytics();
-    for (const event of offlineEvents) {
-      await syncAnalyticsEvent(event);
-    }
-    
     console.log('✅ Background sync completed');
   } catch (error) {
     console.error('❌ Background sync failed:', error);
@@ -340,17 +334,6 @@ async function getOfflineBookings() {
   }
 }
 
-async function getOfflineAnalytics() {
-  try {
-    const db = await openDB();
-    const transaction = db.transaction(['offline_analytics'], 'readonly');
-    const store = transaction.objectStore('offline_analytics');
-    return store.getAll();
-  } catch (error) {
-    console.error('Failed to get offline analytics:', error);
-    return [];
-  }
-}
 
 async function syncBooking(booking) {
   try {
@@ -374,27 +357,6 @@ async function syncBooking(booking) {
   }
 }
 
-async function syncAnalyticsEvent(event) {
-  try {
-    const response = await fetch('/api/analytics/events', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(event)
-    });
-    
-    if (response.ok) {
-      // Remove from offline storage
-      const db = await openDB();
-      const transaction = db.transaction(['offline_analytics'], 'readwrite');
-      const store = transaction.objectStore('offline_analytics');
-      store.delete(event.id);
-    }
-  } catch (error) {
-    console.error('Failed to sync analytics event:', error);
-  }
-}
 
 // IndexedDB helper
 async function openDB() {
@@ -409,10 +371,6 @@ async function openDB() {
       
       if (!db.objectStoreNames.contains('offline_bookings')) {
         db.createObjectStore('offline_bookings', { keyPath: 'id' });
-      }
-      
-      if (!db.objectStoreNames.contains('offline_analytics')) {
-        db.createObjectStore('offline_analytics', { keyPath: 'id' });
       }
     };
   });

@@ -114,10 +114,11 @@ function SearchForm({ onSearch, onRadiusChange, radius, loading: externalLoading
             <input
               type="range"
               id="radius"
-              min="1"
+              min="0.5"
               max="10"
+              step="0.5"
               value={radius}
-              onChange={(e) => onRadiusChange(parseInt(e.target.value))}
+              onChange={(e) => onRadiusChange(parseFloat(e.target.value))}
               className="flex-1"
               disabled={isLoading}
             />

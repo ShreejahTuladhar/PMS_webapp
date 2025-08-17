@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useBooking } from '../hooks/useBooking';
 import SearchSection from './SearchSection';
@@ -10,18 +10,20 @@ import AuthModal from './auth/AuthModal';
 import BookingModal from './booking/BookingModal';
 import BookingConfirmation from './booking/BookingConfirmation';
 import Footer from './Footer';
-import { locationService, analyticsService } from '../services';
+import { locationService } from '../services';
 import searchHistory from '../utils/searchHistory';
 
 function Home() {
   const { isAuthenticated } = useAuth();
   const { currentBooking, bookingStep } = useBooking();
   const location = useLocation();
+  const navigate = useNavigate();
   
   const [searchResults, setSearchResults] = useState([]);
   const [selectedSpot, setSelectedSpot] = useState(null);
-  const [searchRadius, setSearchRadius] = useState(2);
+  const [searchRadius, setSearchRadius] = useState(0.5);
   const [searchLocation, setSearchLocation] = useState(null);
+  const [originalSearchInput, setOriginalSearchInput] = useState(null); // Track original search input
   const [isSearched, setIsSearched] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
@@ -92,51 +94,56 @@ function Home() {
       return;
     }
     
-    console.log('Searching for parking near:', location);
+    console.log('🔍 Home: Searching for parking near:', location, 'Type:', searchType);
     
-    let searchLat, searchLng, searchLoc, searchQuery;
+    // Show special handling for current location searches
+    if (searchType === 'current_location' || location.isCurrentLocation) {
+      console.log('🌍 Home: Processing current location search with coordinates:', {
+        lat: location.lat,
+        lng: location.lng
+      });
+    }
+    
+    // Store original search input for radius changes
+    setOriginalSearchInput(location);
+    
+    let searchLat, searchLng, searchLoc, searchQuery, locationTrimmed;
     
     if (typeof location === 'string') {
       // Validate string input
-      const locationTrimmed = location.trim();
+      locationTrimmed = location.trim();
       if (!locationTrimmed) {
         console.warn('Empty search string provided');
         return;
       }
       
-      // Try to get coordinates from extracted location data first
-      let defaultCoords = kathmanduAreas.ratnapark; // Default fallback
+      // For text searches, we'll let the backend handle location detection
+      // Use a central Kathmandu coordinate as initial fallback, but backend will override this
+      let defaultCoords = kathmanduAreas.ratnapark; // Central Kathmandu fallback
       
+      // Try to get coordinates from known areas first as a hint
       try {
         const coordsResult = await locationService.getCoordinatesForLocationName(locationTrimmed);
         if (coordsResult.success && coordsResult.coordinates) {
           defaultCoords = coordsResult.coordinates;
           console.log(`🎯 Using extracted coordinates for "${locationTrimmed}":`, defaultCoords);
         } else {
-          // Fall back to kathmanduAreas matching
+          // Quick check for known area names (this is just a fallback, backend will handle the real search)
           const locationLower = locationTrimmed.toLowerCase();
           for (const [areaName, coords] of Object.entries(kathmanduAreas)) {
             if (locationLower.includes(areaName.toLowerCase()) || 
                 areaName.toLowerCase().includes(locationLower)) {
               defaultCoords = coords;
-              console.log(`🗺️ Using kathmanduAreas coordinates for "${locationTrimmed}":`, defaultCoords);
+              console.log(`🗺️ Using known area coordinates for "${locationTrimmed}":`, defaultCoords);
               break;
             }
           }
         }
       } catch (error) {
-        console.warn('Error getting coordinates from extracted data:', error);
-        // Fall back to kathmanduAreas matching
-        const locationLower = locationTrimmed.toLowerCase();
-        for (const [areaName, coords] of Object.entries(kathmanduAreas)) {
-          if (locationLower.includes(areaName.toLowerCase()) || 
-              areaName.toLowerCase().includes(locationLower)) {
-            defaultCoords = coords;
-            break;
-          }
-        }
+        console.warn('Error getting coordinates from extracted data, using fallback:', error);
       }
       
+      // These are just initial coordinates - backend will provide the actual search center
       searchLat = defaultCoords.lat;
       searchLng = defaultCoords.lng;
       searchQuery = locationTrimmed;
@@ -171,17 +178,33 @@ function Home() {
       let usedFallback = false;
       
       // Try backend search API first, but fallback immediately if it fails
-      console.log('Attempting backend search API...');
+      console.log('🔗 Home: Attempting backend search API...');
       try {
-        response = await locationService.searchParkingSpots(
-          { lat: searchLat, lng: searchLng },
-          searchRadius,
-          {
-            isActive: true,
-            limit: 50,
-            sortBy: 'distance'
-          }
-        );
+        // Use text-based search if the original input was a string
+        if (typeof location === 'string') {
+          console.log('🔍 Home: Using text-based search for:', locationTrimmed);
+          response = await locationService.searchParkingSpotsByText(
+            locationTrimmed,
+            searchRadius,
+            {
+              isActive: true,
+              limit: 50,
+            }
+          );
+        } else {
+          console.log('🗺️ Home: Using coordinate-based search for:', { lat: searchLat, lng: searchLng });
+          console.log('📍 Home: Search radius:', searchRadius, 'km');
+          response = await locationService.searchParkingSpots(
+            { lat: searchLat, lng: searchLng },
+            searchRadius,
+            {
+              isActive: true,
+              limit: 50,
+              sortBy: 'distance'
+            }
+          );
+          console.log('📦 Home: Backend API response:', response);
+        }
         
         // Check if the response indicates an error even with success flag
         if (!response.success || response.error) {
@@ -213,6 +236,21 @@ function Home() {
         // Handle different response formats
         let parkingSpots = response.parkingSpots || response.data || [];
         console.log(`🏁 Raw parking spots received: ${parkingSpots.length}`, parkingSpots);
+        
+        // Update search center coordinates if backend provided them (for text searches)
+        if (response.searchInfo && response.searchInfo.searchCenter) {
+          const backendSearchCenter = response.searchInfo.searchCenter;
+          console.log(`🎯 Using backend search center: ${backendSearchCenter.latitude}, ${backendSearchCenter.longitude}`);
+          searchLat = backendSearchCenter.latitude;
+          searchLng = backendSearchCenter.longitude;
+          searchLoc = {
+            address: response.searchInfo.foundLocation?.name || searchQuery,
+            lat: searchLat,
+            lng: searchLng,
+            isCurrentLocation: false,
+            foundLocation: response.searchInfo.foundLocation
+          };
+        }
         
         if (usedFallback) {
           // Apply client-side filtering for fallback
@@ -291,52 +329,14 @@ function Home() {
         
         // Track successful search
         searchHistory.addRecentSearch(searchQuery, searchLoc);
-        analyticsService.trackSearch({
-          query: searchQuery,
-          location: searchLoc,
-          radius: searchRadius,
-          resultsCount: parkingLocations.length,
-          searchType: searchType
-        });
-        
-        // Track search performance
-        analyticsService.trackSearchPerformance({
-          query: searchQuery,
-          duration: searchDuration,
-          resultsCount: parkingLocations.length,
-          endpoint: usedFallback ? '/locations' : '/locations/search',
-          success: true
-        });
         
         setSearchResults(parkingLocations);
       } else {
         console.error('Search failed:', response?.error || 'Unknown error');
-        
-        // Track failed search
-        analyticsService.trackSearchPerformance({
-          query: searchQuery,
-          duration: Date.now() - searchStartTime,
-          resultsCount: 0,
-          endpoint: usedFallback ? '/locations' : '/locations/search',
-          success: false,
-          error: response?.error || 'Unknown error'
-        });
-        
         setSearchResults([]);
       }
     } catch (error) {
       console.error('Error during search operation:', error);
-      
-      // Track search error
-      analyticsService.trackSearchPerformance({
-        query: searchQuery,
-        duration: Date.now() - searchStartTime,
-        resultsCount: 0,
-        endpoint: '/locations/search',
-        success: false,
-        error: error.message
-      });
-      
       setSearchResults([]);
     } finally {
       setLoading(false);
@@ -350,37 +350,18 @@ function Home() {
   const handleRadiusChange = (newRadius) => {
     setSearchRadius(newRadius);
     
-    // Re-search with new radius if we have a previous search location
-    if (searchLocation) {
-      handleSearch(searchLocation, 'radius_change');
+    // Re-search with new radius if we have a previous search
+    if (originalSearchInput) {
+      console.log(`🔄 Radius changed to ${newRadius}km, re-searching with:`, originalSearchInput);
+      handleSearch(originalSearchInput, 'radius_change');
     }
   };
 
   const handleSpotSelect = (spot) => {
     setSelectedSpot(spot);
-    
-    // Track spot interaction
-    analyticsService.trackSpotInteraction({
-      spotId: spot.id,
-      spotName: spot.name,
-      type: 'view',
-      searchQuery: searchLocation?.address || 'Unknown',
-      position: searchResults.findIndex(s => s.id === spot.id),
-      userId: isAuthenticated ? 'user' : null
-    });
   };
 
   const handleBooking = (spot) => {
-    // Track booking attempt
-    analyticsService.trackSpotInteraction({
-      spotId: spot.id,
-      spotName: spot.name,
-      type: 'book',
-      searchQuery: searchLocation?.address || 'Unknown',
-      position: searchResults.findIndex(s => s.id === spot.id),
-      userId: isAuthenticated ? 'user' : null
-    });
-    
     if (!isAuthenticated) {
       setIsLoginModalOpen(true);
       return;
@@ -392,6 +373,17 @@ function Home() {
 
   const handleLoginRequired = () => {
     setIsLoginModalOpen(true);
+  };
+
+  // Handler for opening full-screen map mode
+  const openFullScreenMap = (searchQuery = '') => {
+    navigate('/search/fullscreen', { 
+      state: { 
+        searchQuery,
+        searchResults,
+        searchLocation 
+      } 
+    });
   };
 
   const closeLoginModal = () => {
@@ -462,9 +454,21 @@ function Home() {
                   <h2 className="text-2xl font-bold text-gray-800 mb-2">
                     Parking Spots Near You
                   </h2>
-                  <p className="text-gray-600">
-                    Found {searchResults.length} friendly parking spots within {searchRadius}km of where you want to go
-                  </p>
+                  <div className="flex items-center justify-center space-x-4">
+                    <p className="text-gray-600">
+                      Found {searchResults.length} friendly parking spots within {searchRadius}km of where you want to go
+                    </p>
+                    <button
+                      onClick={() => openFullScreenMap(searchLocation?.address || '')}
+                      className="inline-flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-medium"
+                      title="Open in full-screen mode"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                      </svg>
+                      <span>Full Screen</span>
+                    </button>
+                  </div>
                 </div>
 
                 <div className="grid lg:grid-cols-2 gap-6">
@@ -608,6 +612,7 @@ function Home() {
         isOpen={isConfirmationModalOpen}
         onClose={closeConfirmationModal}
       />
+
       
       <Footer />
     </div>

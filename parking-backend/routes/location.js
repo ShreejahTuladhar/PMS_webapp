@@ -8,7 +8,15 @@ const {
   updateSpaceStatus,
   getLocationStats,
   deleteLocation,
+  getPopularLocations,
+  getLocationSuggestions,
 } = require("../controllers/locationController");
+
+const {
+  updateSpaceStatus: spaceUpdate,
+  getLocationAvailability,
+  bulkUpdateSpaceStatus,
+} = require("../controllers/spaceController");
 const { authenticateToken, requireRole } = require("../middleware/auth");
 
 const router = express.Router();
@@ -163,9 +171,26 @@ const queryValidation = [
     .withMessage("Max distance must be between 100 and 50000 meters"),
 ];
 
+const suggestionQueryValidation = [
+  query("q")
+    .notEmpty()
+    .withMessage("Query parameter 'q' is required")
+    .isLength({ min: 2, max: 100 })
+    .withMessage("Query must be between 2 and 100 characters")
+    .trim(),
+  
+  query("limit")
+    .optional()
+    .isInt({ min: 1, max: 20 })
+    .withMessage("Limit must be between 1 and 20"),
+];
+
 // Public routes
 router.get("/", queryValidation, getLocations);
+router.get("/popular", getPopularLocations);
+router.get("/search/suggestions", suggestionQueryValidation, getLocationSuggestions);
 router.get("/:id", locationIdValidation, getLocationById);
+router.get("/:locationId/availability", getLocationAvailability);
 
 // Protected routes - Super Admin only
 router.post(
@@ -200,6 +225,20 @@ router.put(
   requireRole("super_admin", "parking_admin"),
   updateSpaceStatusValidation,
   updateSpaceStatus
+);
+
+router.patch(
+  "/:locationId/spaces/:spaceId/status",
+  authenticateToken,
+  requireRole("super_admin", "parking_admin"),
+  spaceUpdate
+);
+
+router.patch(
+  "/:locationId/spaces/bulk-update",
+  authenticateToken,
+  requireRole("super_admin", "parking_admin"),
+  bulkUpdateSpaceStatus
 );
 
 router.get(

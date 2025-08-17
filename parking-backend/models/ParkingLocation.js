@@ -50,6 +50,29 @@ const parkingLocationSchema = new mongoose.Schema(
       required: [true, "Hourly rate is required"],
       min: [0, "Hourly rate cannot be negative"],
     },
+    rate: {
+      base: {
+        type: Number,
+        required: [true, "Base rate is required"],
+        min: [0, "Base rate cannot be negative"],
+      },
+      discount: {
+        type: Number,
+        default: 0,
+        min: [0, "Discount cannot be negative"],
+        max: [50, "Discount cannot exceed 50%"],
+      },
+    },
+    images: {
+      type: [String],
+      default: ["/images/default-parking.jpg"],
+      validate: {
+        validator: function(images) {
+          return images.length <= 3;
+        },
+        message: "Maximum 3 images allowed",
+      },
+    },
     operatingHours: {
       start: {
         type: String,
@@ -240,6 +263,14 @@ parkingLocationSchema.virtual("occupancyPercentage").get(function () {
   return Math.round((occupiedSpaces / this.totalSpaces) * 100);
 });
 
+// Virtual for discounted rate
+parkingLocationSchema.virtual("discountedRate").get(function () {
+  if (!this.rate || !this.rate.base) return this.hourlyRate || 0;
+  const base = this.rate.base;
+  const discount = this.rate.discount || 0;
+  return Math.ceil(base - (base * discount / 100));
+});
+
 // Virtual for available space types
 parkingLocationSchema.virtual("availableSpaceTypes").get(function () {
   const availableTypes = {};
@@ -313,4 +344,4 @@ parkingLocationSchema.statics.findNearby = function (
   });
 };
 
-module.exports = mongoose.model("ParkingLocation", parkingLocationSchema);
+module.exports = mongoose.model("ParkingLocation", parkingLocationSchema, "locations");

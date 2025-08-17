@@ -87,10 +87,7 @@ const ParkingMarketingCard = ({
             {getCategoryIcon(category)} {getCategoryLabel(category)}
           </div>
 
-          {/* Premium Badge if applicable */}
-          {marketing?.marketingTags?.includes('Premium') && (
-            <div className="premium-badge">👑 PREMIUM</div>
-          )}
+          {/* Premium badge removed */}
         </div>
       </div>
 
@@ -110,16 +107,7 @@ const ParkingMarketingCard = ({
             <span className="price-value">रु{actualPricing.hourlyRate}</span>
             <span className="price-unit">/hour</span>
           </div>
-          {actualPricing.studentDiscount > 0 && (
-            <div className="price-discount">
-              🎓 {Math.round(actualPricing.studentDiscount * 100)}% off for students
-            </div>
-          )}
-          {actualPricing.touristPackage && (
-            <div className="price-package">
-              🎒 Tourist package: ₹{actualPricing.touristPackage}
-            </div>
-          )}
+          {/* Promotional pricing removed */}
         </div>
 
         {/* Key Features */}
@@ -196,12 +184,7 @@ const ParkingMarketingCard = ({
         </button>
       </div>
 
-      {/* Marketing Overlay for Special Offers */}
-      {marketing?.marketingTags?.includes('Special Offer') && (
-        <div className="special-offer-ribbon">
-          🎁 SPECIAL OFFER
-        </div>
-      )}
+      {/* Special offer ribbon removed */}
     </div>
   );
 };
