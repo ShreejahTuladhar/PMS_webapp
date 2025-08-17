@@ -211,12 +211,18 @@ const parkingLocationSchema = new mongoose.Schema(
           "security", // legacy support
           "lighting",  // legacy support
           "covered",
+          "covered_parking", // support for covered_parking
           "ev_charging",
           "car_wash",
           "valet",
           "valet_parking", // legacy support
           "disabled_access",
           "bike_parking",
+          "restroom", // support for restroom facilities
+          "online_booking", // support for online booking
+          "smart_parking", // support for smart parking
+          "24_hour", // support for 24 hour access
+          "attendant", // support for parking attendant
         ],
       },
     ],

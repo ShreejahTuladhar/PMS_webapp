@@ -7,7 +7,7 @@ import MapView from './MapView';
 import ParkingList from './ParkingList';
 import PremiumLocationBanner from './PremiumLocationBanner';
 import AuthModal from './auth/AuthModal';
-import BookingModal from './booking/BookingModal';
+import PaymentFlow from './booking/PaymentFlow';
 import BookingConfirmation from './booking/BookingConfirmation';
 import Footer from './Footer';
 import { locationService } from '../services';
@@ -603,7 +603,7 @@ function Home({ focusSearch = false }) {
         defaultTab="login"
       />
       
-      <BookingModal 
+      <PaymentFlow 
         isOpen={isBookingModalOpen}
         onClose={closeBookingModal}
         parkingSpot={parkingSpotToBook}
