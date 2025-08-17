@@ -180,6 +180,7 @@ const userSchema = new mongoose.Schema(
     },
   },
   {
+    //automatic timestamps for createdAt and updatedAt
     timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },

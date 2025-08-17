@@ -11,7 +11,6 @@ import ClientDashboard from './components/dashboard/client/ClientDashboard';
 import SuperAdminDashboard from './components/dashboard/superadmin/SuperAdminDashboard';
 import FullScreenMapPage from './components/FullScreenMapPage';
 import ProtectedRoute from './components/ProtectedRoute';
-import NotFound from './components/common/NotFound';
 
 function App() {
   return (
@@ -19,7 +18,7 @@ function App() {
       <AuthProvider>
         <BookingProvider>
           <Router>
-            <div className="min-h-screen">
+            <div className="min-h-screen bg-gray-50">
               <Header />
               <Routes>
                 <Route path="/" element={<Home />} />
@@ -29,7 +28,7 @@ function App() {
                 <Route 
                   path="/dashboard" 
                   element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={['customer', 'user']}>
                       <UserDashboard />
                     </ProtectedRoute>
                   } 
@@ -37,11 +36,12 @@ function App() {
                 <Route 
                   path="/client-dashboard" 
                   element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={['client', 'parking_owner']}>
                       <ClientDashboard />
                     </ProtectedRoute>
                   } 
                 />
+<<<<<<< HEAD
                 <Route 
                   path="/super-admin" 
                   element={
@@ -51,6 +51,8 @@ function App() {
                   } 
                 />
                 <Route path="*" element={<NotFound />} /> 
+=======
+>>>>>>> 8654ef5aee37c86942b3385428e2b2764fa505d0
               </Routes>
             </div>
           </Router>

@@ -75,12 +75,9 @@ export function AuthProvider({ children }) {
       payload: { user, token }
     });
 
-    // Redirect to appropriate dashboard based on user role
+    // Redirect to unified dashboard
     if (navigate) {
-      const dashboardPath = user.role === 'client' || user.role === 'parking_owner' 
-        ? '/client-dashboard' 
-        : '/dashboard';
-      navigate(dashboardPath);
+      navigate('/dashboard');
     }
   };
 
