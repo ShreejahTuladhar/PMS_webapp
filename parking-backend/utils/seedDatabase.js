@@ -157,7 +157,7 @@ const createParkingLocations = async () => {
       amenities: ["cctv", "security_guard", "covered"],
       currentStatus: "open",
     },
-    // Thamel Tourist Area
+    // Thamel Tourist Area - Main Locations
     {
       name: "Thamel Central Parking",
       address: "Thamel Marg, Kathmandu 44600, Nepal",
@@ -176,6 +176,166 @@ const createParkingLocations = async () => {
       description:
         "Prime location parking in Thamel with easy access to restaurants, hotels, and shops.",
       amenities: ["cctv", "security_guard", "bike_parking"],
+      currentStatus: "open",
+    },
+    {
+      name: "Thamel Sanchayakosh Gate Parking",
+      address: "Sanchayakosh Gate, Thamel, Kathmandu 44600, Nepal",
+      coordinates: {
+        latitude: 27.7140,
+        longitude: 85.3115,
+      },
+      totalSpaces: 45,
+      availableSpaces: 32,
+      hourlyRate: 60,
+      operatingHours: {
+        start: "06:00",
+        end: "22:00",
+      },
+      contactNumber: "+977-1-4123460",
+      description:
+        "Designated temporary parking area near Sanchayakosh Gate with easy access to Thamel's main attractions.",
+      amenities: ["cctv", "security_guard"],
+      currentStatus: "open",
+    },
+    {
+      name: "Garden of Dreams Parking",
+      address: "Kaiser Mahal, Thamel, Kathmandu 44600, Nepal",
+      coordinates: {
+        latitude: 27.7158,
+        longitude: 85.3140,
+      },
+      totalSpaces: 35,
+      availableSpaces: 18,
+      hourlyRate: 80,
+      operatingHours: {
+        start: "06:00",
+        end: "20:00",
+      },
+      contactNumber: "+977-1-4123461",
+      description:
+        "Premium parking near Garden of Dreams with covered spaces and valet service.",
+      amenities: ["cctv", "security_guard", "covered", "valet"],
+      currentStatus: "open",
+    },
+    {
+      name: "Chaksibari Marg Parking",
+      address: "Chaksibari Marg, Thamel, Kathmandu 44600, Nepal",
+      coordinates: {
+        latitude: 27.7145,
+        longitude: 85.3130,
+      },
+      totalSpaces: 25,
+      availableSpaces: 15,
+      hourlyRate: 70,
+      operatingHours: {
+        start: "07:00",
+        end: "21:00",
+      },
+      contactNumber: "+977-1-4123462",
+      description:
+        "Small parking facility on Chaksibari Marg with bike parking available.",
+      amenities: ["bike_parking", "security_guard"],
+      currentStatus: "open",
+    },
+    {
+      name: "Mandala Street Parking",
+      address: "Mandala Street, Thamel, Kathmandu 44600, Nepal",
+      coordinates: {
+        latitude: 27.7148,
+        longitude: 85.3128,
+      },
+      totalSpaces: 30,
+      availableSpaces: 20,
+      hourlyRate: 65,
+      operatingHours: {
+        start: "00:00",
+        end: "23:59",
+      },
+      contactNumber: "+977-1-4123463",
+      description:
+        "24-hour underground parking facility on Mandala Street with EV charging stations.",
+      amenities: ["cctv", "security_guard", "ev_charging", "covered"],
+      currentStatus: "open",
+    },
+    {
+      name: "Hotel Yak & Yeti Parking",
+      address: "Durbar Marg, Near Thamel, Kathmandu 44600, Nepal",
+      coordinates: {
+        latitude: 27.7135,
+        longitude: 85.3168,
+      },
+      totalSpaces: 60,
+      availableSpaces: 42,
+      hourlyRate: 90,
+      operatingHours: {
+        start: "00:00",
+        end: "23:59",
+      },
+      contactNumber: "+977-1-4123464",
+      description:
+        "Luxury hotel parking with premium amenities including car wash and valet service.",
+      amenities: ["cctv", "security_guard", "covered", "valet", "car_wash"],
+      currentStatus: "open",
+    },
+    {
+      name: "Thamel Eco Resort Parking",
+      address: "Paknajol, Thamel, Kathmandu 44600, Nepal",
+      coordinates: {
+        latitude: 27.7162,
+        longitude: 85.3105,
+      },
+      totalSpaces: 40,
+      availableSpaces: 28,
+      hourlyRate: 55,
+      operatingHours: {
+        start: "06:00",
+        end: "22:00",
+      },
+      contactNumber: "+977-1-4123465",
+      description:
+        "Eco-friendly parking facility with solar-powered EV charging stations.",
+      amenities: ["ev_charging", "bike_parking", "security_guard"],
+      currentStatus: "open",
+    },
+    {
+      name: "Bhagwan Bahal Parking",
+      address: "Bhagwan Bahal, Thamel, Kathmandu 44600, Nepal",
+      coordinates: {
+        latitude: 27.7138,
+        longitude: 85.3118,
+      },
+      totalSpaces: 35,
+      availableSpaces: 22,
+      hourlyRate: 50,
+      operatingHours: {
+        start: "05:30",
+        end: "22:30",
+      },
+      contactNumber: "+977-1-4123466",
+      description:
+        "Budget-friendly parking option in the heart of Thamel with basic security.",
+      amenities: ["security_guard", "bike_parking"],
+      currentStatus: "open",
+    },
+    {
+      name: "Jyatha Thamel Parking",
+      address: "Jyatha, Thamel, Kathmandu 44600, Nepal",
+      coordinates: {
+        latitude: 27.7155,
+        longitude: 85.3112,
+      },
+      totalSpaces: 50,
+      availableSpaces: 35,
+      hourlyRate: 68,
+      operatingHours: {
+        start: "06:00",
+        end: "23:00",
+      },
+      contactNumber: "+977-1-4123467",
+      description:
+        "Multi-level parking facility in Jyatha area with CCTV monitoring and covered spaces.",
+      amenities: ["cctv", "security_guard", "covered", "bike_parking"],
       currentStatus: "open",
     },
     // Durbar Square

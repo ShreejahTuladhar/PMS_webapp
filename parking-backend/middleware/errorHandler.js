@@ -1,12 +1,21 @@
+const { logger } = require("../utils/logger");
+
 const errorHandler = (err, req, res, next) => {
   let error = { ...err };
   error.message = err.message;
 
-  // Log error to console for development
-  if (process.env.NODE_ENV === "development") {
-    console.error("Error Stack:", err.stack);
-    console.error("Error Details:", err);
-  }
+  // Log error with structured logging
+  logger.error("Error Handler", {
+    error: err.message,
+    stack: err.stack,
+    url: req.originalUrl,
+    method: req.method,
+    ip: req.ip,
+    userAgent: req.get('User-Agent'),
+    body: req.body,
+    params: req.params,
+    query: req.query
+  });
 
   // Mongoose bad ObjectId
   if (err.name === "CastError") {

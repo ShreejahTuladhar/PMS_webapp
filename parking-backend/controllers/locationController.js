@@ -326,7 +326,8 @@ const getLocations = async (req, res) => {
       .sort(sort)
       .skip(skip)
       .limit(parseInt(limit))
-      .populate("parkingOwnerId", "firstName lastName email phoneNumber");
+      .populate("parkingOwnerId", "firstName lastName email phoneNumber")
+      .exec();
 
     // Get total count for pagination
     const total = await ParkingLocation.countDocuments(filter);

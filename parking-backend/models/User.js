@@ -6,7 +6,6 @@ const userSchema = new mongoose.Schema(
     username: {
       type: String,
       required: [true, "Username is required"],
-      unique: true,
       trim: true,
       minlength: [3, "Username must be at least 3 characters"],
       maxlength: [50, "Username cannot exceed 50 characters"],
@@ -18,7 +17,6 @@ const userSchema = new mongoose.Schema(
     email: {
       type: String,
       required: [true, "Email is required"],
-      unique: true,
       lowercase: true,
       trim: true,
       match: [
@@ -107,7 +105,7 @@ const userSchema = new mongoose.Schema(
         },
         vehicleType: {
           type: String,
-          enum: ["car", "motorcycle", "bus", "truck"],
+          enum: ["car", "motorcycle", "bus", "truck","van"],
           required: true,
         },
         make: {
@@ -187,9 +185,36 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// Indexes for better performance (unique fields don't need separate index)
+// Indexes for better performance
+userSchema.index({ email: 1 }, { unique: true });
+userSchema.index({ username: 1 }, { unique: true });
 userSchema.index({ role: 1 });
 userSchema.index({ isActive: 1 });
+userSchema.index({ lastLogin: -1 });
+userSchema.index({ createdAt: -1 });
+
+// Compound indexes for common queries
+userSchema.index({ role: 1, isActive: 1 });
+userSchema.index({ email: 1, isActive: 1 });
+
+// Sparse index for assignedLocations (only for parking_admin users)
+userSchema.index({ assignedLocations: 1 }, { sparse: true });
+
+// Text index for search functionality
+userSchema.index({
+  firstName: 'text',
+  lastName: 'text',
+  email: 'text',
+  username: 'text'
+}, {
+  weights: {
+    firstName: 10,
+    lastName: 10,
+    email: 5,
+    username: 5
+  },
+  name: 'user_text_index'
+});
 
 // Virtual for full name
 userSchema.virtual("fullName").get(function () {
