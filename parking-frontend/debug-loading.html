@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug ParkSathi Loading</title>
+</head>
+<body>
+    <h1>🔧 Debug ParkSathi Loading Screen</h1>
+    <p>Open browser developer tools (F12) and watch the console while testing:</p>
+    
+    <button onclick="openWithDebug()" style="
+        background: #ef4444;
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        margin: 10px;
+    ">
+        🐛 Open with Console Debugging
+    </button>
+    
+    <div style="margin-top: 20px; padding: 20px; background: #fef2f2; border: 2px solid #ef4444; border-radius: 10px;">
+        <h3>🔍 What to Watch For:</h3>
+        <ol>
+            <li><strong>Phase progression:</strong> Should see "🎬 Starting phase X" messages</li>
+            <li><strong>Completion call:</strong> Should see "🎬 All phases completed! Calling onComplete..."</li>
+            <li><strong>App transition:</strong> Should see "🚀 App.jsx: handleLoadingComplete called!"</li>
+            <li><strong>Final transition:</strong> Should see "🚀 App.jsx: Setting appInitialized to true"</li>
+        </ol>
+        
+        <h3>🚨 If It's Broken:</h3>
+        <ul>
+            <li>Check which phase it stops at</li>
+            <li>Look for error messages in red</li>
+            <li>Note if onComplete callback is missing</li>
+            <li>Check if the timing is correct (12 seconds total)</li>
+        </ul>
+    </div>
+
+    <script>
+        function openWithDebug() {
+            console.log('🔧 Opening ParkSathi with debug mode...');
+            window.open('http://localhost:3002', '_blank');
+        }
+    </script>
+</body>
+</html>

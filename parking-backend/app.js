@@ -72,6 +72,7 @@ app.get("/api", (req, res) => {
       locations: "/api/locations",
       bookings: "/api/bookings",
       payments: "/api/payments",
+      analytics: "/api/analytics",
     },
   });
 });
@@ -87,6 +88,7 @@ app.use("/api/super-admin", require("./routes/superAdmin"));
 app.use("/api/bookings", require("./routes/bookings")); 
 app.use("/api/payments", require("./routes/payments"));
 app.use("/api/locations", require("./routes/location"));
+app.use("/api/analytics", require("./routes/analytics"));
 
 // Error handling middleware
 app.use((err, req, res, next) => {

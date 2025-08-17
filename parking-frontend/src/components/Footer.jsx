@@ -11,17 +11,69 @@ function Footer() {
           <div className="flex items-center space-x-3 group">
             <div className="relative">
               <div className="p-2 rounded-xl bg-white/90 shadow-md transform transition-all duration-300 group-hover:scale-105">
-                <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M9 21c0 .5.4 1 1 1h4c.6 0 1-.5 1-1v-1H9v1zm3-19C8.1 2 5 5.1 5 9c0 2.4 1.2 4.5 3 5.7V17c0 .5.4 1 1 1h6c.6 0 1-.5 1-1v-2.3c1.8-1.2 3-3.3 3-5.7 0-3.9-3.1-7-7-7z"/>
+                <svg
+                  width="20"
+                  height="16"
+                  viewBox="0 0 40 32"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-5 h-4"
+                >
+                  {/* Mobile Phone (laying flat) */}
+                  <rect
+                    x="4"
+                    y="16"
+                    width="32"
+                    height="12"
+                    rx="3"
+                    ry="3"
+                    fill="#1E3A8A"
+                  />
+                  
+                  {/* Phone Screen */}
+                  <rect
+                    x="6"
+                    y="18"
+                    width="28"
+                    height="8"
+                    rx="1"
+                    ry="1"
+                    fill="#3B82F6"
+                  />
+                  
+                  {/* Car Body (on top of phone) */}
+                  <rect
+                    x="14"
+                    y="8"
+                    width="12"
+                    height="6"
+                    rx="2"
+                    ry="2"
+                    fill="#2563EB"
+                  />
+                  
+                  {/* Car Wheels */}
+                  <circle
+                    cx="17"
+                    cy="16"
+                    r="2"
+                    fill="#374151"
+                  />
+                  <circle
+                    cx="23"
+                    cy="16"
+                    r="2"
+                    fill="#374151"
+                  />
                 </svg>
               </div>
               <div className="absolute -inset-1 bg-gradient-to-r from-yellow-200/30 to-blue-200/30 rounded-xl blur-sm opacity-0 group-hover:opacity-60 transition-opacity duration-300"></div>
             </div>
             <div>
               <h3 className="text-xl font-bold text-gray-700">
-                Park<span className="text-blue-600">Smart</span>
+                Park<span className="text-blue-600">Sathi</span>
               </h3>
-              <p className="text-xs text-gray-500 font-medium">  Smart Parking Solutions</p>
+              <p className="text-xs text-gray-500 font-medium">Smart Parking Solutions</p>
             </div>
           </div>
 

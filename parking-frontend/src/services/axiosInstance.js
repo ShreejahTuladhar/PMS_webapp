@@ -20,7 +20,7 @@ const isTokenExpired = (token) => {
 
 // Create axios instance
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api/v1",
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8080/api",
   withCredentials: true,
   timeout: 30000, // 30 seconds timeout
   headers: {

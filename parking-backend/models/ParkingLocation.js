@@ -17,13 +17,22 @@ const parkingLocationSchema = new mongoose.Schema(
     coordinates: {
       latitude: {
         type: Number,
-        required: [true, "Latitude is required"],
         min: [-90, "Latitude must be between -90 and 90"],
         max: [90, "Latitude must be between -90 and 90"],
       },
       longitude: {
         type: Number,
-        required: [true, "Longitude is required"],
+        min: [-180, "Longitude must be between -180 and 180"],
+        max: [180, "Longitude must be between -180 and 180"],
+      },
+      // Legacy support for lat/lng format
+      lat: {
+        type: Number,
+        min: [-90, "Latitude must be between -90 and 90"],
+        max: [90, "Latitude must be between -90 and 90"],
+      },
+      lng: {
+        type: Number,
         min: [-180, "Longitude must be between -180 and 180"],
         max: [180, "Longitude must be between -180 and 180"],
       },
@@ -199,10 +208,14 @@ const parkingLocationSchema = new mongoose.Schema(
         enum: [
           "cctv",
           "security_guard",
+          "security", // legacy support
+          "lighting",  // legacy support
           "covered",
           "ev_charging",
           "car_wash",
           "valet",
+          "valet_parking", // legacy support
+          "disabled_access",
           "bike_parking",
         ],
       },
@@ -214,7 +227,7 @@ const parkingLocationSchema = new mongoose.Schema(
     // Operating status
     currentStatus: {
       type: String,
-      enum: ["open", "closed", "maintenance", "full"],
+      enum: ["open", "closed", "maintenance", "full", "active"],
       default: "open",
     },
     // Statistics for analytics
@@ -287,7 +300,7 @@ parkingLocationSchema.virtual("availableSpaceTypes").get(function () {
 
 // Method to check if location is currently open
 parkingLocationSchema.methods.isCurrentlyOpen = function () {
-  if (!this.isActive || this.currentStatus !== "open") return false;
+  if (!this.isActive || (this.currentStatus !== "open" && this.currentStatus !== "active")) return false;
 
   const now = new Date();
   const currentTime = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`;

@@ -31,9 +31,9 @@ const startServer = async () => {
       console.log(`Health Check: http://localhost:${PORT}/health`);
       console.log(`API Info: http://localhost:${PORT}/api`);
       
-      // Start system health monitoring
-      console.log("Starting system health monitoring...");
-      systemHealthService.startMonitoring(30000); // Monitor every 30 seconds
+      // System health monitoring disabled to prevent memory issues
+      // console.log("Starting system health monitoring...");
+      // systemHealthService.startMonitoring(30000); // Monitor every 30 seconds
     });
   } catch (error) {
     console.error("Failed to start server:", error.message);
@@ -46,7 +46,7 @@ startServer();
 // Graceful shutdown
 process.on("SIGTERM", () => {
   console.log("SIGTERM received. Shutting down gracefully...");
-  systemHealthService.stopMonitoring();
+  // systemHealthService.stopMonitoring();
   mongoose.connection.close(() => {
     console.log("MongoDB connection closed.");
     process.exit(0);
@@ -55,7 +55,7 @@ process.on("SIGTERM", () => {
 
 process.on("SIGINT", () => {
   console.log("SIGINT received. Shutting down gracefully...");
-  systemHealthService.stopMonitoring();
+  // systemHealthService.stopMonitoring();
   mongoose.connection.close(() => {
     console.log("MongoDB connection closed.");
     process.exit(0);

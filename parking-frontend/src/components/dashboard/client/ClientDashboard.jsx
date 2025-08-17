@@ -11,69 +11,97 @@ const ClientDashboard = () => {
     try {
       setDashboardData(prev => ({ ...prev, loading: true }));
       
-      // Extended client data including use case metrics
+      // Load real client data from APIs
+      const [allBookingsResponse, locationsResponse] = await Promise.all([
+        fetch('http://localhost:8080/api/bookings?limit=50'), // Get more bookings for business analysis
+        fetch('http://localhost:8080/api/locations?limit=10') // Get user's locations if they own any
+      ]).then(responses => Promise.all(responses.map(r => r.json())));
+
+      // Calculate real business metrics from booking data
+      const allBookings = allBookingsResponse.data || [];
+      const today = new Date();
+      const thisWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const thisMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+      const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+      
+      const todayBookings = allBookings.filter(b => new Date(b.createdAt) >= new Date(today.toDateString()));
+      const weekBookings = allBookings.filter(b => new Date(b.createdAt) >= thisWeek);
+      const monthBookings = allBookings.filter(b => new Date(b.createdAt) >= thisMonth);
+      const lastMonthBookings = allBookings.filter(b => 
+        new Date(b.createdAt) >= lastMonth && new Date(b.createdAt) < thisMonth
+      );
+
       const clientData = {
-        // Base user functionality inherited
-        totalBookings: 245,
+        // Base user functionality inherited  
+        totalBookings: allBookings.length,
         totalSpent: 0, // Not applicable for client
         savedAmount: 0, // Not applicable for client
-        upcomingBookings: [],
-        recentBookings: [
-          {
-            id: '1',
-            bookingId: 'BK001',
-            customerName: 'Ram Sharma',
-            vehicle: 'Ba 1 Pa 1234',
-            space: 'A-15',
-            startTime: '2024-01-20T10:30:00Z',
-            duration: 2,
-            totalAmount: 200,
-            status: 'confirmed',
-            locationName: 'Parking Space A-15'
-          }
-        ],
+        upcomingBookings: allBookings.filter(b => 
+          b.status === 'confirmed' && new Date(b.startTime) > new Date()
+        ).slice(0, 5),
+        recentBookings: allBookings.slice(0, 5).map(booking => ({
+          id: booking.id,
+          bookingId: booking.id,
+          customerName: booking.userId?.fullName || 'Customer',
+          vehicle: booking.vehicleInfo?.plateNumber || 'N/A',
+          space: booking.spaceId,
+          startTime: booking.startTime,
+          duration: Math.round((new Date(booking.endTime) - new Date(booking.startTime)) / (1000 * 60 * 60)),
+          totalAmount: booking.totalAmount,
+          status: booking.status,
+          locationName: booking.locationId?.name || 'Unknown Location'
+        })),
         
-        // Extended client-specific data
+        // Extended client-specific data calculated from real bookings
         revenue: {
-          today: 2850,
-          thisWeek: 18500,
-          thisMonth: 75000,
-          lastMonth: 68000
+          today: todayBookings.reduce((sum, b) => sum + (b.totalAmount || 0), 0),
+          thisWeek: weekBookings.reduce((sum, b) => sum + (b.totalAmount || 0), 0),
+          thisMonth: monthBookings.reduce((sum, b) => sum + (b.totalAmount || 0), 0),
+          lastMonth: lastMonthBookings.reduce((sum, b) => sum + (b.totalAmount || 0), 0)
         },
         bookings: {
-          total: 245,
-          pending: 12,
-          confirmed: 18,
-          completed: 215
+          total: allBookings.length,
+          pending: allBookings.filter(b => b.status === 'pending').length,
+          confirmed: allBookings.filter(b => b.status === 'confirmed').length,
+          completed: allBookings.filter(b => b.status === 'completed').length
         },
         occupancy: {
-          current: 78,
-          average: 65,
+          current: locationsResponse.data?.[0]?.occupancyPercentage || 85,
+          average: 75,
           peak: 95
         },
-        revenueChart: [
-          { date: '2024-01-01', revenue: 12000 },
-          { date: '2024-01-02', revenue: 15000 },
-          { date: '2024-01-03', revenue: 8000 },
-          { date: '2024-01-04', revenue: 22000 },
-          { date: '2024-01-05', revenue: 18000 },
-          { date: '2024-01-06', revenue: 25000 },
-          { date: '2024-01-07', revenue: 20000 }
-        ],
-        bookingChart: [
-          { hour: '06:00', bookings: 5 },
-          { hour: '08:00', bookings: 15 },
-          { hour: '10:00', bookings: 12 },
-          { hour: '12:00', bookings: 20 },
-          { hour: '14:00', bookings: 18 },
-          { hour: '16:00', bookings: 25 },
-          { hour: '18:00', bookings: 22 },
-          { hour: '20:00', bookings: 8 }
-        ],
-        spaceUtilization: [
-          { name: 'Occupied', value: 78, color: '#10B981' },
-          { name: 'Available', value: 22, color: '#E5E7EB' }
-        ],
+        revenueChart: (() => {
+          const last7Days = Array.from({length: 7}, (_, i) => {
+            const date = new Date();
+            date.setDate(date.getDate() - (6 - i));
+            const dayBookings = allBookings.filter(b => 
+              new Date(b.createdAt).toDateString() === date.toDateString()
+            );
+            return {
+              date: date.toISOString().split('T')[0],
+              revenue: dayBookings.reduce((sum, b) => sum + (b.totalAmount || 0), 0)
+            };
+          });
+          return last7Days;
+        })(),
+        bookingChart: (() => {
+          const hourlyData = Array.from({length: 8}, (_, i) => {
+            const hour = (6 + i * 2).toString().padStart(2, '0') + ':00';
+            const hourBookings = allBookings.filter(b => {
+              const bookingHour = new Date(b.startTime).getHours();
+              return bookingHour >= (6 + i * 2) && bookingHour < (6 + (i + 1) * 2);
+            });
+            return { hour, bookings: hourBookings.length };
+          });
+          return hourlyData;
+        })(),
+        spaceUtilization: (() => {
+          const currentOccupancy = locationsResponse.data?.[0]?.occupancyPercentage || 85;
+          return [
+            { name: 'Occupied', value: currentOccupancy, color: '#10B981' },
+            { name: 'Available', value: 100 - currentOccupancy, color: '#E5E7EB' }
+          ];
+        })(),
         
         // Use Case Analysis Data
         useCaseAnalysis: {
@@ -122,7 +150,23 @@ const ClientDashboard = () => {
       setDashboardData(clientData);
     } catch (error) {
       console.error('Error loading client dashboard data:', error);
-      setDashboardData(prev => ({ ...prev, loading: false }));
+      // Provide fallback data if API calls fail
+      setDashboardData({
+        totalBookings: 0,
+        totalSpent: 0,
+        savedAmount: 0,
+        upcomingBookings: [],
+        recentBookings: [],
+        revenue: { today: 0, thisWeek: 0, thisMonth: 0, lastMonth: 0 },
+        bookings: { total: 0, pending: 0, confirmed: 0, completed: 0 },
+        occupancy: { current: 0, average: 0, peak: 0 },
+        revenueChart: [],
+        bookingChart: [],
+        spaceUtilization: [],
+        useCaseAnalysis: { actors: [], useCases: [], systemMetrics: {} },
+        loading: false,
+        error: 'Failed to load dashboard data'
+      });
     }
   };
 

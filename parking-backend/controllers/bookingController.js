@@ -53,19 +53,37 @@ const createBooking = async (req, res) => {
     }
 
     // Validate space exists and is available
-    const space = location.spaces.find((s) => s.spaceId === spaceId);
-    if (!space) {
-      return res.status(404).json({
-        success: false,
-        message: "Parking space not found",
-      });
-    }
+    let space = null;
+    if (location.spaces && location.spaces.length > 0) {
+      space = location.spaces.find((s) => s.spaceId === spaceId);
+      if (!space) {
+        return res.status(404).json({
+          success: false,
+          message: "Parking space not found",
+        });
+      }
 
-    if (space.status !== "available") {
-      return res.status(400).json({
-        success: false,
-        message: `Parking space is ${space.status}`,
-      });
+      if (space.status !== "available") {
+        return res.status(400).json({
+          success: false,
+          message: `Parking space is ${space.status}`,
+        });
+      }
+    } else {
+      // Fallback for locations without predefined spaces (demo mode)
+      if (location.availableSpaces <= 0) {
+        return res.status(400).json({
+          success: false,
+          message: "No available parking spaces",
+        });
+      }
+      // Create virtual space for demo
+      space = {
+        spaceId: spaceId,
+        type: "standard",
+        status: "available",
+        vehicleType: vehicleInfo.vehicleType
+      };
     }
 
     // Validate time slots
@@ -149,7 +167,14 @@ const createBooking = async (req, res) => {
 
     // Update space status if payment is completed (cash payment)
     if (paymentMethod === "cash") {
-      await location.updateSpaceStatus(spaceId, "reserved");
+      // Only update space status if location has predefined spaces
+      if (location.spaces && location.spaces.length > 0) {
+        await location.updateSpaceStatus(spaceId, "reserved");
+      } else {
+        // For locations without predefined spaces, just reduce available count
+        location.availableSpaces = Math.max(0, location.availableSpaces - 1);
+        await location.save();
+      }
 
       // 🔥 REAL-TIME UPDATES
       emitSpaceUpdate(locationId, {

@@ -23,7 +23,7 @@ const kathmanduAreas = {
 // Debug log for kathmanduAreas
 console.log('🗺️ KATHMANDU AREAS COORDINATES (defined in SearchSection.jsx):', kathmanduAreas);
 
-const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
+const SearchSection = ({ onSearch, onRadiusChange, radius, focusSearch = false }) => {
   const [location, setLocation] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
@@ -39,6 +39,21 @@ const SearchSection = ({ onSearch, onRadiusChange, radius }) => {
   const suggestionRefs = useRef([]);
   const inputRef = useRef(null);
   const enhancedSearchRef = useRef(null);
+
+  // Auto-focus search input after loading screen
+  useEffect(() => {
+    if (focusSearch && inputRef.current) {
+      // Add a small delay to ensure the component is fully rendered
+      setTimeout(() => {
+        inputRef.current?.focus();
+        // Scroll to the search section smoothly
+        inputRef.current?.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center' 
+        });
+      }, 500);
+    }
+  }, [focusSearch]);
 
   // Generate all searchable locations using dynamic and static data
   const getAllSearchableLocations = useCallback(() => {

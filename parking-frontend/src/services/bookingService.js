@@ -8,8 +8,8 @@ class BookingService {
       if (result.success) {
         return {
           success: true,
-          booking: result.data.booking,
-          message: result.data.message || 'Booking created successfully',
+          booking: result.data,
+          message: result.message || 'Booking created successfully',
         };
       } else {
         return {
@@ -32,8 +32,8 @@ class BookingService {
       if (result.success) {
         return {
           success: true,
-          bookings: result.data.bookings,
-          pagination: result.data.pagination,
+          bookings: result.data,
+          pagination: result.pagination,
         };
       } else {
         return {

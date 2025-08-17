@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useBooking } from '../../hooks/useBooking';
+import toast from 'react-hot-toast';
+import api from '../../services/api';
 
 function BookingModal({ isOpen, onClose, parkingSpot }) {
   const { user } = useAuth();
@@ -8,23 +10,87 @@ function BookingModal({ isOpen, onClose, parkingSpot }) {
   
   const [duration, setDuration] = useState(2);
   const [vehicleType, setVehicleType] = useState('car');
-  const [paymentMethod, setPaymentMethod] = useState('card');
+  const [paymentMethod, setPaymentMethod] = useState('cash');
+  const [plateNumber, setPlateNumber] = useState('');
+  const [spaceId, setSpaceId] = useState('A001');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [errors, setErrors] = useState({});
 
   if (!isOpen || !parkingSpot) return null;
 
   const hourlyRate = parkingSpot.vehicleTypes[vehicleType] || parkingSpot.hourlyRate;
   const totalCost = hourlyRate * duration;
 
-  const handleBooking = async () => {
-    setIsProcessing(true);
+  const validateForm = () => {
+    const newErrors = {};
     
-    // Simulate payment processing
-    setTimeout(() => {
-      startBooking(parkingSpot, duration, vehicleType);
+    if (!plateNumber.trim()) {
+      newErrors.plateNumber = 'Vehicle plate number is required';
+    } else if (plateNumber.length < 2 || plateNumber.length > 15) {
+      newErrors.plateNumber = 'Plate number must be between 2 and 15 characters';
+    }
+    
+    if (!spaceId.trim()) {
+      newErrors.spaceId = 'Please select a parking space';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleBooking = async () => {
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsProcessing(true);
+    setErrors({});
+    
+    try {
+      const now = new Date();
+      const startTime = new Date(now.getTime() + 10 * 60000); // 10 minutes from now
+      const endTime = new Date(startTime.getTime() + duration * 60 * 60000); // duration in hours
+      
+      const bookingData = {
+        locationId: parkingSpot.id || parkingSpot._id,
+        spaceId: spaceId,
+        vehicleInfo: {
+          plateNumber: plateNumber.trim(),
+          vehicleType: vehicleType
+        },
+        startTime: startTime.toISOString(),
+        endTime: endTime.toISOString(),
+        paymentMethod: paymentMethod,
+        notes: `ParkSathi booking for ${duration} hour${duration > 1 ? 's' : ''}`
+      };
+      
+      const response = await api.post('/bookings', bookingData);
+      
+      if (response.data.success) {
+        toast.success('Booking confirmed successfully!');
+        startBooking(parkingSpot, duration, vehicleType);
+        onClose();
+      } else {
+        toast.error(response.data.message || 'Booking failed');
+      }
+    } catch (error) {
+      console.error('Booking error:', error);
+      if (error.status === 400 && error.data?.errors) {
+        const validationErrors = {};
+        error.data.errors.forEach(err => {
+          if (err.path?.includes('plateNumber')) {
+            validationErrors.plateNumber = err.msg;
+          } else if (err.path?.includes('spaceId')) {
+            validationErrors.spaceId = err.msg;
+          }
+        });
+        setErrors(validationErrors);
+      } else {
+        toast.error(error.message || 'Failed to create booking. Please try again.');
+      }
+    } finally {
       setIsProcessing(false);
-      onClose();
-    }, 2000);
+    }
   };
 
   return (
@@ -97,7 +163,7 @@ function BookingModal({ isOpen, onClose, parkingSpot }) {
                 Payment Method
               </label>
               <div className="space-y-2">
-                {['card', 'esewa', 'khalti', 'cash'].map(method => (
+                {['paypal', 'esewa', 'cash'].map(method => (
                   <label key={method} className="flex items-center">
                     <input
                       type="radio"
@@ -109,12 +175,55 @@ function BookingModal({ isOpen, onClose, parkingSpot }) {
                       disabled={isProcessing}
                     />
                     <span className="text-sm text-gray-700 capitalize">
-                      {method === 'esewa' ? 'eSewa' : method === 'khalti' ? 'Khalti' : method}
-                      {method === 'card' && ' (Credit/Debit)'}
+                      {method === 'esewa' ? 'eSewa' : method === 'paypal' ? 'PayPal' : method}
+                      {method === 'paypal' && ' (Credit/Debit)'}
                     </span>
                   </label>
                 ))}
               </div>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Vehicle Plate Number *
+              </label>
+              <input
+                type="text"
+                value={plateNumber}
+                onChange={(e) => setPlateNumber(e.target.value.toUpperCase())}
+                placeholder="e.g., BA-1-PA-1234"
+                className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                  errors.plateNumber ? 'border-red-300' : 'border-gray-300'
+                }`}
+                disabled={isProcessing}
+                maxLength={15}
+              />
+              {errors.plateNumber && (
+                <p className="text-red-500 text-xs mt-1">{errors.plateNumber}</p>
+              )}
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Parking Space *
+              </label>
+              <select
+                value={spaceId}
+                onChange={(e) => setSpaceId(e.target.value)}
+                className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                  errors.spaceId ? 'border-red-300' : 'border-gray-300'
+                }`}
+                disabled={isProcessing}
+              >
+                {['A001', 'A002', 'A003', 'B001', 'B002', 'B003', 'C001', 'C002'].map(space => (
+                  <option key={space} value={space}>
+                    Space {space}
+                  </option>
+                ))}
+              </select>
+              {errors.spaceId && (
+                <p className="text-red-500 text-xs mt-1">{errors.spaceId}</p>
+              )}
             </div>
           </div>
 
@@ -161,7 +270,7 @@ function BookingModal({ isOpen, onClose, parkingSpot }) {
         <div className="px-6 pb-6">
           <button
             onClick={handleBooking}
-            disabled={isProcessing || parkingSpot.availability === 0}
+            disabled={isProcessing || parkingSpot.availability === 0 || !plateNumber.trim()}
             className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200"
           >
             {isProcessing ? (

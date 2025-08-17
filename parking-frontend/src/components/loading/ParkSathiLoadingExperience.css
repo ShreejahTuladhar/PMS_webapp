@@ -1,0 +1,498 @@
+/**
+ * ParkSathi Loading Experience Styles
+ * The ultimate cinematic loading experience
+ * Author: Claude & Shreeraj Tuladhar
+ */
+
+.parksathi-loading-experience {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: radial-gradient(ellipse at center, #1e293b 0%, #0f172a 100%);
+  overflow: hidden;
+  z-index: 10000;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Stage Indicator */
+.stage-indicator {
+  position: absolute;
+  top: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+}
+
+.stage-progress {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 50px;
+  padding: 1rem 2rem;
+  backdrop-filter: blur(20px);
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.stage-step {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+}
+
+.stage-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: -0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0.5rem;
+  height: 1px;
+  background: rgba(94, 120, 153, 0.3);
+}
+
+.step-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(51, 65, 85, 0.5);
+  border: 2px solid rgba(59, 130, 246, 0.3);
+  transition: all 0.3s ease;
+}
+
+.stage-step.active .step-indicator {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.stage-step.completed .step-indicator {
+  background: #10b981;
+  border-color: #10b981;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { 
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+    transform: scale(1);
+  }
+  50% { 
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.8);
+    transform: scale(1.1);
+  }
+}
+
+.step-label {
+  color: #94a3b8;
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: color 0.3s ease;
+}
+
+.stage-step.active .step-label {
+  color: #3b82f6;
+  font-weight: 600;
+}
+
+.stage-step.completed .step-label {
+  color: #10b981;
+}
+
+/* Main Content Area */
+.stage-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+/* Brand Introduction */
+.brand-introduction {
+  text-align: center;
+  color: white;
+  z-index: 10;
+}
+
+.brand-logo-large {
+  font-size: 8rem;
+  margin-bottom: 2rem;
+  filter: drop-shadow(0 0 50px rgba(59, 130, 246, 0.6));
+}
+
+.brand-title {
+  font-size: 4rem;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6, #06b6d4);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 40px rgba(59, 130, 246, 0.3);
+}
+
+.brand-subtitle {
+  font-size: 1.5rem;
+  color: #94a3b8;
+  margin: 0 0 3rem 0;
+  font-weight: 300;
+  letter-spacing: 0.05em;
+}
+
+.brand-features {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.feature {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  color: #e2e8f0;
+  font-size: 1.125rem;
+  font-weight: 500;
+  padding: 0.75rem 1.5rem;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 12px;
+  backdrop-filter: blur(20px);
+}
+
+/* Data Processing Stage */
+.data-processing-stage {
+  text-align: center;
+  color: white;
+  z-index: 10;
+}
+
+.processing-header h2 {
+  font-size: 2.5rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  color: #e2e8f0;
+}
+
+.processing-header p {
+  font-size: 1.125rem;
+  color: #94a3b8;
+  margin: 0 0 3rem 0;
+}
+
+.processing-visualization {
+  position: relative;
+  width: 500px;
+  height: 300px;
+  margin: 0 auto;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 20px;
+  backdrop-filter: blur(20px);
+  overflow: hidden;
+}
+
+.data-flow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.data-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: #3b82f6;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.8);
+}
+
+.processing-stats {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 2rem;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-number {
+  display: block;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #3b82f6;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.stat-label {
+  display: block;
+  font-size: 0.875rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 0.25rem;
+}
+
+/* Route Optimization Stage */
+.route-optimization-stage {
+  text-align: center;
+  color: white;
+  z-index: 10;
+}
+
+.optimization-header h2 {
+  font-size: 2.5rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  color: #e2e8f0;
+}
+
+.optimization-header p {
+  font-size: 1.125rem;
+  color: #94a3b8;
+  margin: 0 0 3rem 0;
+}
+
+.route-visualization {
+  width: 500px;
+  height: 300px;
+  margin: 0 auto 2rem auto;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 20px;
+  backdrop-filter: blur(20px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+.route-map {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.3));
+}
+
+.optimization-metrics {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+}
+
+.metric {
+  text-align: center;
+}
+
+.metric-value {
+  display: block;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #06b6d4;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.metric-label {
+  display: block;
+  font-size: 0.875rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 0.25rem;
+}
+
+/* System Ready Stage */
+.system-ready-stage {
+  text-align: center;
+  color: white;
+  z-index: 10;
+}
+
+.ready-indicator {
+  font-size: 6rem;
+  margin-bottom: 2rem;
+  filter: drop-shadow(0 0 30px rgba(16, 185, 129, 0.6));
+}
+
+.ready-title {
+  font-size: 3rem;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
+  color: #10b981;
+  text-shadow: 0 0 30px rgba(16, 185, 129, 0.3);
+}
+
+.ready-message {
+  font-size: 1.25rem;
+  color: #94a3b8;
+  margin: 0 0 2rem 0;
+}
+
+.countdown {
+  margin-top: 2rem;
+}
+
+.countdown p {
+  font-size: 1rem;
+  color: #3b82f6;
+  font-weight: 500;
+  animation: fade-pulse 1s ease-in-out infinite;
+}
+
+@keyframes fade-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* System Status */
+.system-status {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 2rem;
+  background: rgba(0, 0, 0, 0.9);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 12px;
+  padding: 1rem 2rem;
+  backdrop-filter: blur(20px);
+  z-index: 20;
+}
+
+.status-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.status-label {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+}
+
+.status-value {
+  font-size: 1rem;
+  color: #3b82f6;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.status-value.ready {
+  color: #10b981;
+}
+
+.status-value.loading {
+  color: #f59e0b;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .stage-progress {
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem;
+  }
+  
+  .stage-step:not(:last-child)::after {
+    display: none;
+  }
+  
+  .brand-title {
+    font-size: 3rem;
+  }
+  
+  .brand-logo-large {
+    font-size: 6rem;
+  }
+  
+  .processing-visualization,
+  .route-visualization {
+    width: 90vw;
+    max-width: 400px;
+  }
+  
+  .optimization-metrics {
+    gap: 2rem;
+  }
+  
+  .system-status {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+  }
+  
+  .status-item {
+    flex-direction: row;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .stage-indicator {
+    top: 1rem;
+  }
+  
+  .brand-title {
+    font-size: 2.5rem;
+  }
+  
+  .brand-logo-large {
+    font-size: 5rem;
+  }
+  
+  .brand-subtitle {
+    font-size: 1.25rem;
+  }
+  
+  .processing-header h2,
+  .optimization-header h2 {
+    font-size: 2rem;
+  }
+  
+  .ready-title {
+    font-size: 2.5rem;
+  }
+  
+  .ready-indicator {
+    font-size: 5rem;
+  }
+  
+  .feature {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+  }
+}
+
+/* Performance Optimizations */
+.parksathi-loading-experience * {
+  will-change: transform, opacity;
+}
+
+.data-particle,
+.step-indicator,
+.ready-indicator {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}

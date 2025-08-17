@@ -13,7 +13,7 @@ import Footer from './Footer';
 import { locationService } from '../services';
 import searchHistory from '../utils/searchHistory';
 
-function Home() {
+function Home({ focusSearch = false }) {
   const { isAuthenticated } = useAuth();
   const { currentBooking, bookingStep } = useBooking();
   const location = useLocation();
@@ -437,6 +437,7 @@ function Home() {
           onSearch={handleSearch}
           onRadiusChange={handleRadiusChange}
           radius={searchRadius}
+          focusSearch={focusSearch}
         />
 
         {isSearched && (
