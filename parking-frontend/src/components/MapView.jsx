@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
 import L from 'leaflet';
+import NavigationControls from './navigation/NavigationControls';
+import RouteVisualization from './navigation/RouteVisualization';
 
 // Fix for default markers in react-leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -16,7 +18,7 @@ const getParkingIndicator = () => {
 };
 
 // Create custom parking markers with professional design
-const createParkingIcon = (availability, spot) => {
+const createParkingIcon = (availability, _spot) => {
   const color = availability > 0 ? '#059669' : '#DC2626'; // Professional green or red
   const abbreviation = getParkingIndicator();
   
@@ -127,6 +129,9 @@ const MapView = ({ parkingSpots, radius, center, onSpotSelect, onBooking }) => {
   const [currentLocation, setCurrentLocation] = useState(null);
   const [locationPermission, setLocationPermission] = useState('prompt'); // 'granted', 'denied', 'prompt'
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+  const [navigationRoute, setNavigationRoute] = useState(null);
+  const [showNavigationControls, setShowNavigationControls] = useState(false);
+  const [navigationDestination, setNavigationDestination] = useState(null);
   
   // Default center (you can change this to your city's coordinates)
   const defaultCenter = useMemo(() => [27.7172, 85.3240], []); // Kathmandu, Nepal
@@ -209,15 +214,54 @@ const MapView = ({ parkingSpots, radius, center, onSpotSelect, onBooking }) => {
 
   // Use actual coordinates from parking data
   const parkingSpotsWithCoords = useMemo(() => {
+    if (!parkingSpots || !Array.isArray(parkingSpots)) {
+      return [];
+    }
     return parkingSpots.map((spot) => ({
       ...spot,
-      coordinates: [spot.coordinates.lat, spot.coordinates.lng],
+      coordinates: [spot.coordinates?.lat || 0, spot.coordinates?.lng || 0],
     }));
   }, [parkingSpots]);
 
   const handleSpotClick = (spot) => {
     setSelectedSpot(spot);
     onSpotSelect && onSpotSelect(spot);
+  };
+
+  // Navigation handlers
+  const handleNavigateToSpot = (spot) => {
+    console.log('🧭 MapView: Navigating to spot:', spot);
+    
+    // Extract numeric lat/lng values properly
+    let lat, lng;
+    if (typeof spot.coordinates?.lat === 'object' && spot.coordinates?.lat?._id) {
+      // Handle nested coordinate objects
+      lat = spot.coordinates.lat.coordinates?.lat || spot.coordinates.lat.lat || spot.coordinates.lat[1];
+      lng = spot.coordinates.lng.coordinates?.lng || spot.coordinates.lng.lng || spot.coordinates.lng[0];
+    } else {
+      // Handle normal coordinate objects
+      lat = spot.coordinates?.lat;
+      lng = spot.coordinates?.lng;
+    }
+    
+    const destination = {
+      ...spot,
+      lat: typeof lat === 'number' ? lat : parseFloat(lat),
+      lng: typeof lng === 'number' ? lng : parseFloat(lng)
+    };
+    console.log('🧭 MapView: Created destination object:', destination);
+    setNavigationDestination(destination);
+    setShowNavigationControls(true);
+  };
+
+  const handleRouteCalculated = (route) => {
+    setNavigationRoute(route);
+  };
+
+  const handleNavigationClose = () => {
+    setShowNavigationControls(false);
+    setNavigationRoute(null);
+    setNavigationDestination(null);
   };
 
   const radiusInMeters = radius * 1000; // Convert km to meters
@@ -331,6 +375,17 @@ const MapView = ({ parkingSpots, radius, center, onSpotSelect, onBooking }) => {
             </Marker>
           )}
 
+          {/* Route Visualization */}
+          {navigationRoute && (
+            <RouteVisualization
+              route={navigationRoute}
+              currentLocation={currentLocation}
+              destination={navigationDestination}
+              showInstructions={false}
+              showUserLocation={true}
+            />
+          )}
+
           {/* Parking spot markers */}
           {parkingSpotsWithCoords.map((spot) => (
             <Marker
@@ -342,24 +397,53 @@ const MapView = ({ parkingSpots, radius, center, onSpotSelect, onBooking }) => {
               }}
             >
               <Popup>
-                <div className="p-3 text-center">
+                <div className="p-3 min-w-[200px]">
                   <h4 className="font-semibold text-gray-800 mb-2">{spot.name}</h4>
-                  <button 
-                    className={`px-4 py-2 rounded font-medium text-sm transition ${
-                      spot.availability > 0 && !spot.status
-                        ? 'bg-blue-600 text-white hover:bg-blue-700'
-                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    }`}
-                    disabled={spot.availability === 0 || spot.status}
-                    onClick={() => onBooking && onBooking(spot)}
-                  >
-                    {spot.status ? 'Not Available' : spot.availability > 0 ? 'Book Now' : 'Full'}
-                  </button>
+                  <div className="text-sm text-gray-600 mb-3">
+                    <p>{spot.address}</p>
+                    <p className="text-xs mt-1">
+                      {spot.availability > 0 ? `${spot.availability} spaces available` : 'No spaces available'} • 
+                      Rs. {spot.hourlyRate}/hr
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <button 
+                      className={`w-full px-4 py-2 rounded font-medium text-sm transition ${
+                        spot.availability > 0 && !spot.status
+                          ? 'bg-blue-600 text-white hover:bg-blue-700'
+                          : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      }`}
+                      disabled={spot.availability === 0 || spot.status}
+                      onClick={() => onBooking && onBooking(spot)}
+                    >
+                      {spot.status ? 'Not Available' : spot.availability > 0 ? '🅿️ Book Now' : 'Full'}
+                    </button>
+                    
+                    <button
+                      className="w-full px-4 py-2 rounded font-medium text-sm bg-green-600 text-white hover:bg-green-700 transition flex items-center justify-center space-x-2"
+                      onClick={() => handleNavigateToSpot(spot)}
+                    >
+                      <span>🧭</span>
+                      <span>Navigate Here</span>
+                    </button>
+                  </div>
                 </div>
               </Popup>
             </Marker>
           ))}
         </MapContainer>
+        
+        {/* Navigation Controls - positioned over the map */}
+        {showNavigationControls && navigationDestination && (
+          <NavigationControls
+            destination={navigationDestination}
+            onRouteCalculated={handleRouteCalculated}
+            onNavigationStop={handleNavigationClose}
+            isVisible={showNavigationControls}
+            position="bottom-right"
+          />
+        )}
       </div>
 
       {/* Map Controls */}

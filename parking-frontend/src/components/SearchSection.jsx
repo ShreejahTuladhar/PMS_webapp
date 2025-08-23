@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback, memo } from 'react';
 import searchHistory from '../utils/searchHistory';
 import { locationService } from '../services';
 import { EnhancedSearch, highlightMatch } from '../utils/searchUtils';
+import { logDebug, logInfo, logUserAction, logPerformance } from '../utils/logger';
 
 // Kathmandu area coordinates (moved from deleted data file)
 const kathmanduAreas = {
@@ -20,11 +21,11 @@ const kathmanduAreas = {
   swayambhunath: { lat: 27.7148, lng: 85.2906 }
 };
 
-// Debug log for kathmanduAreas
-console.log('🗺️ KATHMANDU AREAS COORDINATES (defined in SearchSection.jsx):', kathmanduAreas);
+// Professional initialization logging
+logDebug('SearchSection', 'Kathmandu areas initialized', { areasCount: Object.keys(kathmanduAreas).length });
 
-const SearchSection = ({ onSearch, onRadiusChange, radius, focusSearch = false }) => {
-  const [location, setLocation] = useState('');
+const SearchSection = ({ onSearch, onRadiusChange, radius, focusSearch = false, initialQuery = '' }) => {
+  const [location, setLocation] = useState(initialQuery);
   const [isLoading, setIsLoading] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -795,4 +796,5 @@ const SearchSection = ({ onSearch, onRadiusChange, radius, focusSearch = false }
   );
 };
 
-export default SearchSection;
+// 🚀 Performance Optimization: Prevent unnecessary re-renders
+export default memo(SearchSection);

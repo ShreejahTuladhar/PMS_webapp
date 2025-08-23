@@ -11,7 +11,9 @@ import SmartQuickActions from './SmartQuickActions';
 import DigitalTicketModal from './DigitalTicketModal';
 import SupportModal from './SupportModal';
 import ParkingSearchMap from '../../search/ParkingSearchMap';
+import BookingManager from '../BookingManager';
 import { bookingService, userService } from '../../../services';
+import { safeArray, safeObject, filterValidBookings, safeAsync } from '../../../utils/apiSafety';
 
 const UserDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -21,7 +23,13 @@ const UserDashboard = () => {
   const [selectedBookingId, setSelectedBookingId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Handle modal opening from quick actions
+  /**
+   * Handle modal opening from quick actions
+   * @param {'digital_ticket' | 'support' | 'parking_search'} modalType - Type of modal to open
+   * @param {Object} params - Modal parameters
+   * @param {string} [params.bookingId] - Booking ID for digital ticket modal
+   * @param {string} [params.query] - Search query for parking search modal
+   */
   const handleModalOpen = (modalType, params = {}) => {
     switch (modalType) {
       case 'digital_ticket':
@@ -45,30 +53,40 @@ const UserDashboard = () => {
     setActiveTab(tabId);
   };
 
-  const loadUserData = async (setDashboardData) => {
-    try {
-      setDashboardData(prev => ({ ...prev, loading: true }));
-      
-      const [bookingsResponse, statsResponse] = await Promise.all([
-        bookingService.getBookings({ limit: 5, status: 'all' }),
-        userService.getUserStats()
-      ]);
+  // 🚀 Professional-grade data loader with enterprise-level error handling
+  const loadUserData = safeAsync(async (setDashboardData) => {
+    setDashboardData(prev => ({ ...prev, loading: true }));
+    
+    const [bookingsResponse, statsResponse] = await Promise.all([
+      bookingService.getBookings({ limit: 5, status: 'all' }),
+      userService.getUserStats()
+    ]);
 
-      setDashboardData({
-        recentBookings: bookingsResponse.bookings || [],
-        totalBookings: statsResponse.totalBookings || 0,
-        totalSpent: statsResponse.totalSpent || 0,
-        savedAmount: statsResponse.savedAmount || 0,
-        upcomingBookings: bookingsResponse.bookings?.filter(b => 
-          b.status === 'confirmed' && new Date(b.startTime) > new Date()
-        ) || [],
-        loading: false
-      });
-    } catch (error) {
-      console.error('Error loading dashboard data:', error);
-      setDashboardData(prev => ({ ...prev, loading: false }));
-    }
-  };
+    // 🛡️ Use professional API safety utilities
+    const bookings = filterValidBookings(safeArray(bookingsResponse, 'bookings'));
+    const stats = safeObject(statsResponse, 'data');
+
+    // 📊 Calculate derived data safely
+    const now = new Date();
+    const upcomingBookings = bookings.filter(b => 
+      b.status === 'confirmed' && 
+      b.startTime && 
+      new Date(b.startTime) > now
+    );
+
+    setDashboardData({
+      recentBookings: bookings.slice(0, 5),
+      totalBookings: stats.totalBookings || bookings.length,
+      totalSpent: stats.totalSpent || 0,
+      savedAmount: stats.savedAmount || 0,
+      upcomingBookings,
+      loading: false,
+      lastUpdated: now.toISOString()
+    });
+  }, (setDashboardData) => {
+    // 🔥 Graceful fallback on complete failure
+    setDashboardData(prev => ({ ...prev, loading: false, error: 'Failed to load dashboard data' }));
+  });
 
   const initialState = {
     recentBookings: [],
@@ -79,7 +97,7 @@ const UserDashboard = () => {
   };
 
   const additionalTabs = [
-    { id: 'bookings', name: 'Booking History', icon: '' },
+    { id: 'bookings', name: 'Booking Manager', icon: '📋' },
     { id: 'transactions', name: 'Transaction History', icon: '' },
     { id: 'vehicles', name: 'Vehicle Details', icon: '' },
     { id: 'favorites', name: 'Favorite Locations', icon: '' },
@@ -239,7 +257,7 @@ const UserDashboard = () => {
             );
           }
           
-          if (activeTab === 'bookings') return <BookingHistory />;
+          if (activeTab === 'bookings') return <BookingManager />;
           if (activeTab === 'transactions') return <TransactionHistory />;
           if (activeTab === 'vehicles') return <VehicleManagement />;
           if (activeTab === 'favorites') return <FavoriteLocations />;

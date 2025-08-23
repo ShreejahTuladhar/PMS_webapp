@@ -13,9 +13,11 @@ const ParkingList = ({ parkingSpots, onBooking, selectedSpot, onLoginRequired, o
   const spotRefs = useRef({});
 
   // Check if any locations have marketing data to show marketing view by default
-  const hasMarketingData = parkingSpots.some(spot => 
-    spot.marketing || spot.landmarkName || spot.category
-  );
+  const hasMarketingData = parkingSpots && Array.isArray(parkingSpots) 
+    ? parkingSpots.some(spot => 
+        spot.marketing || spot.landmarkName || spot.category
+      )
+    : false;
 
   // Auto-set to cards view if marketing data is available
   useEffect(() => {
@@ -84,7 +86,7 @@ const ParkingList = ({ parkingSpots, onBooking, selectedSpot, onLoginRequired, o
     // TODO: Save to backend/localStorage
   };
 
-  const sortedSpots = [...parkingSpots].sort((a, b) => {
+  const sortedSpots = parkingSpots ? [...parkingSpots].sort((a, b) => {
     switch (sortBy) {
       case 'price':
         return a.hourlyRate - b.hourlyRate;
@@ -95,7 +97,7 @@ const ParkingList = ({ parkingSpots, onBooking, selectedSpot, onLoginRequired, o
       default:
         return a.distance - b.distance;
     }
-  });
+  }) : [];
 
   const formatDistance = (distance) => {
     if (distance < 1) {
@@ -127,7 +129,7 @@ const ParkingList = ({ parkingSpots, onBooking, selectedSpot, onLoginRequired, o
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h3 className="text-lg font-semibold text-gray-800">
-              Parking Locations ({parkingSpots.length})
+              Parking Locations ({parkingSpots ? parkingSpots.length : 0})
             </h3>
             {spotsWithOffers > 0 && (
               <p className="text-sm text-green-600 font-medium mt-1">
@@ -332,7 +334,7 @@ const ParkingList = ({ parkingSpots, onBooking, selectedSpot, onLoginRequired, o
         </div>
       )}
 
-      {parkingSpots.length === 0 && (
+      {(!parkingSpots || parkingSpots.length === 0) && (
         <div className="p-8 text-center text-gray-500">
           <svg className="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />

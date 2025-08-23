@@ -132,7 +132,7 @@
   },
   "protocol_handlers": [
     {
-      "protocol": "parksathi",
+      "protocol": "web+parksathi",
       "url": "/handle-protocol?url=%s"
     }
   ],

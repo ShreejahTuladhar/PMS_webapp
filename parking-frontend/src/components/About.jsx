@@ -42,7 +42,7 @@ function About() {
           <div className="max-w-4xl mx-auto text-center">
             <div className="animate-fade-in-up">
               <h1 className="text-5xl md:text-6xl font-extrabold text-white mb-6 tracking-tight drop-shadow-sm">
-                About <span className="text-green-300">Park</span><span className="text-orange-300">Sathi</span>
+                About <span className="text-green-300">Park</span><span className="text-orange-300">Sathi</span> 🚗
               </h1>
               <p className="text-2xl md:text-3xl text-white/90 font-medium mb-8 drop-shadow-sm">
                 Your friendly neighborhood parking helper, made by locals!
@@ -71,7 +71,7 @@ function About() {
             
             <div className="text-center mb-8 relative z-10">
               <h2 className="text-3xl font-bold text-gray-800 mb-4 flex items-center justify-center gap-3">
-                Why Choose ParkSathi?
+                Why Choose ParkSathi? 🚗
               </h2>
               <p className="text-gray-700 max-w-4xl mx-auto text-base font-medium leading-relaxed">
                 Finding parking shouldn't be stressful! We understand the struggles of Kathmandu traffic and limited parking. 

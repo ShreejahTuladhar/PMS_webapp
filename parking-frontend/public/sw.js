@@ -376,29 +376,6 @@ async function openDB() {
   });
 }
 
-// Performance monitoring
-self.addEventListener('fetch', (event) => {
-  const start = performance.now();
-  
-  event.respondWith(
-    handleRequest(event.request).then((response) => {
-      const duration = performance.now() - start;
-      
-      // Log slow requests
-      if (duration > 1000) {
-        console.warn(`Slow request: ${event.request.url} took ${duration}ms`);
-      }
-      
-      return response;
-    })
-  );
-});
-
-// Default request handler
-async function handleRequest(request) {
-  // Implement the main fetch logic here
-  return fetch(request);
-}
 
 console.log('🚀 ParkSathi Service Worker loaded successfully');
 console.log('© 2025 1Ox4Fox LLC - Conceptualized by Shreeraj Tuladhar');

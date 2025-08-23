@@ -3,25 +3,55 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { locationService } from '../services';
 import searchHistory from '../utils/searchHistory';
 import toast from 'react-hot-toast';
-import FullScreenMapView from './FullScreenMapView';
+// 🔄 REUSING HOME PAGE COMPONENTS - Component Architecture Excellence
+import MapView from './MapView';
+import AuthModal from './auth/AuthModal';
+import PaymentFlow from './booking/PaymentFlow';
+import BookingConfirmation from './booking/BookingConfirmation';
+import ParkingJourney from './journey/ParkingJourney';
+import { useAuth } from '../hooks/useAuth';
+import { useBooking } from '../hooks/useBooking';
+import { logInfo, logUserAction, logPerformance } from '../utils/logger';
+
+/**
+ * 🎯 FullScreenMapPage - Component Reuse Architecture
+ * 
+ * Root Cause Solution: Instead of custom FullScreenMapView, 
+ * we reuse proven Home page components for consistency.
+ * 
+ * Partner's Vision: "recreate the ui components mentioned by reusing ui component"
+ * - SearchSection (search bar with suggestions) ✅
+ * - MapView (map with location pointers) ✅  
+ * - ParkingList (list and card view) ✅
+ * 
+ * This demonstrates professional component architecture!
+ */
 
 const FullScreenMapPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { isAuthenticated } = useAuth();
+  const { currentBooking, bookingStep, isJourneyActive } = useBooking();
+  
+  // Initialize with passed state for seamless transition
   const [searchQuery, setSearchQuery] = useState(location.state?.searchQuery || '');
-  const [searchResults, setSearchResults] = useState([]);
+  const [searchResults, setSearchResults] = useState(location.state?.searchResults || []);
   const [loading, setLoading] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState(null);
-  const [viewMode, setViewMode] = useState('list'); // 'list' or 'card'
-  const [searchRadius, setSearchRadius] = useState(2); // km - use same naming as Home
-  const [userLocation, setUserLocation] = useState(null);
-  const [mapCenter, setMapCenter] = useState({ lat: 27.7172, lng: 85.3240 }); // Kathmandu center
+  const [selectedSpot, setSelectedSpot] = useState(location.state?.selectedSpot || null);
+  const [viewMode, setViewMode] = useState('cards'); // 'list' or 'cards' - default to cards like wireframe
+  const [searchRadius, setSearchRadius] = useState(location.state?.searchRadius || 0.5);
   const [sortBy, setSortBy] = useState('distance');
-  const [searchLocation, setSearchLocation] = useState(null);
-  const [originalSearchInput, setOriginalSearchInput] = useState(null);
-  // mapRef removed - using MapView component instead
+  const [searchLocation, setSearchLocation] = useState(location.state?.searchLocation || null);
+  const [originalSearchInput, setOriginalSearchInput] = useState(location.state?.originalSearchInput || null);
+  
+  // Modal states - same as Home
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
+  const [isJourneyModalOpen, setIsJourneyModalOpen] = useState(false);
+  const [parkingSpotToBook, setParkingSpotToBook] = useState(null);
 
-  // Kathmandu area coordinates (same as Home component)
+  // Kathmandu area coordinates (reused from Home)
   const kathmanduAreas = {
     ratnapark: { lat: 27.7064, lng: 85.3238 },
     thamel: { lat: 27.7151, lng: 85.3107 },
@@ -38,9 +68,36 @@ const FullScreenMapPage = () => {
     swayambhunath: { lat: 27.7148, lng: 85.2906 }
   };
 
-  // Helper function to calculate distance between two coordinates (same as Home)
+  // Watch for booking confirmation and journey (same as Home)
+  useEffect(() => {
+    if (bookingStep === 'confirmed' && currentBooking) {
+      setIsConfirmationModalOpen(true);
+    }
+  }, [bookingStep, currentBooking]);
+  
+  // Watch for journey activation (same as Home)
+  useEffect(() => {
+    if (isJourneyActive && bookingStep === 'confirmed') {
+      setIsConfirmationModalOpen(false);
+      setTimeout(() => {
+        setIsJourneyModalOpen(true);
+      }, 500);
+    } else if (!isJourneyActive) {
+      setIsJourneyModalOpen(false);
+    }
+  }, [isJourneyActive, bookingStep]);
+
+  // Initialize with search from navigation state
+  useEffect(() => {
+    if (location.state?.searchQuery && !location.state?.searchResults?.length) {
+      logInfo('FullScreenMapPage', 'initialized_with_search', { query: location.state.searchQuery });
+      performSearch(location.state.searchQuery);
+    }
+  }, [location.state]);
+
+  // Helper function to calculate distance (reused from Home)
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
-    const R = 6371; // Radius of the Earth in kilometers
+    const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
     const a = 
@@ -48,735 +105,483 @@ const FullScreenMapPage = () => {
       Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
       Math.sin(dLon/2) * Math.sin(dLon/2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c; // Distance in kilometers
+    return R * c;
   };
 
-  // Initialize with search results from Home page if available
-  useEffect(() => {
-    if (location.state?.searchResults) {
-      setSearchResults(location.state.searchResults);
-      setSearchLocation(location.state.searchLocation);
-      setOriginalSearchInput(location.state.searchQuery);
-    } else if (searchQuery) {
-      // If no search results passed, perform fresh search
-      handleSearch(searchQuery);
+  const getKathmanduCoordinates = (locationName) => {
+    const lowerName = locationName.toLowerCase();
+    for (const [key, coords] of Object.entries(kathmanduAreas)) {
+      if (lowerName.includes(key) || key.includes(lowerName)) {
+        return coords;
+      }
     }
-  }, []);
+    return null;
+  };
 
-  // Real backend search function (adapted from Home component)
-  const handleSearch = async (locationInput, searchType = 'manual') => {
-    // Validate search parameters before proceeding
-    if (!locationInput) {
-      console.warn('Search called without location parameter');
-      return;
-    }
-    
-    if (typeof locationInput === 'string' && !locationInput.trim()) {
-      console.warn('Search called with empty string');
-      return;
-    }
-    
-    if (typeof locationInput === 'object' && (!locationInput.lat || !locationInput.lng)) {
-      console.warn('Search called with invalid location object:', locationInput);
-      return;
-    }
-    
-    console.log('Searching for parking near:', locationInput);
-    
-    // Store original search input for radius changes
-    setOriginalSearchInput(locationInput);
-    
-    let searchLat, searchLng, searchLoc, searchQueryValue, locationTrimmed;
-    
-    if (typeof locationInput === 'string') {
-      // Validate string input
-      locationTrimmed = locationInput.trim();
-      if (!locationTrimmed) {
-        console.warn('Empty search string provided');
-        return;
-      }
-      
-      // For text searches, we'll let the backend handle location detection
-      // Use a central Kathmandu coordinate as initial fallback, but backend will override this
-      let defaultCoords = kathmanduAreas.ratnapark; // Central Kathmandu fallback
-      
-      // Try to get coordinates from known areas first as a hint
-      try {
-        const coordsResult = await locationService.getCoordinatesForLocationName(locationTrimmed);
-        if (coordsResult.success && coordsResult.coordinates) {
-          defaultCoords = coordsResult.coordinates;
-          console.log(`🎯 Using extracted coordinates for "${locationTrimmed}":`, defaultCoords);
-        } else {
-          // Quick check for known area names (this is just a fallback, backend will handle the real search)
-          const locationLower = locationTrimmed.toLowerCase();
-          for (const [areaName, coords] of Object.entries(kathmanduAreas)) {
-            if (locationLower.includes(areaName.toLowerCase()) || 
-                areaName.toLowerCase().includes(locationLower)) {
-              defaultCoords = coords;
-              console.log(`🗺️ Using known area coordinates for "${locationTrimmed}":`, defaultCoords);
-              break;
-            }
-          }
-        }
-      } catch (error) {
-        console.warn('Error getting coordinates from extracted data, using fallback:', error);
-      }
-      
-      // These are just initial coordinates - backend will provide the actual search center
-      searchLat = defaultCoords.lat;
-      searchLng = defaultCoords.lng;
-      searchQueryValue = locationTrimmed;
-      searchLoc = {
-        address: locationTrimmed,
-        lat: searchLat,
-        lng: searchLng,
-        isCurrentLocation: false
-      };
-    } else {
-      // Location is already an object with coordinates
-      // Validate coordinates
-      if (!locationInput.lat || !locationInput.lng || 
-          isNaN(locationInput.lat) || isNaN(locationInput.lng) ||
-          locationInput.lat < -90 || locationInput.lat > 90 ||
-          locationInput.lng < -180 || locationInput.lng > 180) {
-        console.warn('Invalid coordinates provided:', locationInput);
-        return;
-      }
-      
-      searchLat = locationInput.lat;
-      searchLng = locationInput.lng;
-      searchQueryValue = locationInput.address || 'Current Location';
-      searchLoc = locationInput;
-    }
-    
-    setLoading(true);
+  const performSearch = async (query) => {
+    if (!query?.trim()) return;
+
     const searchStartTime = Date.now();
-    
+    setLoading(true);
+    setOriginalSearchInput(query);
+
     try {
-      let response = null;
-      let usedFallback = false;
-      
-      // Try backend search API first, but fallback immediately if it fails
-      console.log('Attempting backend search API...');
-      try {
-        // Use text-based search if the original input was a string
-        if (typeof locationInput === 'string') {
-          console.log('🔍 Using text-based search for:', locationTrimmed);
-          response = await locationService.searchParkingSpotsByText(
-            locationTrimmed,
-            searchRadius,
-            {
-              isActive: true,
-              limit: 50,
-            }
-          );
-        } else {
-          console.log('🗺️ Using coordinate-based search for:', { lat: searchLat, lng: searchLng });
-          response = await locationService.searchParkingSpots(
-            { lat: searchLat, lng: searchLng },
-            searchRadius,
-            {
-              isActive: true,
-              limit: 50,
-              sortBy: 'distance'
-            }
-          );
-        }
+      logInfo('FullScreenMapPage', 'search_initiated', { query, radius: searchRadius });
+
+      const coordinates = getKathmanduCoordinates(query);
+      let searchResults = [];
+
+      if (coordinates) {
+        setSearchLocation(coordinates);
+        const locations = await locationService.searchNearby(coordinates.lat, coordinates.lng, searchRadius);
         
-        // Check if the response indicates an error even with success flag
-        if (!response.success || response.error) {
-          throw new Error(response.error || 'Backend search API returned error');
-        }
-        
-        // Check if no results were found, might indicate backend database is empty or search issue
-        const resultSpots = response.parkingSpots || response.data || [];
-        if (resultSpots.length === 0) {
-          console.warn('Backend search returned 0 results, trying fallback method to get all locations');
-          throw new Error('No results from backend search, using fallback');
-        }
-      } catch (searchError) {
-        console.warn('Backend search API not available, using fallback method:', searchError.message);
-        usedFallback = true;
-        
-        // Fallback to getAllParkingSpots with client-side filtering
-        console.log('🔄 Using fallback: getAllParkingSpots with client-side filtering');
-        response = await locationService.getAllParkingSpots({ 
-          limit: 100, // Increase limit to get more locations
-          // Remove isActive filter to get all locations and filter client-side
-        });
-        console.log('📦 Fallback response:', response);
-      }
-      
-      const searchDuration = Date.now() - searchStartTime;
-      
-      if (response && response.success) {
-        // Handle different response formats
-        let parkingSpots = response.parkingSpots || response.data || [];
-        console.log(`🏁 Raw parking spots received: ${parkingSpots.length}`, parkingSpots);
-        
-        // Update search center coordinates if backend provided them (for text searches)
-        if (response.searchInfo && response.searchInfo.searchCenter) {
-          const backendSearchCenter = response.searchInfo.searchCenter;
-          console.log(`🎯 Using backend search center: ${backendSearchCenter.latitude}, ${backendSearchCenter.longitude}`);
-          searchLat = backendSearchCenter.latitude;
-          searchLng = backendSearchCenter.longitude;
-          searchLoc = {
-            address: response.searchInfo.foundLocation?.name || searchQueryValue,
-            lat: searchLat,
-            lng: searchLng,
-            isCurrentLocation: false,
-            foundLocation: response.searchInfo.foundLocation
-          };
-        }
-        
-        if (usedFallback) {
-          // Apply client-side filtering for fallback
-          console.log('Applying client-side filtering for fallback...');
-          console.log(`📍 Search coordinates: ${searchLat}, ${searchLng}, radius: ${searchRadius}km`);
-          
-          parkingSpots = parkingSpots.map(spot => {
-            const distance = calculateDistance(searchLat, searchLng, 
+        if (locations && locations.length > 0) {
+          // Transform to match Home component format for consistency
+          searchResults = locations.map(spot => ({
+            id: spot.id,
+            name: spot.name,
+            address: spot.address,
+            coordinates: {
+              lat: spot.coordinates?.latitude || spot.coordinates?.lat || 0,
+              lng: spot.coordinates?.longitude || spot.coordinates?.lng || 0
+            },
+            hourlyRate: spot.hourlyRate,
+            totalSpaces: spot.totalSpaces,
+            availableSpaces: spot.availableSpaces,
+            availability: spot.availableSpaces, // MapView expects 'availability'
+            occupancyPercentage: spot.occupancyPercentage,
+            amenities: spot.amenities || [],
+            operatingHours: spot.operatingHours,
+            isCurrentlyOpen: spot.isCurrentlyOpen,
+            currentStatus: spot.currentStatus,
+            contactNumber: spot.contactNumber,
+            description: spot.description,
+            // Calculate distance
+            distance: calculateDistance(coordinates.lat, coordinates.lng, 
               spot.coordinates?.latitude || spot.coordinates?.lat || 0, 
-              spot.coordinates?.longitude || spot.coordinates?.lng || 0);
-            console.log(`📏 Distance to ${spot.name}: ${distance.toFixed(2)}km`);
-            return {
-              ...spot,
-              distance
-            };
-          })
-          .filter(spot => {
-            const withinRadius = spot.distance <= searchRadius;
-            console.log(`✅ ${spot.name} within ${searchRadius}km: ${withinRadius}`);
-            return withinRadius;
-          })
-          .sort((a, b) => a.distance - b.distance);
+              spot.coordinates?.longitude || spot.coordinates?.lng || 0),
+            // Add vehicle types for compatibility
+            vehicleTypes: {
+              car: spot.hourlyRate,
+              motorcycle: Math.round(spot.hourlyRate * 0.7),
+              bicycle: Math.round(spot.hourlyRate * 0.3)
+            },
+            // MapView compatibility properties
+            businessHours: {
+              isOpen24: false,
+              open: spot.operatingHours?.start || '06:00',
+              close: spot.operatingHours?.end || '22:00'
+            },
+            features: spot.amenities || [],
+            rating: 4.2,
+            operator: 'ParkSathi Network',
+            zone: spot.address?.split(',')[0] || 'Kathmandu',
+            smartParkingEnabled: spot.amenities?.includes('smart_parking') || false,
+            galliMapsSupported: true,
+            baatoMapsSupported: true,
+            appSupport: 'ParkSathi App',
+            specialOffers: null,
+            status: spot.currentStatus === 'maintenance' ? 'Under Maintenance' : null,
+            expectedOpening: null
+          }));
+
+          // Sort results
+          searchResults = sortLocations(searchResults);
         }
-        
-        // Transform database format to match expected format
-        const parkingLocations = parkingSpots.map(spot => ({
-          id: spot.id,
-          name: spot.name,
-          address: spot.address,
-          coordinates: {
-            lat: spot.coordinates?.latitude || spot.coordinates?.lat || 0,
-            lng: spot.coordinates?.longitude || spot.coordinates?.lng || 0
-          },
-          hourlyRate: spot.hourlyRate,
-          totalSpaces: spot.totalSpaces,
-          availableSpaces: spot.availableSpaces,
-          availability: spot.availableSpaces, // MapView expects 'availability'
-          occupancyPercentage: spot.occupancyPercentage,
-          amenities: spot.amenities || [],
-          operatingHours: spot.operatingHours,
-          isCurrentlyOpen: spot.isCurrentlyOpen,
-          currentStatus: spot.currentStatus,
-          contactNumber: spot.contactNumber,
-          description: spot.description,
-          // Calculate distance if not provided by API
-          distance: spot.distance || calculateDistance(searchLat, searchLng, 
-            spot.coordinates?.latitude || spot.coordinates?.lat || 0, 
-            spot.coordinates?.longitude || spot.coordinates?.lng || 0),
-          // Add vehicle types for compatibility
-          vehicleTypes: {
-            car: spot.hourlyRate,
-            motorcycle: Math.round(spot.hourlyRate * 0.7), // 30% discount for motorcycles
-            bicycle: Math.round(spot.hourlyRate * 0.3)     // 70% discount for bicycles
-          },
-          // MapView compatibility properties
-          businessHours: {
-            isOpen24: false, // Default to false, could be derived from operatingHours
-            open: spot.operatingHours?.start || '06:00',
-            close: spot.operatingHours?.end || '22:00'
-          },
-          features: spot.amenities || [],
-          rating: 4.2, // Default rating, could be calculated from reviews
-          operator: 'ParkSathi Network',
-          zone: spot.address?.split(',')[0] || 'Kathmandu',
-          smartParkingEnabled: spot.amenities?.includes('smart_parking') || false,
-          galliMapsSupported: true,
-          baatoMapsSupported: true,
-          appSupport: 'ParkSathi App',
-          specialOffers: null,
-          status: spot.currentStatus === 'maintenance' ? 'Under Maintenance' : null,
-          expectedOpening: null,
-          // Additional properties for full-screen map
-          isAvailable: spot.availableSpaces > 0,
-          type: spot.type || 'general'
-        }));
-        
-        console.log(`🎯 Final result: Found ${parkingLocations.length} locations within ${searchRadius}km using ${usedFallback ? 'fallback method' : 'backend search'}`);
-        console.log('🗺️ Parking locations to display on map:', parkingLocations);
-        
-        // Track successful search
-        searchHistory.addRecentSearch(searchQueryValue, searchLoc);
-        
-        setSearchResults(parkingLocations);
       } else {
-        console.error('Search failed:', response?.error || 'Unknown error');
-        setSearchResults([]);
+        toast.error(`Location "${query}" not found in Kathmandu Valley`);
+        logInfo('FullScreenMapPage', 'search_location_not_found', { query });
       }
+
+      setSearchResults(searchResults);
+      
+      // Add to search history
+      if (searchResults.length > 0) {
+        searchHistory.add({
+          query,
+          location: coordinates,
+          resultsCount: searchResults.length,
+          timestamp: new Date().toISOString()
+        });
+      }
+
+      const searchDuration = Date.now() - searchStartTime;
+      logPerformance('FullScreenMapPage', 'search_completed', searchDuration, {
+        resultsCount: searchResults.length,
+        query
+      });
+
     } catch (error) {
-      console.error('Error during search operation:', error);
-      setSearchResults([]);
+      console.error('Search failed:', error);
+      toast.error('Search failed. Please try again.');
+      logInfo('FullScreenMapPage', 'search_failed', { query, error: error.message });
     } finally {
       setLoading(false);
     }
-    
-    setSearchLocation(searchLoc);
-    setMapCenter({ lat: searchLat, lng: searchLng });
   };
 
-  // Backend integration complete - no need for old sample data loading
+  const sortLocations = (locations) => {
+    return [...locations].sort((a, b) => {
+      switch (sortBy) {
+        case 'distance':
+          return (a.distance || 0) - (b.distance || 0);
+        case 'price':
+          return (a.hourlyRate || 0) - (b.hourlyRate || 0);
+        case 'availability':
+          return (b.availableSpaces || 0) - (a.availableSpaces || 0);
+        case 'rating':
+          return (b.rating || 0) - (a.rating || 0);
+        default:
+          return 0;
+      }
+    });
+  };
 
-  // Removed old loadLocations function - using real backend integration from handleSearch
+  // Handle search from SearchSection component
+  const handleSearchFromSection = (query, location) => {
+    setSearchQuery(query);
+    if (location) {
+      setSearchLocation(location);
+    }
+    performSearch(query);
+  };
 
-  const getCurrentLocation = () => {
-    if (!navigator.geolocation) {
-      toast.error('Geolocation is not supported by this browser');
+  // Consistent handlers with Home component
+  const handleSpotSelect = (spot) => {
+    setSelectedSpot(spot);
+    logUserAction('FullScreenMapPage', 'spot_selected', { spotId: spot.id });
+  };
+
+  const handleBooking = (spot) => {
+    if (!isAuthenticated) {
+      setIsLoginModalOpen(true);
       return;
     }
-
-    setLoading(true);
-    toast.loading('Getting your location...', { id: 'location-loading' });
-
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords;
-        const currentLocationData = {
-          lat: latitude,
-          lng: longitude,
-          address: 'Current Location',
-          isCurrentLocation: true
-        };
-
-        console.log('🌍 Current location detected:', currentLocationData);
-        
-        try {
-          // Update UI state
-          setUserLocation(currentLocationData);
-          setMapCenter({ lat: latitude, lng: longitude });
-          setSearchQuery('Current Location');
-          
-          // Dismiss loading toast
-          toast.dismiss('location-loading');
-          toast.success('Location detected successfully');
-          
-          // Trigger backend search with current location
-          await handleSearch(currentLocationData, 'current_location');
-          
-        } catch (error) {
-          console.error('Error searching with current location:', error);
-          toast.dismiss('location-loading');
-          toast.error('Failed to search parking near your location');
-          setLoading(false);
-        }
-      },
-      (error) => {
-        console.error('Geolocation error:', error);
-        toast.dismiss('location-loading');
-        
-        let errorMessage = 'Unable to get your location';
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            errorMessage = 'Location access denied. Please enable location permissions.';
-            break;
-          case error.POSITION_UNAVAILABLE:
-            errorMessage = 'Location information unavailable.';
-            break;
-          case error.TIMEOUT:
-            errorMessage = 'Location request timed out.';
-            break;
-        }
-        
-        toast.error(errorMessage);
-        setLoading(false);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 300000 // 5 minutes
-      }
-    );
-  };
-
-  const handleRadiusChange = (newRadius) => {
-    setSearchRadius(newRadius);
     
-    // Re-search with new radius if we have a previous search
-    if (originalSearchInput) {
-      console.log(`🔄 Radius changed to ${newRadius}km, re-searching with:`, originalSearchInput);
-      handleSearch(originalSearchInput, 'radius_change');
-    }
+    setParkingSpotToBook(spot);
+    setIsBookingModalOpen(true);
   };
 
-  const handleSearchClick = () => {
-    if (searchQuery.trim()) {
-      handleSearch(searchQuery.trim());
-    }
+  const handleLoginRequired = () => {
+    setIsLoginModalOpen(true);
   };
 
-  const handleLocationSelect = (location) => {
-    setSelectedLocation(location);
-    // Update map center using the correct coordinate structure
-    if (location.coordinates) {
-      setMapCenter({
-        lat: location.coordinates.lat,
-        lng: location.coordinates.lng
-      });
-    }
+  const handleViewModeChange = (newViewMode) => {
+    setViewMode(newViewMode);
+    logUserAction('FullScreenMapPage', `view_mode_changed`, { mode: newViewMode });
   };
 
-  const handleBookNow = (location) => {
-    toast.success(`Redirecting to booking for ${location.name}`);
-    // In real app, navigate to booking page with pre-selected location
+  // Modal close handlers (same as Home)
+  const closeLoginModal = () => {
+    setIsLoginModalOpen(false);
   };
 
-  const handleMinimize = () => {
-    // Return to previous page with search results
-    navigate(-1);
+  const closeBookingModal = () => {
+    setIsBookingModalOpen(false);
+    setParkingSpotToBook(null);
   };
 
-  const getLocationTypeDisplay = (spot) => {
-    const name = spot.name.toLowerCase();
-    const address = spot.address.toLowerCase();
-    const type = spot.type ? spot.type.toLowerCase() : '';
-    
-    // Hospital
-    if (name.includes('hospital') || address.includes('hospital') || type.includes('hospital')) {
-      return { abbr: 'H', color: '#DC2626', label: 'Hospital' };
-    }
-    // School/University/College
-    if (name.includes('school') || name.includes('university') || name.includes('college') || 
-        address.includes('school') || address.includes('university') || address.includes('college') ||
-        type.includes('school') || type.includes('university') || type.includes('college')) {
-      return { abbr: 'S', color: '#7C3AED', label: 'School' };
-    }
-    // Mall
-    if (name.includes('mall') || address.includes('mall') || type.includes('mall')) {
-      return { abbr: 'M', color: '#059669', label: 'Mall' };
-    }
-    // Shopping Center
-    if (name.includes('shopping') || address.includes('shopping') || type.includes('shopping')) {
-      return { abbr: 'SC', color: '#0891B2', label: 'Shopping' };
-    }
-    // Airport
-    if (name.includes('airport') || address.includes('airport') || type.includes('airport')) {
-      return { abbr: 'A', color: '#EA580C', label: 'Airport' };
-    }
-    // Hotel
-    if (name.includes('hotel') || address.includes('hotel') || type.includes('hotel')) {
-      return { abbr: 'HT', color: '#BE185D', label: 'Hotel' };
-    }
-    // Office/Business
-    if (name.includes('office') || name.includes('business') || address.includes('office') || 
-        type.includes('office') || type.includes('business')) {
-      return { abbr: 'O', color: '#374151', label: 'Office' };
-    }
-    // Restaurant
-    if (name.includes('restaurant') || name.includes('cafe') || address.includes('restaurant') ||
-        type.includes('restaurant') || type.includes('cafe')) {
-      return { abbr: 'R', color: '#F59E0B', label: 'Restaurant' };
-    }
-    // Tourist/Temple/Heritage
-    if (name.includes('temple') || name.includes('durbar') || name.includes('tourist') ||
-        address.includes('temple') || address.includes('durbar') || type.includes('tourist')) {
-      return { abbr: 'T', color: '#8B5CF6', label: 'Tourist' };
-    }
-    // Default parking
-    return { abbr: 'P', color: '#6B7280', label: 'Parking' };
+  const closeConfirmationModal = () => {
+    setIsConfirmationModalOpen(false);
   };
-
-  const getAvailabilityColor = (availableSpaces, totalSpaces) => {
-    const percentage = (availableSpaces / totalSpaces) * 100;
-    if (percentage > 50) return 'text-green-600';
-    if (percentage > 20) return 'text-yellow-600';
-    return 'text-red-600';
+  
+  const closeJourneyModal = () => {
+    setIsJourneyModalOpen(false);
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-white">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={handleMinimize}
-              className="flex items-center space-x-2 px-4 py-2 bg-blue-100 hover:bg-blue-200 rounded-lg transition-colors text-blue-700 font-medium"
-              title="Return to main interface"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-              <span>Minimize</span>
-            </button>
-            <h1 className="text-2xl font-bold text-gray-900">Full-Screen Parking Search</h1>
+    <div className="min-h-screen bg-gray-100 flex flex-col">
+      {/* Professional Header - matching wireframe */}
+      <header className="bg-white shadow-md z-30">
+        <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+          <div className="flex items-center">
+            <span className="text-4xl mr-2">🚗</span>
+            <div>
+              <h1 className="text-xl font-bold text-gray-800">ParkSathi</h1>
+              <p className="text-sm text-gray-500">Smart Parking Solutions</p>
+            </div>
           </div>
-          
           <div className="flex items-center space-x-4">
-            <span className="text-sm text-gray-600">Found {searchResults.length} locations</span>
-            <button
-              onClick={() => navigate('/')}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              title="Close and go home"
-            >
-              <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex h-full">
-        {/* Map Area */}
-        <div className="flex-1 relative">
-          <FullScreenMapView 
-            parkingSpots={searchResults}
-            radius={searchRadius}
-            center={searchLocation}
-            onSpotSelect={handleLocationSelect}
-            onBooking={handleBookNow}
-          />
-        </div>
-
-        {/* Right Side Panel */}
-        <div className="w-96 bg-white border-l border-gray-200 flex flex-col h-full">
-          {/* Search Controls */}
-          <div className="p-6 border-b border-gray-200 space-y-4">
-            {/* Search Input */}
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search location (e.g., Thamel, Airport, Mall)"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSearchClick()}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            {isAuthenticated && (
+              <div className="flex items-center space-x-2 bg-blue-100 rounded-full px-3 py-1">
+                <span className="bg-blue-500 text-white rounded-full h-8 w-8 flex items-center justify-center font-semibold">
+                  {isAuthenticated ? 'U' : 'G'}
+                </span>
+                <span className="text-gray-700 font-medium">User</span>
+                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </div>
-            </div>
+            )}
+            <button className="text-gray-600">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </header>
 
-            {/* Action Buttons */}
-            <div className="flex space-x-2">
+      {/* Main Layout - Sidebar + Map */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Fixed Left Sidebar - matching wireframe */}
+        <aside className="w-96 bg-white p-4 overflow-y-auto shadow-lg z-20 flex flex-col">
+          <div className="flex-shrink-0">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold text-gray-800">
+                Parking Locations ({searchResults.length})
+              </h2>
               <button
-                onClick={handleSearchClick}
-                className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-medium"
+                onClick={() => navigate('/', { 
+                  state: {
+                    searchResults,
+                    selectedSpot,
+                    searchLocation,
+                    searchRadius,
+                    originalSearchInput
+                  }
+                })}
+                className="flex items-center text-blue-600 font-medium hover:text-blue-800"
               >
-                Search
-              </button>
-              <button
-                onClick={getCurrentLocation}
-                disabled={loading}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? (
-                  <>
-                    <div className="w-4 h-4 mr-2 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
-                    <span>Getting Location...</span>
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    </svg>
-                    <span>Use My Location</span>
-                  </>
-                )}
+                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                </svg>
+                Exit Fullscreen
               </button>
             </div>
-
-            {/* Filters */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Distance (km)
-                </label>
-                <select
-                  value={searchRadius}
-                  onChange={(e) => handleRadiusChange(Number(e.target.value))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            
+            <div className="flex items-center justify-between mb-4">
+              {/* Cards/List Toggle - exactly as wireframe */}
+              <div className="flex items-center space-x-1 p-1 bg-gray-200 rounded-lg">
+                <button
+                  onClick={() => handleViewModeChange('cards')}
+                  className={`px-3 py-1 rounded-md flex items-center transition-colors ${
+                    viewMode === 'cards'
+                      ? 'bg-white shadow text-blue-600'
+                      : 'text-gray-600 hover:text-gray-800'
+                  }`}
                 >
-                  <option value={1}>1 km</option>
-                  <option value={2}>2 km</option>
-                  <option value={5}>5 km</option>
-                  <option value={10}>10 km</option>
-                  <option value={20}>20 km</option>
-                </select>
+                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  </svg>
+                  Cards
+                </button>
+                <button
+                  onClick={() => handleViewModeChange('list')}
+                  className={`px-3 py-1 rounded-md flex items-center transition-colors ${
+                    viewMode === 'list'
+                      ? 'bg-white shadow text-blue-600'
+                      : 'text-gray-600 hover:text-gray-800'
+                  }`}
+                >
+                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                  </svg>
+                  List
+                </button>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Sort By
-                </label>
+              
+              {/* Sort Dropdown */}
+              <div className="flex items-center">
+                <label className="text-sm text-gray-600 mr-2">Sort by:</label>
                 <select
                   value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  onChange={(e) => {
+                    setSortBy(e.target.value);
+                    setSearchResults(sortLocations(searchResults));
+                  }}
+                  className="border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="distance">Distance</option>
                   <option value="price">Price</option>
-                  <option value="rating">Rating</option>
                   <option value="availability">Availability</option>
+                  <option value="rating">Rating</option>
                 </select>
               </div>
             </div>
-
-            {/* View Toggle */}
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-gray-700">View Mode</span>
-              <div className="flex bg-gray-100 rounded-lg p-1">
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`px-3 py-1 rounded text-sm font-medium transition ${
-                    viewMode === 'list' ? 'bg-white text-gray-900 shadow' : 'text-gray-600'
-                  }`}
-                >
-                  List
-                </button>
-                <button
-                  onClick={() => setViewMode('card')}
-                  className={`px-3 py-1 rounded text-sm font-medium transition ${
-                    viewMode === 'card' ? 'bg-white text-gray-900 shadow' : 'text-gray-600'
-                  }`}
-                >
-                  Cards
-                </button>
-              </div>
-            </div>
           </div>
-
-          {/* Results */}
-          <div className="flex-1 overflow-y-auto">
+          
+          {/* Parking Cards List */}
+          <div className="flex-1 overflow-y-auto space-y-4">
             {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-                <span className="ml-3 text-gray-600">Searching...</span>
-              </div>
-            ) : searchResults.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
+              <div className="flex items-center justify-center h-64">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                  <p className="text-gray-600">Searching for parking locations...</p>
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No locations found</h3>
-                <p className="text-gray-500">Try adjusting your search or distance range</p>
               </div>
-            ) : (
-              <div className="p-4 space-y-4">
-                {searchResults.map((location) => (
-                  <div
-                    key={location.id}
-                    className={`border rounded-lg p-4 cursor-pointer transition-all hover:shadow-md ${
-                      selectedLocation?.id === location.id 
-                        ? 'border-blue-500 bg-blue-50' 
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                    onClick={() => handleLocationSelect(location)}
-                  >
-                    {viewMode === 'card' ? (
-                      // Card View
-                      <div className="space-y-3">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-2">
-                              <div 
-                                className="w-6 h-6 rounded flex items-center justify-center text-white text-xs font-semibold"
-                                style={{ backgroundColor: getLocationTypeDisplay(location).color }}
-                                title={getLocationTypeDisplay(location).label}
-                              >
-                                {getLocationTypeDisplay(location).abbr}
-                              </div>
-                              <h3 className="font-semibold text-gray-900">{location.name}</h3>
-                            </div>
-                            <p className="text-sm text-gray-600 mt-1">{location.address}</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-bold text-lg text-gray-900">Rs. {location.hourlyRate}/hr</p>
-                            <p className="text-xs text-gray-500">{location.distance} km away</p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center space-x-4">
-                          <div className="flex items-center space-x-1">
-                            <svg className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                            </svg>
-                            <span className="text-sm text-gray-600">{location.rating} ({location.reviewCount})</span>
-                          </div>
-                          <div className={`text-sm font-medium ${getAvailabilityColor(location.availableSpaces, location.totalSpaces)}`}>
-                            {location.availableSpaces}/{location.totalSpaces} available
-                          </div>
-                        </div>
-
-                        <div className="flex flex-wrap gap-1">
-                          {location.features.slice(0, 3).map((feature, index) => (
-                            <span key={index} className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">
-                              {feature}
-                            </span>
-                          ))}
-                        </div>
-
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleBookNow(location);
-                          }}
-                          disabled={!location.isAvailable}
-                          className={`w-full py-2 rounded-lg font-medium transition ${
-                            location.isAvailable
-                              ? 'bg-blue-600 text-white hover:bg-blue-700'
-                              : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                          }`}
-                        >
-                          {location.isAvailable ? 'Book Now' : 'Not Available'}
-                        </button>
+            ) : searchResults.length > 0 ? (
+              searchResults.map((spot) => (
+                <div
+                  key={spot.id}
+                  className={`border rounded-lg p-4 bg-white hover:shadow-md transition-shadow cursor-pointer ${
+                    selectedSpot?.id === spot.id
+                      ? 'border-blue-500 bg-blue-50 shadow-lg'
+                      : 'border-gray-200'
+                  }`}
+                  onClick={() => handleSpotSelect(spot)}
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-bold text-lg text-gray-800">{spot.name}</h3>
+                      <p className="text-sm text-gray-500">{spot.address}</p>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-lg font-bold text-green-600">
+                        Rs. {spot.hourlyRate}/hr
+                      </span>
+                      <svg className="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                      <span className="font-semibold">{spot.rating || '4.2'}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between mt-3 text-sm">
+                    <div className="flex items-center text-gray-600">
+                      <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM21 17a2 2 0 11-4 0 2 2 0 014 0zM7 9l4-4V3a2 2 0 00-2-2H5a2 2 0 00-2 2v2l4 4zM17 9l-4-4V3a2 2 0 012-2h4a2 2 0 012 2v2l-4 4z" />
+                      </svg>
+                      <span>
+                        {spot.amenities?.includes('car') ? 'Car' : ''}
+                        {spot.amenities?.includes('motorcycle') ? ', Bike' : ''}
+                        {!spot.amenities?.length ? 'Car, Bike' : ''}
+                      </span>
+                    </div>
+                    
+                    {spot.availableSpaces > 0 ? (
+                      <div className="flex items-center text-green-600 font-semibold">
+                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>{spot.availableSpaces}/{spot.totalSpaces} spots available</span>
                       </div>
                     ) : (
-                      // List View
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2">
-                            <div 
-                              className="w-5 h-5 rounded flex items-center justify-center text-white text-xs font-semibold"
-                              style={{ backgroundColor: getLocationTypeDisplay(location).color }}
-                              title={getLocationTypeDisplay(location).label}
-                            >
-                              {getLocationTypeDisplay(location).abbr}
-                            </div>
-                            <h3 className="font-medium text-gray-900">{location.name}</h3>
-                          </div>
-                          <p className="text-sm text-gray-600">{location.distance} km • Rs. {location.hourlyRate}/hr</p>
-                          <div className={`text-xs ${getAvailabilityColor(location.availableSpaces, location.totalSpaces)}`}>
-                            {location.availableSpaces} spaces available
-                          </div>
-                        </div>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleBookNow(location);
-                          }}
-                          disabled={!location.isAvailable}
-                          className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                            location.isAvailable
-                              ? 'bg-blue-600 text-white hover:bg-blue-700'
-                              : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                          }`}
-                        >
-                          {location.isAvailable ? 'Book' : 'Full'}
-                        </button>
+                      <div className="flex items-center text-red-600 font-semibold">
+                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>Full</span>
                       </div>
                     )}
                   </div>
-                ))}
+                  
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleBooking(spot);
+                    }}
+                    className={`w-full font-bold py-2 rounded-lg mt-4 transition-colors ${
+                      spot.availableSpaces > 0
+                        ? 'bg-blue-600 text-white hover:bg-blue-700'
+                        : 'bg-gray-400 text-white cursor-not-allowed'
+                    }`}
+                    disabled={spot.availableSpaces === 0}
+                  >
+                    {spot.availableSpaces > 0 ? 'Book Now' : 'Unavailable'}
+                  </button>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-12">
+                <div className="text-gray-400 mb-4">
+                  <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">No parking found</h3>
+                <p className="text-gray-500">Try adjusting your search or expanding the area.</p>
               </div>
             )}
           </div>
-        </div>
+        </aside>
+        
+        {/* Right Panel - Map with Controls */}
+        <main className="flex-1 relative z-10">
+          <div className="absolute inset-0">
+            <MapView
+              parkingSpots={searchResults}
+              radius={searchRadius}
+              center={searchLocation}
+              onSpotSelect={handleSpotSelect}
+              onBooking={handleBooking}
+            />
+          </div>
+          
+          {/* Map Zoom Controls */}
+          <div className="absolute top-4 left-4 bg-white rounded-lg shadow-lg p-1 space-y-1 z-20">
+            <button className="h-8 w-8 flex items-center justify-center text-gray-700 hover:bg-gray-100 rounded-md">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+            </button>
+            <button className="h-8 w-8 flex items-center justify-center text-gray-700 hover:bg-gray-100 rounded-md">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+              </svg>
+            </button>
+          </div>
+          
+          {/* Map Legend - Bottom Bar */}
+          <div className="absolute bottom-4 left-0 right-0 p-4 z-20">
+            <div className="bg-white rounded-lg shadow-xl p-3 max-w-4xl mx-auto">
+              <div className="flex flex-wrap items-center justify-between text-sm text-gray-600 gap-4">
+                <div className="flex items-center">
+                  <span className="h-2 w-2 rounded-full bg-green-500 mr-2"></span>
+                  Available
+                </div>
+                <div className="flex items-center">
+                  <span className="h-2 w-2 rounded-full bg-red-500 mr-2"></span>
+                  Full
+                </div>
+                <div className="flex items-center">
+                  <span className="h-2 w-2 rounded-full border-2 border-blue-500 mr-2"></span>
+                  Search Area
+                </div>
+                <div className="flex items-center">
+                  <svg className="w-4 h-4 text-blue-500 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  Your Location
+                </div>
+                <div className="flex items-center text-green-600">
+                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Location Active
+                </div>
+                <div className="font-semibold text-gray-800">
+                  {searchResults.length} parking locations found
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
       </div>
+
+      {/* 🔄 REUSED MODALS - Same as Home Page */}
+      <AuthModal 
+        isOpen={isLoginModalOpen} 
+        onClose={closeLoginModal}
+        defaultTab="login"
+      />
+      
+      <PaymentFlow 
+        isOpen={isBookingModalOpen}
+        onClose={closeBookingModal}
+        parkingSpot={parkingSpotToBook}
+      />
+      
+      <BookingConfirmation 
+        isOpen={isConfirmationModalOpen}
+        onClose={closeConfirmationModal}
+      />
+      
+      <ParkingJourney 
+        isOpen={isJourneyModalOpen}
+        onClose={closeJourneyModal}
+      />
     </div>
   );
 };

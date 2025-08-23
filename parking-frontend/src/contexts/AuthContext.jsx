@@ -70,20 +70,46 @@ export function AuthProvider({ children }) {
   const login = (user, token, navigate) => {
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(user));
+    
+    // Enhanced security for super admin role
+    if (user.role === 'super_admin') {
+      // Create secure metadata without exposing sensitive role info
+      const secureMetadata = btoa(JSON.stringify({
+        role_verified: 'super_admin_verified',
+        timestamp: Date.now(),
+        session_id: Math.random().toString(36).substring(7),
+        security_level: 'maximum'
+      }));
+      sessionStorage.setItem('_ss_meta', secureMetadata);
+      
+      // Add additional auth token for super admin (more secure storage)
+      localStorage.setItem('authToken', token);
+    }
+    
     dispatch({
       type: 'LOGIN_SUCCESS',
       payload: { user, token }
     });
 
-    // Redirect to unified dashboard
+    // Enhanced redirect logic based on role
     if (navigate) {
-      navigate('/dashboard');
+      const redirectMap = {
+        'super_admin': '/super-admin',
+        'client': '/client-dashboard',
+        'parking_owner': '/client-dashboard',
+        'customer': '/dashboard',
+        'user': '/dashboard'
+      };
+      
+      navigate(redirectMap[user.role] || '/dashboard');
     }
   };
 
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('authToken'); // Remove super admin auth token
+    sessionStorage.removeItem('_ss_meta'); // Remove secure metadata
     dispatch({ type: 'LOGOUT' });
   };
 

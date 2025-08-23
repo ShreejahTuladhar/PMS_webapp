@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, memo } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import AuthModal from './auth/AuthModal';
@@ -32,16 +32,26 @@ const Header = () => {
   };
 
   const switchToDashboard = (dashboardType) => {
-    const path = dashboardType === 'client' ? '/client-dashboard' : '/dashboard';
-    navigate(path);
+    const pathMap = {
+      'super_admin': '/super-admin',
+      'client': '/client-dashboard',
+      'user': '/dashboard'
+    };
+    
+    navigate(pathMap[dashboardType] || '/dashboard');
     setIsProfileDropdownOpen(false);
     setIsMenuOpen(false);
   };
 
   const getCurrentDashboardType = () => {
+    if (location.pathname === '/super-admin') return 'super_admin';
     if (location.pathname === '/client-dashboard') return 'client';
     if (location.pathname === '/dashboard') return 'user';
-    return user?.role === 'client' || user?.role === 'parking_owner' ? 'client' : 'user';
+    
+    // Return based on user role
+    if (user?.role === 'super_admin') return 'super_admin';
+    if (user?.role === 'client' || user?.role === 'parking_owner') return 'client';
+    return 'user';
   };
 
   const closeAuthModal = () => {
@@ -128,14 +138,18 @@ const Header = () => {
             {/* Dashboard Link - Show only when authenticated */}
             {isAuthenticated && (
               <Link 
-                to={user?.role === 'client' || user?.role === 'parking_owner' ? '/client-dashboard' : '/dashboard'}
+                to={
+                  user?.role === 'super_admin' ? '/super-admin' :
+                  user?.role === 'client' || user?.role === 'parking_owner' ? '/client-dashboard' : 
+                  '/dashboard'
+                }
                 className={`text-sm font-medium transition-colors ${
-                  isActiveLink('/dashboard') || isActiveLink('/client-dashboard')
+                  isActiveLink('/dashboard') || isActiveLink('/client-dashboard') || isActiveLink('/super-admin')
                     ? 'text-blue-600' 
                     : 'text-gray-700 hover:text-blue-600'
                 }`}
               >
-                Dashboard
+                {user?.role === 'super_admin' ? 'Admin Panel' : 'Dashboard'}
               </Link>
             )}
           </nav>

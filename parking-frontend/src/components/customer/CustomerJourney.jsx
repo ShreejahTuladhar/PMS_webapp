@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import VehicleRegistration from './VehicleRegistration';
 import DigitalTicket from './DigitalTicket';
 import EntryExit from './EntryExit';
@@ -6,13 +7,43 @@ import PaymentVerification from './PaymentVerification';
 import CustomerSupport from './CustomerSupport';
 
 function CustomerJourney() {
+  const location = useLocation();
   const [journeyStep, setJourneyStep] = useState('welcome'); // welcome, vehicle, entry, parked, exit, support
   const [customerData, setCustomerData] = useState({
     vehicle: null,
     ticket: null,
     parking: null,
-    payment: null
+    payment: null,
+    navigation: null
   });
+
+  // Handle navigation completion signal
+  useEffect(() => {
+    if (location.state?.navigationCompleted) {
+      console.log('🚗 Navigation completed, starting parking flow:', location.state);
+      
+      setCustomerData(prev => ({
+        ...prev,
+        navigation: {
+          destination: location.state.destination,
+          arrivalTime: location.state.arrivalTime,
+          journeyDuration: location.state.journeyDuration,
+          currentLocation: location.state.currentLocation
+        }
+      }));
+      
+      // Skip welcome and go directly to vehicle registration
+      setJourneyStep('vehicle');
+      
+      // Show success message
+      if (location.state.message) {
+        setTimeout(() => {
+          // You can add a toast notification here if needed
+          console.log('✅', location.state.message);
+        }, 500);
+      }
+    }
+  }, [location.state]);
 
   // Steps: welcome → vehicle → entry → parked → exit
   const steps = [
@@ -121,6 +152,27 @@ function CustomerJourney() {
           </div>
         )}
 
+        {/* Navigation Success Banner */}
+        {customerData.navigation && journeyStep === 'vehicle' && (
+          <div className="max-w-2xl mx-auto mb-6">
+            <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg p-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-green-800">Navigation Complete!</p>
+                  <p className="text-sm text-green-600">
+                    Journey time: {customerData.navigation.journeyDuration} | Arrived at {customerData.navigation.destination?.name}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Vehicle Registration Step */}
         {journeyStep === 'vehicle' && (
           <VehicleRegistration
@@ -128,7 +180,8 @@ function CustomerJourney() {
               setCustomerData(prev => ({ ...prev, vehicle: vehicleData }));
               setJourneyStep('entry');
             }}
-            onBack={() => setJourneyStep('welcome')}
+            onBack={() => customerData.navigation ? null : setJourneyStep('welcome')}
+            navigationData={customerData.navigation}
           />
         )}
 

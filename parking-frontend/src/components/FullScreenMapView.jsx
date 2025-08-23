@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
 import L from 'leaflet';
+import NavigationControls from './navigation/NavigationControls';
+import RouteVisualization from './navigation/RouteVisualization';
 
 // Fix for default markers in react-leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -16,7 +18,7 @@ const getParkingIndicator = () => {
 };
 
 // Create custom parking markers with professional design
-const createParkingIcon = (availability, spot) => {
+const createParkingIcon = (availability, _spot) => {
   const color = availability > 0 ? '#059669' : '#DC2626'; // Professional green or red
   const abbreviation = getParkingIndicator();
   
@@ -126,7 +128,10 @@ const FullScreenMapView = ({ parkingSpots, radius, center, onSpotSelect, onBooki
   const [_selectedSpot, setSelectedSpot] = useState(null);
   const [currentLocation, setCurrentLocation] = useState(null);
   const [locationPermission, setLocationPermission] = useState('prompt'); // 'granted', 'denied', 'prompt'
-  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+  const [_isLoadingLocation, _setIsLoadingLocation] = useState(false);
+  const [_navigationRoute, _setNavigationRoute] = useState(null);
+  const [_showNavigationControls, _setShowNavigationControls] = useState(false);
+  const [_navigationDestination, _setNavigationDestination] = useState(null);
   
   // Default center (you can change this to your city's coordinates)
   const defaultCenter = useMemo(() => [27.7172, 85.3240], []); // Kathmandu, Nepal
@@ -138,7 +143,7 @@ const FullScreenMapView = ({ parkingSpots, radius, center, onSpotSelect, onBooki
       return;
     }
 
-    setIsLoadingLocation(true);
+    _setIsLoadingLocation(true);
     
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -149,12 +154,12 @@ const FullScreenMapView = ({ parkingSpots, radius, center, onSpotSelect, onBooki
           accuracy: position.coords.accuracy
         });
         setLocationPermission('granted');
-        setIsLoadingLocation(false);
+        _setIsLoadingLocation(false);
       },
       (error) => {
         console.error('Error getting location:', error);
         setLocationPermission('denied');
-        setIsLoadingLocation(false);
+        _setIsLoadingLocation(false);
       },
       {
         enableHighAccuracy: true,

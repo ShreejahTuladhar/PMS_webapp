@@ -24,7 +24,7 @@ function AuthModal({ isOpen, onClose, defaultTab = 'login' }) {
 
   return (
     <div 
-      className={`fixed inset-0 z-50 transition-all duration-700 ease-in-out ${
+      className={`fixed inset-0 z-[9999] transition-all duration-700 ease-in-out ${
         isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
       }`}
     >
@@ -62,7 +62,7 @@ function AuthModal({ isOpen, onClose, defaultTab = 'login' }) {
                   {activeTab === 'login' ? (
                     <>Welcome <span className="text-blue-600">Back!</span></>
                   ) : (
-                    <>Join <span className="text-blue-600">ParkSathi!</span></>
+                    <>Join <span className="text-blue-600">ParkSathi!</span> 🚗</>
                   )}
                 </h3>
                 <p className="text-gray-600 text-base font-medium">

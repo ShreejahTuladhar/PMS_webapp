@@ -39,15 +39,22 @@ const generateNavigationURL = (destination, platform = 'google') => {
 };
 
 function BookingConfirmation({ isOpen, onClose }) {
-  const { currentBooking, navigationData, startNavigation, completeBooking } = useBooking();
+  const { currentBooking, navigationData, startJourney, completeBooking } = useBooking();
   const [showQR, setShowQR] = useState(false);
   const [selectedNavPlatform, setSelectedNavPlatform] = useState('galli');
 
   if (!isOpen || !currentBooking) return null;
 
-  const handleStartNavigation = () => {
+  const handleStartParkingJourney = () => {
     if (navigationData) {
-      startNavigation();
+      // Start the parking journey process
+      startJourney('ticket_generation');
+      onClose(); // Close this modal, journey modal will open
+      return;
+    }
+    
+    // Fallback to old navigation behavior
+    if (navigationData) {
       
       // Generate URL based on selected platform and parking spot's local navigation support
       const parkingSpot = currentBooking.parkingSpot;
@@ -99,7 +106,7 @@ function BookingConfirmation({ isOpen, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[9999]">
       <div className="bg-white rounded-lg shadow-xl max-w-lg w-full">
         <div className="text-center p-8">
           {/* Success Icon */}
@@ -246,17 +253,20 @@ function BookingConfirmation({ isOpen, onClose }) {
                 
                 <div className="space-y-2">
                   <button
-                    onClick={handleOpenInApp}
-                    className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition font-medium"
+                    onClick={handleStartParkingJourney}
+                    className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition font-medium flex items-center justify-center space-x-2"
                   >
-                     Open in Mobile App
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    <span>🚗 Start Parking Journey</span>
                   </button>
                   
                   <button
-                    onClick={handleStartNavigation}
+                    onClick={handleOpenInApp}
                     className="w-full bg-white text-green-700 border border-green-300 py-2 px-4 rounded-lg hover:bg-green-50 transition font-medium"
                   >
-                     Open in Browser
+                     Quick External Navigation
                   </button>
                 </div>
                 

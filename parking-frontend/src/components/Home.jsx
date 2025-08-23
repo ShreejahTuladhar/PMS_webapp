@@ -9,34 +9,50 @@ import PremiumLocationBanner from './PremiumLocationBanner';
 import AuthModal from './auth/AuthModal';
 import PaymentFlow from './booking/PaymentFlow';
 import BookingConfirmation from './booking/BookingConfirmation';
+import ParkingJourney from './journey/ParkingJourney';
 import Footer from './Footer';
 import { locationService } from '../services';
 import searchHistory from '../utils/searchHistory';
 
 function Home({ focusSearch = false }) {
   const { isAuthenticated } = useAuth();
-  const { currentBooking, bookingStep } = useBooking();
+  const { currentBooking, bookingStep, isJourneyActive } = useBooking();
   const location = useLocation();
   const navigate = useNavigate();
   
-  const [searchResults, setSearchResults] = useState([]);
-  const [selectedSpot, setSelectedSpot] = useState(null);
-  const [searchRadius, setSearchRadius] = useState(0.5);
-  const [searchLocation, setSearchLocation] = useState(null);
-  const [originalSearchInput, setOriginalSearchInput] = useState(null); // Track original search input
-  const [isSearched, setIsSearched] = useState(false);
+  // Initialize state from navigation (from fullscreen return)
+  const [searchResults, setSearchResults] = useState(location.state?.searchResults || []);
+  const [selectedSpot, setSelectedSpot] = useState(location.state?.selectedSpot || null);
+  const [searchRadius, setSearchRadius] = useState(location.state?.searchRadius || 0.5);
+  const [searchLocation, setSearchLocation] = useState(location.state?.searchLocation || null);
+  const [originalSearchInput, setOriginalSearchInput] = useState(location.state?.originalSearchInput || null);
+  const [isSearched, setIsSearched] = useState(location.state?.searchResults?.length > 0 || false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
+  const [isJourneyModalOpen, setIsJourneyModalOpen] = useState(false);
   const [parkingSpotToBook, setParkingSpotToBook] = useState(null);
   const [_loading, setLoading] = useState(false);
 
-  // Watch for booking confirmation
+  // Watch for booking confirmation and journey
   useEffect(() => {
     if (bookingStep === 'confirmed' && currentBooking) {
       setIsConfirmationModalOpen(true);
     }
   }, [bookingStep, currentBooking]);
+  
+  // Watch for journey activation
+  useEffect(() => {
+    if (isJourneyActive && bookingStep === 'confirmed') {
+      // Close confirmation modal and open journey modal
+      setIsConfirmationModalOpen(false);
+      setTimeout(() => {
+        setIsJourneyModalOpen(true);
+      }, 500);
+    } else if (!isJourneyActive) {
+      setIsJourneyModalOpen(false);
+    }
+  }, [isJourneyActive, bookingStep]);
 
   // Handle redirect from ProtectedRoute to open login modal
   useEffect(() => {
@@ -46,6 +62,17 @@ function Home({ focusSearch = false }) {
       window.history.replaceState(null, '', window.location.pathname);
     }
   }, [location.state?.openLogin]);
+
+  // Clear navigation state after initialization to prevent stale state
+  useEffect(() => {
+    if (location.state?.searchResults) {
+      // Clear the state after initial load to prevent stale data on refresh
+      const timer = setTimeout(() => {
+        window.history.replaceState(null, '', window.location.pathname);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [location.state]);
 
   // Helper function to calculate distance between two coordinates
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
@@ -230,7 +257,7 @@ function Home({ focusSearch = false }) {
         console.log('📦 Fallback response:', response);
       }
       
-      const searchDuration = Date.now() - searchStartTime;
+      const _searchDuration = Date.now() - searchStartTime;
       
       if (response && response.success) {
         // Handle different response formats
@@ -379,9 +406,12 @@ function Home({ focusSearch = false }) {
   const openFullScreenMap = (searchQuery = '') => {
     navigate('/search/fullscreen', { 
       state: { 
-        searchQuery,
+        searchQuery: searchQuery || searchLocation?.address || '',
         searchResults,
-        searchLocation 
+        searchLocation,
+        selectedSpot,
+        searchRadius,
+        originalSearchInput
       } 
     });
   };
@@ -397,6 +427,10 @@ function Home({ focusSearch = false }) {
 
   const closeConfirmationModal = () => {
     setIsConfirmationModalOpen(false);
+  };
+  
+  const closeJourneyModal = () => {
+    setIsJourneyModalOpen(false);
   };
 
   return (
@@ -439,6 +473,41 @@ function Home({ focusSearch = false }) {
           radius={searchRadius}
           focusSearch={focusSearch}
         />
+
+        {/* Welcome Message */}
+        {!isSearched && (
+          <div className="container mx-auto px-4 py-8">
+            <div className="text-center mb-8">
+              <div className="bg-gradient-to-r from-blue-50 via-white to-blue-50 rounded-2xl p-6 shadow-sm border border-blue-100 max-w-4xl mx-auto">
+                <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+                  Welcome to <span className="text-blue-600">ParkSathi</span>! 🚗
+                </h1>
+                <p className="text-lg text-gray-600 mb-4">
+                  Your friendly neighborhood parking companion in Nepal
+                </p>
+                <p className="text-gray-500 max-w-2xl mx-auto">
+                  Find, book, and manage parking spots across Kathmandu Valley with ease. 
+                  Made by Nepalis, for Nepalis - simple, reliable, and always here to help!
+                </p>
+                
+                <div className="flex items-center justify-center gap-6 mt-6 text-sm text-gray-500">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span>Real-time availability</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <span>Instant booking</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                    <span>Fair pricing</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {isSearched && (
           <div className="container mx-auto px-4 py-8">
@@ -612,6 +681,11 @@ function Home({ focusSearch = false }) {
       <BookingConfirmation 
         isOpen={isConfirmationModalOpen}
         onClose={closeConfirmationModal}
+      />
+      
+      <ParkingJourney 
+        isOpen={isJourneyModalOpen}
+        onClose={closeJourneyModal}
       />
 
       

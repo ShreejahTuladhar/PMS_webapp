@@ -328,12 +328,32 @@ const SuperAdminDashboard = () => {
         }
     };
 
-    if (user?.role !== 'super_admin') {
+    // Enhanced security check for super admin
+    const isSecureSession = () => {
+        try {
+            const secureSession = sessionStorage.getItem('_ss_meta');
+            if (!secureSession) return false;
+            
+            const metadata = JSON.parse(atob(secureSession));
+            return metadata.role_verified === 'super_admin_verified' && 
+                   metadata.security_level === 'maximum';
+        } catch {
+            return false;
+        }
+    };
+
+    if (user?.role !== 'super_admin' || !isSecureSession()) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-100">
-                <div className="text-center">
-                    <h2 className="text-2xl font-bold text-red-600 mb-4">Access Denied</h2>
-                    <p className="text-gray-600">You don't have permission to access the Super Admin Dashboard.</p>
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-900 via-red-800 to-red-900">
+                <div className="text-center max-w-md bg-white/10 backdrop-blur-md p-8 rounded-2xl border border-red-300/30">
+                    <div className="text-red-300 text-6xl mb-6">🛡️</div>
+                    <h2 className="text-3xl font-bold text-white mb-4">Restricted Access</h2>
+                    <p className="text-red-100 mb-6">
+                        This area requires super administrator privileges with enhanced security verification.
+                    </p>
+                    <div className="text-sm text-red-200 bg-red-800/30 p-3 rounded-lg">
+                        Unauthorized access attempts are logged and monitored.
+                    </div>
                 </div>
             </div>
         );
