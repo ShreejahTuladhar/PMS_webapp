@@ -1,7 +1,7 @@
 /**
  * Analytics Routes
  * Routes for advanced analytics and business intelligence
- * Author: Claude & Shreeraj Tuladhar
+ * Author: Shreejah Tuladhar
  */
 
 const express = require('express');

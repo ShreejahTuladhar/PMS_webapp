@@ -1,7 +1,7 @@
 /**
  * Cinematic ParkSathi Loading Screen
  * Pure CSS animations - no external dependencies
- * Author: Claude & Shreeraj Tuladhar
+ * Author: Shreejah Tuladhar
  */
 
 import React, { useState, useEffect, useRef } from 'react';

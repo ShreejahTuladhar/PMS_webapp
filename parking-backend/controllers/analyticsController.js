@@ -1,7 +1,7 @@
 /**
  * Analytics Controller
  * Provides advanced analytics endpoints for business intelligence
- * Author: Claude & Shreeraj Tuladhar
+ * Author: Shreejah Tuladhar
  */
 
 const advancedDB = require('../services/advancedDatabaseService');

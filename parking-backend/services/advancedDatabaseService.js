@@ -1,7 +1,7 @@
 /**
  * Advanced Database Service Layer
  * Provides optimized queries and analytics for ParkSathi
- * Author: Claude & Shreeraj Tuladhar
+ * Author: Shreejah Tuladhar
  */
 
 const mongoose = require('mongoose');

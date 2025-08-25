@@ -1,7 +1,6 @@
 /**
  * Database Operations Test Suite
  * Comprehensive testing of all advanced database operations
- * Author: Claude & Shreeraj Tuladhar
  */
 
 const mongoose = require('mongoose');
@@ -101,7 +100,7 @@ class DatabaseOperationsTester {
         throw new Error('Missing analytics data structure');
       }
       
-      return `Generated ${analytics.analytics.length} daily analytics records`;
+      return `Created ${analytics.analytics.length} daily analytics records`;
     });
 
     await this.runTest('Occupancy Analytics', async () => {
@@ -138,7 +137,7 @@ class DatabaseOperationsTester {
         throw new Error('Missing forecast data structure');
       }
       
-      return `Generated ${forecast.forecast.length} day forecast`;
+      return `Created ${forecast.forecast.length} day forecast`;
     });
 
     console.log();

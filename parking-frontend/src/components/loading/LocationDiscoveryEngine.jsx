@@ -1,7 +1,7 @@
 /**
  * Location Discovery Engine
  * Real-time location data fetching for epic loading screen
- * Author: Claude & Shreeraj Tuladhar
+ * Author: Shreejah Tuladhar
  */
 
 import React, { useState, useEffect, useCallback } from 'react';

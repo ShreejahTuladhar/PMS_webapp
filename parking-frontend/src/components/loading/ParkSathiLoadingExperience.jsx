@@ -1,7 +1,7 @@
 /**
  * ParkSathi Loading Experience
  * The ultimate jaw-dropping loading screen
- * Author: Claude & Shreeraj Tuladhar
+ * Author: Shreejah Tuladhar
  */
 
 import React, { useState, useEffect, useRef } from 'react';

@@ -1,7 +1,7 @@
 /**
  * Database Index Service
  * Manages database indexing strategy for optimal performance
- * Author: Claude & Shreeraj Tuladhar
+ * Author: Shreejah Tuladhar
  */
 
 const mongoose = require('mongoose');

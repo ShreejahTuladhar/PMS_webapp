@@ -1,7 +1,7 @@
 /**
  * Analytics Service
  * Handles all analytics API requests for business intelligence
- * Author: Claude & Shreeraj Tuladhar
+ * Author: Shreejah Tuladhar
  */
 
 import axiosInstance from './axiosInstance';

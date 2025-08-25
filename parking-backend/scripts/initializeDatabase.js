@@ -1,7 +1,7 @@
 /**
  * Database Initialization Script
  * Sets up optimal database indexes and configurations
- * Author: Claude & Shreeraj Tuladhar
+ * Author: Shreejah Tuladhar
  */
 
 const mongoose = require('mongoose');

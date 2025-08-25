@@ -1,7 +1,7 @@
 /**
  * Location Accuracy Checker
  * Validates and fixes location data inconsistencies
- * Author: Claude & Shreeraj Tuladhar
+ * Author: Shreejah Tuladhar
  */
 
 const mongoose = require('mongoose');

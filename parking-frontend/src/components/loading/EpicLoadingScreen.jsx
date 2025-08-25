@@ -1,7 +1,7 @@
 /**
  * Epic ParkSathi Loading Screen
  * Jaw-dropping location discovery animation
- * Author: Claude & Shreeraj Tuladhar
+ * Author: Shreejah Tuladhar
  */
 
 import React, { useState, useEffect, useRef } from 'react';
