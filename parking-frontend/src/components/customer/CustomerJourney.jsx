@@ -17,29 +17,34 @@ function CustomerJourney() {
     navigation: null
   });
 
-  // Handle navigation completion signal
+  // Handle navigation completion and booking data
   useEffect(() => {
-    if (location.state?.navigationCompleted) {
-      console.log('🚗 Navigation completed, starting parking flow:', location.state);
+    if (location.state?.navigationCompleted || location.state?.bookingData) {
+      console.log('🚗 Navigation completed or booking data received, starting parking flow:', location.state);
       
-      setCustomerData(prev => ({
-        ...prev,
-        navigation: {
+      const newCustomerData = {
+        ...customerData,
+        booking: location.state.bookingData || null,
+        navigation: location.state.destination ? {
           destination: location.state.destination,
           arrivalTime: location.state.arrivalTime,
-          journeyDuration: location.state.journeyDuration,
+          journeyDuration: location.state.journeyDuration || 'N/A',
           currentLocation: location.state.currentLocation
-        }
-      }));
+        } : null
+      };
       
-      // Skip welcome and go directly to vehicle registration
-      setJourneyStep('vehicle');
+      setCustomerData(newCustomerData);
+      
+      // Skip welcome if requested or if we have booking data
+      if (location.state.skipWelcome || location.state.bookingData) {
+        setJourneyStep('vehicle');
+      }
       
       // Show success message
       if (location.state.message) {
         setTimeout(() => {
-          // You can add a toast notification here if needed
           console.log('✅', location.state.message);
+          // You can add toast notification here if needed
         }, 500);
       }
     }
@@ -172,6 +177,27 @@ function CustomerJourney() {
             </div>
           </div>
         )}
+        
+        {/* Booking Information Banner */}
+        {customerData.booking && journeyStep === 'vehicle' && (
+          <div className="max-w-2xl mx-auto mb-6">
+            <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+                  <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M4 4h16v2H4V4zm0 4h16v12H4V8zm2 2v8h12v-8H6zm2 2h8v1H8v-1zm0 2h8v1H8v-1zm0 2h6v1H8v-1z"/>
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-blue-800">Booking Confirmed</p>
+                  <p className="text-sm text-blue-600">
+                    Ticket: {customerData.booking.ticketNumber} | Vehicle: {customerData.booking.vehicleInfo?.plateNumber} | Duration: {customerData.booking.notes?.match(/\d+/)?.[0] || 'N/A'}h
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Vehicle Registration Step */}
         {journeyStep === 'vehicle' && (
@@ -180,8 +206,10 @@ function CustomerJourney() {
               setCustomerData(prev => ({ ...prev, vehicle: vehicleData }));
               setJourneyStep('entry');
             }}
-            onBack={() => customerData.navigation ? null : setJourneyStep('welcome')}
+            onBack={() => (customerData.navigation || customerData.booking) ? null : setJourneyStep('welcome')}
             navigationData={customerData.navigation}
+            bookingData={customerData.booking}
+            preFilledPlate={customerData.booking?.vehicleInfo?.plateNumber}
           />
         )}
 
@@ -190,6 +218,7 @@ function CustomerJourney() {
           <EntryExit
             mode="entry"
             vehicleData={customerData.vehicle}
+            bookingData={customerData.booking}
             onComplete={(ticketData) => {
               setCustomerData(prev => ({ ...prev, ticket: ticketData }));
               setJourneyStep('parked');

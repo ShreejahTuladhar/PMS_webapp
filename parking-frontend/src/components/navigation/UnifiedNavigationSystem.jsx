@@ -277,7 +277,8 @@ const UnifiedNavigationSystem = ({
   onClose,
   onNavigationComplete,
   startLocation,
-  className = ''
+  className = '',
+  bookingData = null // Pass booking data for dynamic Park Now integration
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -446,7 +447,7 @@ const UnifiedNavigationSystem = ({
     toast.success('Navigation started!');
   }, [normalizedDestination, currentLocation, navigationService, handleLocationUpdate]);
 
-  // Stop navigation
+  // Stop navigation - with Park Now integration
   const stopNavigation = useCallback(() => {
     setIsNavigating(false);
     setHasArrived(false);
@@ -455,8 +456,29 @@ const UnifiedNavigationSystem = ({
     setRemainingTime(0);
     
     navigationService.stopLocationTracking();
-    toast.success('Navigation stopped');
-  }, [navigationService]);
+    
+    // If we have booking data, trigger Park Now journey
+    if (bookingData && navigate) {
+      toast.success('Navigation stopped - Starting Park Now journey...');
+      navigate('/parking', {
+        state: {
+          navigationCompleted: true,
+          bookingData: bookingData,
+          destination: normalizedDestination,
+          arrivalTime: new Date().toISOString(),
+          journeyDuration: remainingTime ? navigationService.formatDuration(remainingTime) : 'N/A',
+          currentLocation: currentLocation,
+          message: '🎯 Navigation stopped - Complete your Park Now journey to get your digital parking ticket.'
+        }
+      });
+      
+      if (onClose) {
+        onClose();
+      }
+    } else {
+      toast.success('Navigation stopped');
+    }
+  }, [navigationService, bookingData, navigate, normalizedDestination, remainingTime, currentLocation, onClose]);
 
   // Toggle voice
   const toggleVoice = () => {
@@ -737,13 +759,20 @@ const UnifiedNavigationSystem = ({
                 )}
               </button>
             ) : (
-              <button
-                onClick={stopNavigation}
-                className="w-full bg-red-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-red-700 flex items-center justify-center space-x-2"
-              >
-                <span>🛑</span>
-                <span>Stop Navigation</span>
-              </button>
+              <div className="space-y-2">
+                <button
+                  onClick={stopNavigation}
+                  className="w-full bg-red-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-red-700 flex items-center justify-center space-x-2"
+                >
+                  <span>🛑</span>
+                  <span>{bookingData ? 'Stop Navigation & Park Now' : 'Stop Navigation'}</span>
+                </button>
+                {bookingData && (
+                  <p className="text-xs text-center text-gray-500">
+                    Stopping navigation will start your Park Now journey
+                  </p>
+                )}
+              </div>
             )}
 
             {/* External navigation */}

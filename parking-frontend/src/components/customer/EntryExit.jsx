@@ -22,7 +22,7 @@ import { QRCodeSVG } from 'qrcode.react';
  *   onBack={handleBack}
  * />
  */
-function EntryExit({ mode, vehicleData, ticketData, onComplete, onBack }) {
+function EntryExit({ mode, vehicleData, ticketData, onComplete, onBack, bookingData }) {
   const [processStep, setProcessStep] = useState('ready'); // ready, processing, success
   const [generatedTicket, setGeneratedTicket] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -34,9 +34,12 @@ function EntryExit({ mode, vehicleData, ticketData, onComplete, onBack }) {
   const ticketId = generatedTicket?.id || `PKG-${Date.now()}`;
   const qrData = generatedTicket ? JSON.stringify({
     ticketId: generatedTicket.id,
+    ticketNumber: generatedTicket.ticketNumber,
+    bookingId: generatedTicket.bookingId,
     vehiclePlate: vehicleData.licensePlate,
     entryTime: generatedTicket.entryTime,
     location: generatedTicket.location,
+    validUntil: generatedTicket.validUntil,
     userId: 'user123' // Should come from auth context
   }) : '';
 
@@ -48,24 +51,34 @@ function EntryExit({ mode, vehicleData, ticketData, onComplete, onBack }) {
     await new Promise(resolve => setTimeout(resolve, 2000));
 
     if (isEntry) {
-      // Generate ticket for entry
+      // Generate ticket for entry - using booking data if available
       const ticket = {
         id: ticketId,
+        bookingId: bookingData?.bookingId || null,
+        ticketNumber: bookingData?.ticketNumber || `PKT${Date.now()}`,
         vehiclePlate: vehicleData.licensePlate,
         vehicleInfo: vehicleData,
         entryTime: currentTime.toISOString(),
-        location: {
+        location: bookingData?.locationId ? {
+          name: bookingData.locationId.name || 'Parking Location',
+          address: bookingData.locationId.address || 'Address not available',
+          spaceNumber: bookingData.spaceId || `A${Math.floor(Math.random() * 50) + 1}`,
+          level: Math.floor(Math.random() * 3) + 1
+        } : {
           name: 'Downtown Parking Plaza',
           address: '123 Main Street, Kathmandu',
           spaceNumber: `A${Math.floor(Math.random() * 50) + 1}`,
           level: Math.floor(Math.random() * 3) + 1
         },
         pricing: {
-          hourlyRate: 150, // NPR per hour
-          dailyRate: 1200,
+          hourlyRate: bookingData?.hourlyRate || 150,
+          totalAmount: bookingData?.totalAmount || 150,
+          duration: bookingData?.notes?.match(/\d+/)?.[0] || 1, // Extract duration from booking notes
           currency: 'NPR'
         },
+        bookingInfo: bookingData,
         status: 'active',
+        validUntil: bookingData?.endTime || new Date(currentTime.getTime() + (2 * 60 * 60 * 1000)).toISOString(), // 2 hours default
         qrCode: qrData
       };
       setGeneratedTicket(ticket);

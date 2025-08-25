@@ -32,7 +32,7 @@ const SmartBookingFlow = ({ isOpen, onClose, parkingSpot }) => {
   const [navigationMode, setNavigationMode] = useState('floating');
   
   // QR and ticket data
-  const [qrCode, setQrCode] = useState(null);
+  const [bookingTicket, setBookingTicket] = useState(null);
   const [bookingConfirmed, setBookingConfirmed] = useState(false);
 
   // Smart location detection and flow determination
@@ -172,12 +172,12 @@ const SmartBookingFlow = ({ isOpen, onClose, parkingSpot }) => {
         const confirmedBooking = {
           ...booking,
           bookingId: response.data.bookingId || `PMS${Date.now()}`,
-          qrCode: `QR${Date.now()}${Math.random().toString(36).substring(2, 11)}`,
+          ticketNumber: `PKT${Date.now()}${Math.random().toString(36).substring(2, 6).toUpperCase()}`,
           status: 'confirmed',
           confirmationTime: new Date().toISOString()
         };
 
-        setQrCode(confirmedBooking.qrCode);
+        setBookingTicket(confirmedBooking);
         setBookingConfirmed(true);
 
         // SmartBookingFlow is self-contained - no need for external booking context
@@ -214,9 +214,28 @@ const SmartBookingFlow = ({ isOpen, onClose, parkingSpot }) => {
   };
 
   const handleNavigationComplete = () => {
-    toast.success('🎉 You\'ve arrived! Your parking spot is ready.');
-    setBookingStep('confirmation');
+    toast.success('🎉 You\'ve arrived! Starting Park Now journey...');
+    // Navigate to Park Now journey with booking data
+    navigate('/parking', {
+      state: {
+        navigationCompleted: true,
+        bookingData: bookingTicket,
+        destination: normalizedDestination,
+        arrivalTime: new Date().toISOString(),
+        journeyDuration: '12 min', // This should come from navigation service
+        currentLocation: userLocation,
+        message: '🎉 You have arrived at your destination! Ready to park?'
+      }
+    });
+    onClose(); // Close the booking modal
   };
+
+  const normalizedDestination = parkingSpot ? {
+    lat: parkingSpot.coordinates?.lat || parkingSpot.lat || 27.7172,
+    lng: parkingSpot.coordinates?.lng || parkingSpot.lng || 85.3240,
+    name: parkingSpot.name,
+    address: parkingSpot.address || parkingSpot.location?.address
+  } : null;
 
   if (!isOpen || !parkingSpot) return null;
 
@@ -385,59 +404,74 @@ const SmartBookingFlow = ({ isOpen, onClose, parkingSpot }) => {
           {bookingStep === 'navigation' && currentFlow === 'remote' && (
             <div className="space-y-4">
               <div className="text-center p-6">
-                <div className="text-6xl mb-4">🎫</div>
+                {/* Parking Ticket Icon */}
+                <div className="w-20 h-20 mx-auto mb-4 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <svg className="w-12 h-12 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M4 4h16v2H4V4zm0 4h16v12H4V8zm2 2v8h12v-8H6zm2 2h8v1H8v-1zm0 2h8v1H8v-1zm0 2h6v1H8v-1z"/>
+                  </svg>
+                </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">Booking Confirmed!</h3>
                 <p className="text-gray-600 mb-4">Your parking spot is reserved. Navigate to the location.</p>
                 
-                {qrCode && (
-                  <div className="bg-gray-100 p-4 rounded-lg mb-4">
-                    <div className="text-2xl font-mono text-gray-800">{qrCode}</div>
-                    <p className="text-xs text-gray-600 mt-1">Show this code at parking</p>
+                {bookingTicket && (
+                  <div className="bg-gray-50 p-4 rounded-lg mb-4 border border-gray-200">
+                    <div className="text-sm text-gray-600 mb-1">Booking Reference</div>
+                    <div className="text-lg font-bold text-gray-800">{bookingTicket.ticketNumber}</div>
+                    <div className="text-xs text-gray-500 mt-1">Keep this for your records</div>
                   </div>
                 )}
               </div>
 
               <UnifiedNavigationSystem
                 mode="modal"
-                destination={{
-                  lat: parkingSpot.coordinates?.lat || parkingSpot.lat || 27.7172,
-                  lng: parkingSpot.coordinates?.lng || parkingSpot.lng || 85.3240,
-                  name: parkingSpot.name,
-                  address: parkingSpot.address || parkingSpot.location?.address
-                }}
+                destination={normalizedDestination}
                 isOpen={true}
                 onNavigationComplete={handleNavigationComplete}
+                bookingData={bookingTicket}
               />
             </div>
           )}
 
-          {/* Confirmation Step (for onsite bookings or after navigation) */}
-          {bookingStep === 'confirmation' && (
+          {/* Confirmation Step (for onsite bookings) */}
+          {bookingStep === 'confirmation' && currentFlow === 'onsite' && (
             <div className="text-center p-6">
-              <div className="text-6xl mb-4">🎉</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                {currentFlow === 'onsite' ? 'Ready to Park!' : 'You\'ve Arrived!'}
-              </h3>
-              <p className="text-gray-600 mb-6">
-                {currentFlow === 'onsite' 
-                  ? 'Your parking space is ready. You can start parking now.'
-                  : 'Your parking space is waiting for you.'
-                }
-              </p>
+              {/* Parking Ticket Icon */}
+              <div className="w-20 h-20 mx-auto mb-4 bg-green-100 rounded-lg flex items-center justify-center">
+                <svg className="w-12 h-12 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M4 4h16v2H4V4zm0 4h16v12H4V8zm2 2v8h12v-8H6zm2 2h8v1H8v-1zm0 2h8v1H8v-1zm0 2h6v1H8v-1z"/>
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Ready to Park!</h3>
+              <p className="text-gray-600 mb-6">Your parking space is ready. Start the Park Now journey to get your digital ticket.</p>
               
-              {qrCode && (
-                <div className="bg-gray-100 p-6 rounded-lg mb-6">
-                  <div className="text-3xl font-mono text-gray-800 mb-2">{qrCode}</div>
-                  <p className="text-sm text-gray-600">Show this QR code to the parking attendant</p>
+              {bookingTicket && (
+                <div className="bg-gray-50 p-4 rounded-lg mb-6 border border-gray-200">
+                  <div className="text-sm text-gray-600 mb-1">Booking Reference</div>
+                  <div className="text-lg font-bold text-gray-800">{bookingTicket.ticketNumber}</div>
+                  <div className="text-xs text-gray-500 mt-1">Vehicle: {bookingData.plateNumber}</div>
+                  <div className="text-xs text-gray-500">Duration: {bookingData.duration} hour{bookingData.duration > 1 ? 's' : ''}</div>
                 </div>
               )}
 
               <div className="space-y-3">
                 <button
-                  onClick={onClose}
+                  onClick={() => {
+                    // Navigate to Park Now journey with booking data
+                    navigate('/parking', {
+                      state: {
+                        bookingData: bookingTicket,
+                        destination: normalizedDestination,
+                        arrivalTime: new Date().toISOString(),
+                        currentLocation: userLocation,
+                        skipWelcome: true,
+                        message: '✅ Booking confirmed! Complete your Park Now journey to get your digital parking ticket.'
+                      }
+                    });
+                    onClose();
+                  }}
                   className="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-green-700"
                 >
-                  Start Parking
+                  Start Park Now Journey
                 </button>
                 
                 <button

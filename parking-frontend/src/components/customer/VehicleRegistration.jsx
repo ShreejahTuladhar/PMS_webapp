@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-function VehicleRegistration({ onComplete, onBack }) {
+function VehicleRegistration({ onComplete, onBack, navigationData, bookingData, preFilledPlate }) {
   const [vehicle, setVehicle] = useState({
     make: '',
     model: '',
@@ -45,7 +45,23 @@ function VehicleRegistration({ onComplete, onBack }) {
     if (saved) {
       setSavedVehicles(JSON.parse(saved));
     }
-  }, []);
+    
+    // Pre-fill vehicle data from booking if available
+    if (preFilledPlate) {
+      setVehicle(prev => ({
+        ...prev,
+        licensePlate: preFilledPlate
+      }));
+    }
+    
+    // If we have booking data, also pre-fill vehicle type
+    if (bookingData?.vehicleInfo?.vehicleType) {
+      setVehicle(prev => ({
+        ...prev,
+        type: bookingData.vehicleInfo.vehicleType
+      }));
+    }
+  }, [preFilledPlate, bookingData]);
 
   const handleInputChange = (field, value) => {
     setVehicle(prev => ({ ...prev, [field]: value }));
@@ -75,13 +91,30 @@ function VehicleRegistration({ onComplete, onBack }) {
 
   return (
     <div className="max-w-2xl mx-auto">
-      {/* Back Button */}
-      <button
-        onClick={onBack}
-        className="flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-6 font-medium transition-colors"
-      >
-        ← Back to Welcome
-      </button>
+      {/* Back Button - only show if no navigation/booking data */}
+      {!(navigationData || bookingData) && (
+        <button
+          onClick={onBack}
+          className="flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-6 font-medium transition-colors"
+        >
+          ← Back to Welcome
+        </button>
+      )}
+      
+      {/* Booking context message */}
+      {bookingData && (
+        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex items-center space-x-2">
+            <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M4 4h16v2H4V4zm0 4h16v12H4V8zm2 2v8h12v-8H6zm2 2h8v1H8v-1zm0 2h8v1H8v-1zm0 2h6v1H8v-1z"/>
+            </svg>
+            <span className="text-blue-800 font-medium">Using details from your booking</span>
+          </div>
+          <p className="text-sm text-blue-600 mt-1">
+            We've pre-filled your vehicle information. Please verify and add any missing details.
+          </p>
+        </div>
+      )}
 
       <div className="bg-white/95 rounded-3xl p-8 shadow-xl border border-blue-200 relative overflow-hidden">
         {/* Magical background elements */}
