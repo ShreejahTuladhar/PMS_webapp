@@ -1,6 +1,7 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { Polyline, Marker, useMap } from 'react-leaflet';
 import L from 'leaflet';
+import navigationService from '../../services/navigationService';
 
 // Create custom user location marker
 const createUserLocationIcon = () => {
@@ -129,27 +130,74 @@ const RouteVisualization = ({
   destination,
   showInstructions = true,
   showUserLocation = true,
-  className = ''
+  autoCalculateRoute = false
 }) => {
   const routeRef = useRef(null);
+  const [calculatedRoute, setCalculatedRoute] = useState(null);
+  const [isCalculatingRoute, setIsCalculatingRoute] = useState(false);
+
+  // Auto-calculate route when enabled
+  const calculateRouteIfNeeded = useCallback(async () => {
+    if (!autoCalculateRoute || !currentLocation || !destination || isCalculatingRoute) {
+      return;
+    }
+
+    setIsCalculatingRoute(true);
+    try {
+      console.log('🗺️ RouteVisualization: Auto-calculating route...');
+      const routeData = await navigationService.calculateRoute(currentLocation, destination, {
+        alternatives: false,
+        steps: true
+      });
+      setCalculatedRoute(routeData);
+      console.log('✅ RouteVisualization: Route calculated successfully');
+    } catch (error) {
+      console.error('❌ RouteVisualization: Route calculation failed:', error);
+      setCalculatedRoute(null);
+    } finally {
+      setIsCalculatingRoute(false);
+    }
+  }, [autoCalculateRoute, currentLocation, destination, isCalculatingRoute]);
+
+  // Trigger route calculation when dependencies change
+  useEffect(() => {
+    calculateRouteIfNeeded();
+  }, [calculateRouteIfNeeded]);
 
   // Convert route geometry to leaflet format
   const getRouteCoordinates = () => {
-    if (!route || !route.geometry || !route.geometry.coordinates) {
+    // Use calculated route if available, otherwise use provided route
+    const activeRoute = calculatedRoute || route;
+    
+    if (!activeRoute || !activeRoute.geometry || !activeRoute.geometry.coordinates) {
+      // Fallback to direct line if no route available
+      if (currentLocation && destination) {
+        const destLat = destination.lat || destination.coordinates?.lat || destination.coordinates?.[0];
+        const destLng = destination.lng || destination.coordinates?.lng || destination.coordinates?.[1];
+        
+        if (destLat && destLng) {
+          return [
+            [currentLocation.lat, currentLocation.lng],
+            [destLat, destLng]
+          ];
+        }
+      }
       return [];
     }
 
-    return route.geometry.coordinates.map(([lng, lat]) => [lat, lng]);
+    return activeRoute.geometry.coordinates.map(([lng, lat]) => [lat, lng]);
   };
 
-  // Get route style based on traffic or road conditions
+  // Get route style based on route type
   const getRouteStyle = () => {
+    const isCalculatedRoute = calculatedRoute !== null;
+    
     return {
-      color: '#3b82f6',
-      weight: 6,
-      opacity: 0.8,
+      color: isCalculatedRoute ? '#3b82f6' : '#9CA3AF',
+      weight: isCalculatedRoute ? 6 : 4,
+      opacity: isCalculatedRoute ? 0.9 : 0.6,
       smoothFactor: 1,
-      dashArray: null,
+      dashArray: isCalculatedRoute ? null : '5, 5',
       lineCap: 'round',
       lineJoin: 'round'
     };
@@ -157,36 +205,58 @@ const RouteVisualization = ({
 
   // Get instruction positions
   const getInstructionMarkers = () => {
-    if (!route || !route.instructions || !showInstructions) {
+    const activeRoute = calculatedRoute || route;
+    
+    if (!activeRoute || !activeRoute.instructions || !showInstructions) {
       return [];
     }
 
-    return route.instructions.slice(0, -1).map((instruction, index) => ({
-      position: [instruction.location.lat, instruction.location.lng],
-      instruction: instruction,
-      key: `instruction-${index}`
-    }));
+    return activeRoute.instructions.slice(0, -1)
+      .filter(instruction => 
+        instruction.location && 
+        typeof instruction.location.lat === 'number' && 
+        typeof instruction.location.lng === 'number' &&
+        !isNaN(instruction.location.lat) &&
+        !isNaN(instruction.location.lng)
+      )
+      .map((instruction, index) => ({
+        position: [instruction.location.lat, instruction.location.lng],
+        instruction: instruction,
+        key: `instruction-${index}`
+      }));
   };
 
   const routeCoordinates = getRouteCoordinates();
   const instructionMarkers = getInstructionMarkers();
 
   return (
-    <div className={className}>
+    <>
       {/* Auto-fit bounds when route changes */}
       {route && <AutoFitBounds route={route} />}
+      
+      {/* Route calculating indicator */}
+      {isCalculatingRoute && (
+        <div className="absolute top-4 left-4 z-[1000] bg-white rounded-lg shadow-lg p-2">
+          <div className="flex items-center space-x-2 text-sm">
+            <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            <span className="text-blue-600">Calculating optimal route...</span>
+          </div>
+        </div>
+      )}
       
       {/* Route polyline */}
       {routeCoordinates.length > 0 && (
         <>
-          {/* Route shadow for better visibility */}
-          <Polyline
-            positions={routeCoordinates}
-            color="#000000"
-            weight={8}
-            opacity={0.3}
-            smoothFactor={1}
-          />
+          {/* Route shadow for better visibility - only for calculated routes */}
+          {calculatedRoute && (
+            <Polyline
+              positions={routeCoordinates}
+              color="#000000"
+              weight={8}
+              opacity={0.3}
+              smoothFactor={1}
+            />
+          )}
           
           {/* Main route line */}
           <Polyline
@@ -222,12 +292,35 @@ const RouteVisualization = ({
       )}
 
       {/* Destination marker */}
-      {destination && (
-        <Marker
-          position={[destination.lat || destination.coordinates?.lat, destination.lng || destination.coordinates?.lng]}
-          icon={createDestinationIcon()}
-          zIndexOffset={900}
-        >
+      {(() => {
+        if (!destination) return null;
+        
+        // Extract coordinates safely
+        let lat, lng;
+        
+        if (typeof destination.lat === 'number' && typeof destination.lng === 'number') {
+          lat = destination.lat;
+          lng = destination.lng;
+        } else if (destination.coordinates && Array.isArray(destination.coordinates) && destination.coordinates.length >= 2) {
+          lat = destination.coordinates[0]; // latitude first in our format
+          lng = destination.coordinates[1]; // longitude second
+        } else if (destination.coordinates?.lat && destination.coordinates?.lng) {
+          lat = destination.coordinates.lat;
+          lng = destination.coordinates.lng;
+        }
+        
+        // Only render marker if we have valid coordinates
+        if (!lat || !lng || isNaN(lat) || isNaN(lng)) {
+          console.warn('⚠️ RouteVisualization: Invalid destination coordinates:', destination);
+          return null;
+        }
+        
+        return (
+          <Marker
+            position={[lat, lng]}
+            icon={createDestinationIcon()}
+            zIndexOffset={900}
+          >
           {/*<Popup>
             <div className="text-sm max-w-xs">
               <div className="font-semibold mb-1">🎯 {destination.name}</div>
@@ -242,8 +335,9 @@ const RouteVisualization = ({
               )}
             </div>
           </Popup>*/}
-        </Marker>
-      )}
+          </Marker>
+        );
+      })()}
 
       {/* Instruction markers */}
       {instructionMarkers.map(({ position, instruction, key }) => (
@@ -275,35 +369,55 @@ const RouteVisualization = ({
       ))}
 
       {/* Route information overlay */}
-      {route && (
+      {(route || calculatedRoute) && !isCalculatingRoute && (
         <div className="absolute top-4 left-4 z-[1000] bg-white rounded-lg shadow-lg p-3 max-w-xs">
           <div className="flex items-center space-x-3">
             <div className="flex-shrink-0">
               <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                <span className="text-blue-600 text-sm">🗺️</span>
+                <span className="text-blue-600 text-sm">{calculatedRoute ? '🗺️' : '📍'}</span>
               </div>
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-sm font-semibold text-gray-900">
-                {(route.distance / 1000).toFixed(1)} km
+                {calculatedRoute 
+                  ? `${(calculatedRoute.distance / 1000).toFixed(1)} km`
+                  : route
+                  ? `${(route.distance / 1000).toFixed(1)} km`
+                  : 'Route'
+                }
               </div>
               <div className="text-xs text-gray-500">
-                {Math.ceil(route.duration / 60)} minutes
+                {calculatedRoute 
+                  ? `${Math.ceil(calculatedRoute.duration / 60)} minutes`
+                  : route
+                  ? `${Math.ceil(route.duration / 60)} minutes`
+                  : 'Direct line'
+                }
               </div>
             </div>
           </div>
           
-          {route.instructions && (
+          {(calculatedRoute?.instructions || route?.instructions) && (
             <div className="mt-2 pt-2 border-t border-gray-100">
               <div className="text-xs text-gray-600">
-                {route.instructions.length} navigation steps
+                {(calculatedRoute?.instructions || route?.instructions).length} navigation steps
+                {calculatedRoute && <span className="text-green-600 ml-1">• Optimized</span>}
               </div>
             </div>
           )}
         </div>
       )}
-    </div>
+    </>
   );
 };
 
 export default RouteVisualization;
+
+// Usage example:
+// <RouteVisualization
+//   currentLocation={userLocation}
+//   destination={parkingSpot}
+//   autoCalculateRoute={true}  // Enable automatic route calculation
+//   showInstructions={true}
+//   showUserLocation={true}
+// />

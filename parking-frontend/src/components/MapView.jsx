@@ -1,8 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
 import L from 'leaflet';
+// 🔒 ADMIN-ONLY INTERNAL NAVIGATION (Hidden from regular users)
 import NavigationControls from './navigation/NavigationControls';
 import RouteVisualization from './navigation/RouteVisualization';
+import { useAdminAccess } from '../hooks/useAdminAccess';
 
 // Fix for default markers in react-leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -124,11 +126,13 @@ const MapController = ({ center, zoom }) => {
   return null;
 };
 
-const MapView = ({ parkingSpots, radius, center, onSpotSelect, onBooking }) => {
+const MapView = ({ parkingSpots, radius, center, onSpotSelect, onBooking, onNavigationActivated }) => {
+  const { canViewInternalNav } = useAdminAccess();
   const [_selectedSpot, setSelectedSpot] = useState(null);
   const [currentLocation, setCurrentLocation] = useState(null);
   const [locationPermission, setLocationPermission] = useState('prompt'); // 'granted', 'denied', 'prompt'
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+  // 🔒 ADMIN-ONLY INTERNAL NAVIGATION STATES (Hidden from regular users)
   const [navigationRoute, setNavigationRoute] = useState(null);
   const [showNavigationControls, setShowNavigationControls] = useState(false);
   const [navigationDestination, setNavigationDestination] = useState(null);
@@ -228,30 +232,36 @@ const MapView = ({ parkingSpots, radius, center, onSpotSelect, onBooking }) => {
     onSpotSelect && onSpotSelect(spot);
   };
 
-  // Navigation handlers
+  // 🔒 ADMIN-ONLY INTERNAL NAVIGATION HANDLERS (Hidden from regular users)
   const handleNavigateToSpot = (spot) => {
-    console.log('🧭 MapView: Navigating to spot:', spot);
-    
-    // Extract numeric lat/lng values properly
-    let lat, lng;
-    if (typeof spot.coordinates?.lat === 'object' && spot.coordinates?.lat?._id) {
-      // Handle nested coordinate objects
-      lat = spot.coordinates.lat.coordinates?.lat || spot.coordinates.lat.lat || spot.coordinates.lat[1];
-      lng = spot.coordinates.lng.coordinates?.lng || spot.coordinates.lng.lng || spot.coordinates.lng[0];
-    } else {
-      // Handle normal coordinate objects
-      lat = spot.coordinates?.lat;
-      lng = spot.coordinates?.lng;
+    // Only allow internal navigation for super admins
+    if (!canViewInternalNav) {
+      console.warn('⚠️ MapView: Internal navigation access denied - super admin required');
+      
+      // Instead of showing internal navigation, notify parent to use Google Maps
+      if (onNavigationActivated) {
+        onNavigationActivated(spot);
+      }
+      return;
     }
     
+    console.log('🔒 MapView: Starting internal navigation for admin:', spot);
+    
+    // Create destination object with original spot data - let navigationUtils handle coordinate extraction
     const destination = {
       ...spot,
-      lat: typeof lat === 'number' ? lat : parseFloat(lat),
-      lng: typeof lng === 'number' ? lng : parseFloat(lng)
+      name: spot.name,
+      address: spot.address
     };
+    
     console.log('🧭 MapView: Created destination object:', destination);
     setNavigationDestination(destination);
     setShowNavigationControls(true);
+    
+    // Notify parent component about navigation activation
+    if (onNavigationActivated) {
+      onNavigationActivated(destination);
+    }
   };
 
   const handleRouteCalculated = (route) => {
@@ -336,17 +346,19 @@ const MapView = ({ parkingSpots, radius, center, onSpotSelect, onBooking }) => {
           
           <MapController center={{ lat: mapCenter[0], lng: mapCenter[1] }} zoom={13} />
           
-          {/* Search radius circle */}
-          <Circle
-            center={mapCenter}
-            radius={radiusInMeters}
-            pathOptions={{
-              color: '#3B82F6',
-              fillColor: '#3B82F6',
-              fillOpacity: 0.1,
-              weight: 2,
-            }}
-          />
+          {/* Search radius circle - hide during navigation */}
+          {!navigationRoute && (
+            <Circle
+              center={mapCenter}
+              radius={radiusInMeters}
+              pathOptions={{
+                color: '#3B82F6',
+                fillColor: '#3B82F6',
+                fillOpacity: 0.1,
+                weight: 2,
+              }}
+            />
+          )}
           
           {/* Current Location Marker */}
           {currentLocation && (
@@ -375,19 +387,29 @@ const MapView = ({ parkingSpots, radius, center, onSpotSelect, onBooking }) => {
             </Marker>
           )}
 
-          {/* Route Visualization */}
-          {navigationRoute && (
+          {/* 🔒 ADMIN-ONLY ROUTE VISUALIZATION (Hidden from regular users) */}
+          {canViewInternalNav && (navigationRoute || navigationDestination) && (
             <RouteVisualization
               route={navigationRoute}
               currentLocation={currentLocation}
               destination={navigationDestination}
               showInstructions={false}
               showUserLocation={true}
+              autoCalculateRoute={!navigationRoute} // Auto-calculate if no route provided
             />
           )}
 
-          {/* Parking spot markers */}
-          {parkingSpotsWithCoords.map((spot) => (
+          {/* Parking spot markers - hide other spots during navigation */}
+          {parkingSpotsWithCoords
+            .filter((spot) => {
+              // During navigation, only show the selected destination
+              if (navigationRoute && navigationDestination) {
+                return spot.id === navigationDestination.id;
+              }
+              // When not navigating, show all spots
+              return true;
+            })
+            .map((spot) => (
             <Marker
               key={spot.id}
               position={spot.coordinates}
@@ -434,15 +456,20 @@ const MapView = ({ parkingSpots, radius, center, onSpotSelect, onBooking }) => {
           ))}
         </MapContainer>
         
-        {/* Navigation Controls - positioned over the map */}
-        {showNavigationControls && navigationDestination && (
-          <NavigationControls
-            destination={navigationDestination}
-            onRouteCalculated={handleRouteCalculated}
-            onNavigationStop={handleNavigationClose}
-            isVisible={showNavigationControls}
-            position="bottom-right"
-          />
+        {/* 🔒 ADMIN-ONLY INTERNAL NAVIGATION CONTROLS (Hidden from regular users) */}
+        {canViewInternalNav && showNavigationControls && navigationDestination && (
+          <div className="relative">
+            <div className="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold z-10">
+              🔒 ADMIN ONLY
+            </div>
+            <NavigationControls
+              destination={navigationDestination}
+              onRouteCalculated={handleRouteCalculated}
+              onNavigationStop={handleNavigationClose}
+              isVisible={showNavigationControls}
+              position="bottom-right"
+            />
+          </div>
         )}
       </div>
 

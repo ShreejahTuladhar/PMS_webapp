@@ -92,18 +92,23 @@ const SearchSection = ({ onSearch, onRadiusChange, radius, focusSearch = false, 
       }
     });
     
-    // Add fallback common locations only if we have limited extracted data
-    if (extractedLocationData.length < 10) {
-      const commonLocations = [
-        'Kamaladi', 'Anamnagar', 'Dillibazar', 'Maharajgunj', 'Baluwatar',
-        'Sundhara', 'Bagbazar', 'Ason', 'Indrachowk', 'Basantapur',
-        'Tripureshwor', 'Kalimati', 'Thankot', 'Balaju', 'Tokha',
-        'Budhanilkantha', 'Gongabu', 'Chabahil', 'Jorpati', 'Boudha',
-        'Pashupatinath', 'Gaushala', 'Sinamangal', 'Tinkune', 'Koteshwor',
-        'Thimi', 'Bhaktapur', 'Sano Thimi', 'Katunje', 'Lokanthali',
-        'Imadol', 'Satdobato', 'Lagankhel', 'Pulchowk', 'Kupondole',
-        'Sanepa', 'Jawalakhel', 'Patan Dhoka', 'Mangal Bazaar'
-      ];
+    // Always add comprehensive common locations to ensure good search coverage
+    const commonLocations = [
+      // Popular Places shown in UI
+      'Durbar Square', 'Patan', 'Lagankhel', 'Kalimati Vegetable Market',
+      'Koteshwor', 'New Road', 'Maharajgunj', 'Jawalakhel',
+      // Additional common locations
+      'Kamaladi', 'Anamnagar', 'Dillibazar', 'Baluwatar',
+      'Sundhara', 'Bagbazar', 'Asan', 'Indrachowk', 'Basantapur',
+      'Tripureshwor', 'Kalimati', 'Thankot', 'Balaju', 'Tokha',
+      'Budhanilkantha', 'Gongabu', 'Chabahil', 'Jorpati', 'Boudha',
+      'Pashupatinath', 'Gaushala', 'Sinamangal', 'Tinkune',
+      'Thimi', 'Bhaktapur', 'Sano Thimi', 'Katunje', 'Lokanthali',
+      'Imadol', 'Satdobato', 'Pulchowk', 'Kupondole',
+      'Sanepa', 'Patan Dhoka', 'Mangal Bazaar', 'Baneshwor'
+    ];
+    
+    if (extractedLocationData.length < 20) {
       
       console.log(`🏙️ Adding fallback common locations (extracted data count: ${extractedLocationData.length}):`, commonLocations.slice(0, 5), '...');
       commonLocations.forEach(loc => locations.add(loc));
@@ -357,7 +362,7 @@ const SearchSection = ({ onSearch, onRadiusChange, radius, focusSearch = false, 
     }
   };
 
-  const handleQuickSearch = async (locationName, index) => {
+  const handleQuickSearch = async (locationName) => {
     setLocation(locationName);
     setShowSuggestions(false);
     setShowRecentSearches(false);
@@ -755,7 +760,7 @@ const SearchSection = ({ onSearch, onRadiusChange, radius, focusSearch = false, 
                   {popularLocations.map((loc, index) => (
                     <button
                       key={loc}
-                      onClick={() => handleQuickSearch(loc, index)}
+                      onClick={() => handleQuickSearch(loc)}
                       className="relative group px-4 py-3 glass-dark border border-white/10 rounded-xl hover:border-yellow-300/50 transition-all duration-300 hover:transform hover:scale-105"
                     >
                       <span className="text-gray-700 font-semibold group-hover:text-gray-900 transition-colors duration-300">{loc}</span>
@@ -783,10 +788,16 @@ const SearchSection = ({ onSearch, onRadiusChange, radius, focusSearch = false, 
                 <span className="text-yellow-600 font-bold">Smart Search:</span> Detects typos, suggests corrections, and finds partial matches • Use ↑ ↓ arrow keys to navigate
               </p>
             </div>
-          ) : location.length >= 2 && suggestions.length === 0 && enhancedSearchRef.current && (
-            <div className="mt-6 p-4 glass-dark border border-red-300/30 rounded-xl">
+          ) : location.length >= 2 && suggestions.length === 0 && enhancedSearchRef.current ? (
+            <div className="mt-6 p-4 glass-dark border border-blue-300/30 rounded-xl">
               <p className="text-sm text-gray-700 text-center font-medium">
-                <span className="text-red-600 font-bold">No matches found:</span> Try checking spelling or use a shorter search term
+                <span className="text-blue-600 font-bold">Search anywhere:</span> Press Enter to find parking near "{location}" • All Kathmandu Valley locations supported
+              </p>
+            </div>
+          ) : suggestions.length > 0 && (
+            <div className="mt-6 p-4 glass-dark border border-green-300/30 rounded-xl">
+              <p className="text-sm text-gray-700 text-center font-medium">
+                <span className="text-green-600 font-bold">Found {suggestions.length} matches:</span> Select a location or press Enter to search
               </p>
             </div>
           )}

@@ -670,6 +670,12 @@ class LocationService {
       };
     }
   }
+
+  // Alias method for backward compatibility
+  async searchNearby(lat, lng, radius = 0.5) {
+    const response = await this.getNearbyParkingSpots(lat, lng, radius);
+    return response.success ? response.parkingSpots : [];
+  }
 }
 
 export default new LocationService();

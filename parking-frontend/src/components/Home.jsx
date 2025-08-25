@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useBooking } from '../hooks/useBooking';
@@ -8,15 +8,17 @@ import ParkingList from './ParkingList';
 import PremiumLocationBanner from './PremiumLocationBanner';
 import AuthModal from './auth/AuthModal';
 import PaymentFlow from './booking/PaymentFlow';
-import BookingConfirmation from './booking/BookingConfirmation';
-import ParkingJourney from './journey/ParkingJourney';
+import SmartBookingFlow from './booking/SmartBookingFlow';
+import UnifiedNavigationSystem from './navigation/UnifiedNavigationSystem';
 import Footer from './Footer';
 import { locationService } from '../services';
 import searchHistory from '../utils/searchHistory';
+import { openGoogleMapsNavigation } from '../utils/navigationUtils';
+import toast from 'react-hot-toast';
 
 function Home({ focusSearch = false }) {
   const { isAuthenticated } = useAuth();
-  const { currentBooking, bookingStep, isJourneyActive } = useBooking();
+  const { currentBooking, bookingStep } = useBooking();
   const location = useLocation();
   const navigate = useNavigate();
   
@@ -29,30 +31,23 @@ function Home({ focusSearch = false }) {
   const [isSearched, setIsSearched] = useState(location.state?.searchResults?.length > 0 || false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
-  const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
-  const [isJourneyModalOpen, setIsJourneyModalOpen] = useState(false);
+  const [showNavigation, setShowNavigation] = useState(false);
   const [parkingSpotToBook, setParkingSpotToBook] = useState(null);
   const [_loading, setLoading] = useState(false);
+  const [isNavigationActive, setIsNavigationActive] = useState(false);
+  const [selectedNavigationSpot, setSelectedNavigationSpot] = useState(null);
+  
+  // Ref for scrolling to map section
+  const mapSectionRef = useRef(null);
 
-  // Watch for booking confirmation and journey
+  // Watch for booking confirmation and navigation
   useEffect(() => {
     if (bookingStep === 'confirmed' && currentBooking) {
-      setIsConfirmationModalOpen(true);
+      // Smart booking flow handles this automatically
     }
   }, [bookingStep, currentBooking]);
   
-  // Watch for journey activation
-  useEffect(() => {
-    if (isJourneyActive && bookingStep === 'confirmed') {
-      // Close confirmation modal and open journey modal
-      setIsConfirmationModalOpen(false);
-      setTimeout(() => {
-        setIsJourneyModalOpen(true);
-      }, 500);
-    } else if (!isJourneyActive) {
-      setIsJourneyModalOpen(false);
-    }
-  }, [isJourneyActive, bookingStep]);
+  // Journey activation is now handled by SmartBookingFlow
 
   // Handle redirect from ProtectedRoute to open login modal
   useEffect(() => {
@@ -73,6 +68,19 @@ function Home({ focusSearch = false }) {
       return () => clearTimeout(timer);
     }
   }, [location.state]);
+
+  // Scroll to map section when search results are displayed
+  useEffect(() => {
+    if (isSearched && mapSectionRef.current) {
+      const timer = setTimeout(() => {
+        mapSectionRef.current.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start' 
+        });
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [isSearched]);
 
   // Helper function to calculate distance between two coordinates
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
@@ -402,6 +410,47 @@ function Home({ focusSearch = false }) {
     setIsLoginModalOpen(true);
   };
 
+  // Handle navigation activation when "Navigate Here" is clicked
+  const handleNavigationActivated = (spot) => {
+    setIsNavigationActive(true);
+    setSelectedNavigationSpot(spot);
+    toast.success('Navigation activated! Use buttons to navigate with external apps.');
+  };
+
+  // Handle navigate with app
+  const handleNavigateWithApp = (app = 'google') => {
+    if (!selectedNavigationSpot) {
+      toast.error('Please select a parking spot to navigate to first.');
+      return;
+    }
+
+    try {
+      openGoogleMapsNavigation(selectedNavigationSpot);
+    } catch (error) {
+      console.error('Navigation error:', error);
+      toast.error('Failed to open navigation app.');
+    }
+  };
+
+  // Handle internal navigation
+  const handleStartInternalNavigation = () => {
+    if (!selectedNavigationSpot) {
+      toast.error('Please select a parking spot to navigate to first.');
+      return;
+    }
+    
+    // Navigate to full-screen internal navigation
+    navigate('/navigation', {
+      state: {
+        destination: selectedNavigationSpot,
+        searchResults,
+        searchLocation,
+        selectedSpot,
+        searchRadius
+      }
+    });
+  };
+
   // Handler for opening full-screen map mode
   const openFullScreenMap = (searchQuery = '') => {
     navigate('/search/fullscreen', { 
@@ -425,12 +474,9 @@ function Home({ focusSearch = false }) {
     setParkingSpotToBook(null);
   };
 
-  const closeConfirmationModal = () => {
-    setIsConfirmationModalOpen(false);
-  };
-  
-  const closeJourneyModal = () => {
-    setIsJourneyModalOpen(false);
+  const handleNavigationStart = (spot) => {
+    setSelectedNavigationSpot(spot);
+    setShowNavigation(true);
   };
 
   return (
@@ -510,7 +556,7 @@ function Home({ focusSearch = false }) {
         )}
 
         {isSearched && (
-          <div className="container mx-auto px-4 py-8">
+          <div className="container mx-auto px-4 py-8" ref={mapSectionRef}>
             {searchResults.length > 0 ? (
               <>
                 {/* Premium Location Banner */}
@@ -524,20 +570,52 @@ function Home({ focusSearch = false }) {
                   <h2 className="text-2xl font-bold text-gray-800 mb-2">
                     Parking Spots Near You
                   </h2>
-                  <div className="flex items-center justify-center space-x-4">
+                  <div className="flex items-center justify-between">
                     <p className="text-gray-600">
                       Found {searchResults.length} friendly parking spots within {searchRadius}km of where you want to go
                     </p>
-                    <button
-                      onClick={() => openFullScreenMap(searchLocation?.address || '')}
-                      className="inline-flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-medium"
-                      title="Open in full-screen mode"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-                      </svg>
-                      <span>Full Screen</span>
-                    </button>
+                    
+                    <div className="flex items-center space-x-2">
+                      {/* Navigation buttons - only active when navigation is activated */}
+                      <button
+                        onClick={handleStartInternalNavigation}
+                        disabled={!isNavigationActive}
+                        className={`inline-flex items-center space-x-2 px-4 py-2 rounded-lg transition font-medium ${
+                          isNavigationActive 
+                            ? 'bg-green-600 text-white hover:bg-green-700' 
+                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        }`}
+                        title="Start internal navigation"
+                      >
+                        <span>🧭</span>
+                        <span>Navigate</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleNavigateWithApp('google')}
+                        disabled={!isNavigationActive}
+                        className={`inline-flex items-center space-x-2 px-4 py-2 rounded-lg transition font-medium ${
+                          isNavigationActive 
+                            ? 'bg-red-600 text-white hover:bg-red-700' 
+                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        }`}
+                        title="Open in Google Maps"
+                      >
+                        <span>🗺️</span>
+                        <span>Google Maps</span>
+                      </button>
+
+                      <button
+                        onClick={() => openFullScreenMap(searchLocation?.address || '')}
+                        className="inline-flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-medium"
+                        title="Open in full-screen mode"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                        </svg>
+                        <span>Full Screen</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -549,6 +627,7 @@ function Home({ focusSearch = false }) {
                       center={searchLocation}
                       onSpotSelect={handleSpotSelect}
                       onBooking={handleBooking}
+                      onNavigationActivated={handleNavigationActivated}
                     />
                   </div>
                   
@@ -672,21 +751,28 @@ function Home({ focusSearch = false }) {
         defaultTab="login"
       />
       
-      <PaymentFlow 
+      <SmartBookingFlow
         isOpen={isBookingModalOpen}
         onClose={closeBookingModal}
         parkingSpot={parkingSpotToBook}
       />
       
-      <BookingConfirmation 
-        isOpen={isConfirmationModalOpen}
-        onClose={closeConfirmationModal}
-      />
-      
-      <ParkingJourney 
-        isOpen={isJourneyModalOpen}
-        onClose={closeJourneyModal}
-      />
+      {showNavigation && selectedNavigationSpot && (
+        <UnifiedNavigationSystem
+          mode="fullscreen"
+          destination={{
+            lat: selectedNavigationSpot.coordinates?.lat || selectedNavigationSpot.lat || 27.7172,
+            lng: selectedNavigationSpot.coordinates?.lng || selectedNavigationSpot.lng || 85.3240,
+            name: selectedNavigationSpot.name,
+            address: selectedNavigationSpot.address || selectedNavigationSpot.location?.address
+          }}
+          startLocation={searchLocation}
+          onNavigationComplete={() => {
+            setShowNavigation(false);
+            toast.success('🎉 You have arrived at your destination!');
+          }}
+        />
+      )}
 
       
       <Footer />

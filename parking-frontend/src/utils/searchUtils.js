@@ -113,15 +113,16 @@ export class EnhancedSearch {
     });
 
     // 4. Fuzzy matches for potential typos (lower priority)
-    if (queryLower.length >= 3) {
+    if (queryLower.length >= 2) { // Lowered from 3 to 2
       this.locations.forEach(location => {
         if (!results.find(r => r.text === location)) {
           const similarity = calculateSimilarity(queryLower, location.toLowerCase());
           
-          // Consider it a fuzzy match if similarity > 0.6
-          if (similarity > 0.6) {
+          // Consider it a fuzzy match if similarity > 0.4 (lowered threshold)
+          if (similarity > 0.4) {
             let reason = 'Similar spelling';
             if (similarity > 0.8) reason = 'Possible typo correction';
+            else if (similarity > 0.6) reason = 'Close match';
             
             results.push({
               text: location,
@@ -149,7 +150,7 @@ export class EnhancedSearch {
           });
           
           const wordMatchRatio = matchingWords / queryWords.length;
-          if (wordMatchRatio > 0.5) {
+          if (wordMatchRatio >= 0.3) { // Lowered from 0.5 to 0.3 for more inclusive matching
             results.push({
               text: location,
               type: 'partial_words',

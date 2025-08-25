@@ -387,3 +387,351 @@
     transform: translateY(-50%) scale(1);
   }
 }
+
+/* ============================= */
+/* SINGLE CARD MODE STYLES */
+/* ============================= */
+
+.parking-marketing-grid.single-card-mode {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 500px;
+  position: relative;
+  focus: outline;
+  outline: none;
+}
+
+.parking-marketing-grid.single-card-mode:focus-visible {
+  outline: 2px solid #3B82F6;
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* Progress Indicator */
+.single-card-progress {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.progress-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #6B7280;
+}
+
+.current-position {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #3B82F6;
+  line-height: 1;
+}
+
+.separator {
+  font-size: 1.2rem;
+  color: #9CA3AF;
+  margin: 0 0.2rem;
+}
+
+.total-count {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.locations-label {
+  font-size: 0.85rem;
+  color: #6B7280;
+  margin-left: 0.25rem;
+}
+
+/* Progress Dots */
+.progress-dots {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.progress-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #D1D5DB;
+  transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+  cursor: default;
+}
+
+.progress-dot.active {
+  background-color: #3B82F6;
+  transform: scale(1.4);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.progress-dot:hover {
+  background-color: #9CA3AF;
+  transform: scale(1.2);
+}
+
+/* Single Card Container */
+.single-card-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 0 1rem;
+  margin-bottom: 1rem;
+}
+
+.marketing-card-wrapper.single-card {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  transition: all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+  transform-origin: center;
+}
+
+.marketing-card-wrapper.single-card.animating {
+  transform: scale(0.95);
+  opacity: 0.8;
+  filter: blur(1px);
+}
+
+.marketing-card-wrapper.single-card:not(.animating) {
+  transform: scale(1);
+  opacity: 1;
+  filter: blur(0);
+}
+
+.marketing-card-wrapper.single-card.selected {
+  transform: scale(1.02);
+  box-shadow: 0 12px 32px rgba(59, 130, 246, 0.15);
+  border: 2px solid rgba(59, 130, 246, 0.3);
+}
+
+/* Navigation Instructions */
+.single-card-instructions {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  margin: 0.5rem 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.instruction-group {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.instruction-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #6B7280;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.instruction-icon {
+  font-size: 1.1rem;
+  opacity: 0.8;
+}
+
+.instruction-text {
+  white-space: nowrap;
+}
+
+/* Compact Summary */
+.single-card-summary {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 0.75rem;
+  margin-top: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.summary-compact {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.summary-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: #6B7280;
+}
+
+.summary-icon {
+  font-size: 1rem;
+  opacity: 0.8;
+}
+
+.summary-text {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Touch/Scroll Feedback */
+.single-card-container:active {
+  transform: scale(0.98);
+}
+
+/* Responsive Single Card Mode */
+@media (max-width: 768px) {
+  .single-card-progress {
+    padding: 0.75rem 0;
+    margin-bottom: 0.75rem;
+  }
+
+  .current-position {
+    font-size: 1.3rem;
+  }
+
+  .instruction-group {
+    gap: 1rem;
+  }
+
+  .instruction-item {
+    font-size: 0.75rem;
+  }
+
+  .summary-compact {
+    gap: 1rem;
+  }
+
+  .summary-item {
+    font-size: 0.75rem;
+  }
+
+  .single-card-container {
+    padding: 0 0.5rem;
+  }
+
+  .marketing-card-wrapper.single-card {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .single-card-progress {
+    padding: 0.5rem 0;
+  }
+
+  .progress-info {
+    font-size: 0.8rem;
+  }
+
+  .current-position {
+    font-size: 1.2rem;
+  }
+
+  .locations-label {
+    display: none; /* Hide on very small screens */
+  }
+
+  .instruction-group {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .instruction-item {
+    font-size: 0.7rem;
+  }
+
+  .summary-compact {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .single-card-instructions,
+  .single-card-summary {
+    margin: 0.25rem 0;
+    padding: 0.5rem;
+  }
+}
+
+/* Animation for card transitions */
+@keyframes cardSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.marketing-card-wrapper.single-card {
+  animation: cardSlideIn 0.4s ease-out;
+}
+
+/* Focus management */
+.parking-marketing-grid.single-card-mode {
+  user-select: none;
+}
+
+.parking-marketing-grid.single-card-mode:focus {
+  outline: none;
+}
+
+/* Scroll hint animation */
+.instruction-icon {
+  animation: gentle-bounce 3s ease-in-out infinite;
+}
+
+@keyframes gentle-bounce {
+  0%, 100% { 
+    transform: translateY(0); 
+    opacity: 0.8;
+  }
+  50% { 
+    transform: translateY(-2px); 
+    opacity: 1;
+  }
+}
+
+/* Loading state for card transitions */
+.marketing-card-wrapper.single-card.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.marketing-card-wrapper.single-card.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 24px;
+  height: 24px;
+  border: 2px solid #3B82F6;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}

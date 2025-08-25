@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import ParkingMarketingCard from './ParkingMarketingCard';
 // import specialOffersService from '../services/specialOffersService'; // Removed promotional offers
 import './ParkingMarketingGrid.css';
 
 /**
- * Marketing Grid Component
- * Displays parking locations as marketing cards with special offers
+ * Marketing Grid Component - Single Card View
+ * Displays one parking card at a time with scroll navigation
  */
 const ParkingMarketingGrid = ({ 
   parkingSpots, 
@@ -14,6 +14,23 @@ const ParkingMarketingGrid = ({
   selectedSpot,
   sortBy = 'distance' 
 }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+  const containerRef = useRef(null);
+
+  // Initialize current index based on selected spot
+  useEffect(() => {
+    if (selectedSpot && parkingSpots.length > 0) {
+      const index = parkingSpots.findIndex(spot => 
+        (spot.id || spot._id) === (selectedSpot.id || selectedSpot._id)
+      );
+      if (index >= 0 && index !== currentIndex) {
+        setCurrentIndex(index);
+      }
+    }
+  }, [selectedSpot, parkingSpots, currentIndex]);
 
   // Removed special offers functionality
   const enhancedSpots = parkingSpots.map(spot => ({
@@ -40,8 +57,91 @@ const ParkingMarketingGrid = ({
     }
   });
 
+  // Navigation function with smooth animations
+  const navigateCard = useCallback((direction) => {
+    if (isAnimating || sortedSpots.length <= 1) return;
+
+    let newIndex = currentIndex;
+
+    if (direction === 'next') {
+      newIndex = (currentIndex + 1) % sortedSpots.length;
+    } else if (direction === 'prev') {
+      newIndex = currentIndex === 0 ? sortedSpots.length - 1 : currentIndex - 1;
+    }
+
+    if (newIndex === currentIndex) return;
+
+    setIsAnimating(true);
+    setCurrentIndex(newIndex);
+
+    // Reset animation state
+    setTimeout(() => {
+      setIsAnimating(false);
+    }, 300);
+  }, [currentIndex, sortedSpots.length, isAnimating]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (sortedSpots.length <= 1) return;
+
+      switch (e.key) {
+        case 'ArrowUp':
+        case 'ArrowLeft':
+          e.preventDefault();
+          navigateCard('prev');
+          break;
+        case 'ArrowDown':
+        case 'ArrowRight':
+          e.preventDefault();
+          navigateCard('next');
+          break;
+      }
+    };
+
+    const container = containerRef.current;
+    if (container) {
+      container.addEventListener('keydown', handleKeyDown);
+      return () => container.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [navigateCard, sortedSpots.length]);
+
+  // Mouse wheel navigation
+  const handleWheel = useCallback((e) => {
+    e.preventDefault();
+    
+    if (isAnimating || sortedSpots.length <= 1) return;
+
+    const direction = e.deltaY > 0 ? 'next' : 'prev';
+    navigateCard(direction);
+  }, [navigateCard, isAnimating, sortedSpots.length]);
+
+  // Touch navigation
+  const handleTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientY);
+  };
+
+  const handleTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientY);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+
+    const distance = touchStart - touchEnd;
+    const minSwipeDistance = 50;
+
+    if (Math.abs(distance) < minSwipeDistance) return;
+
+    if (distance > 0) {
+      navigateCard('next'); // Swipe up = next
+    } else {
+      navigateCard('prev'); // Swipe down = previous
+    }
+  };
+
   // Removed offers grouping functionality
-  const spotsWithOffers = [];
   const orderedSpots = sortedSpots;
 
   if (parkingSpots.length === 0) {
@@ -56,51 +156,112 @@ const ParkingMarketingGrid = ({
     );
   }
 
+  // Get current parking spot
+  const currentSpot = orderedSpots[currentIndex];
+
+  if (!currentSpot) {
+    return (
+      <div className="marketing-grid-empty">
+        <div className="empty-state">
+          <div className="empty-icon">🅿️</div>
+          <h3>No parking locations found</h3>
+          <p>Try expanding your search radius or searching in a different area</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="parking-marketing-grid">
-      {/* Special offers summary removed */}
-
-      {/* Marketing Cards Grid */}
-      <div className="marketing-cards-container">
-        <div className="marketing-cards-grid">
-          {orderedSpots.map((spot, index) => (
-            <div 
-              key={spot.id || spot._id} 
-              className={`marketing-card-wrapper ${
-                selectedSpot?.id === spot.id ? 'selected' : ''
-              } ${
-                spot.hasActiveOffers ? 'has-offers' : ''
-              }`}
-            >
-              <ParkingMarketingCard
-                parkingLocation={spot}
-                onBookNow={onBookNow}
-                onViewDetails={onViewDetails}
-                isCompact={false}
+    <div 
+      ref={containerRef}
+      className="parking-marketing-grid single-card-mode"
+      tabIndex={0}
+      onWheel={handleWheel}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      style={{ outline: 'none' }}
+    >
+      {/* Progress Indicator */}
+      <div className="single-card-progress">
+        <div className="progress-info">
+          <span className="current-position">{currentIndex + 1}</span>
+          <span className="separator">/</span>
+          <span className="total-count">{orderedSpots.length}</span>
+          <span className="locations-label">parking locations</span>
+        </div>
+        
+        {/* Progress Dots */}
+        <div className="progress-dots">
+          {orderedSpots.slice(0, Math.min(10, orderedSpots.length)).map((_, index) => {
+            const isActive = Math.floor((currentIndex / orderedSpots.length) * Math.min(10, orderedSpots.length)) === index ||
+                           (currentIndex === index && orderedSpots.length <= 10);
+            return (
+              <div
+                key={index}
+                className={`progress-dot ${isActive ? 'active' : ''}`}
+                onClick={() => {
+                  if (orderedSpots.length <= 10) {
+                    setCurrentIndex(index);
+                  }
+                }}
+                style={{ cursor: orderedSpots.length <= 10 ? 'pointer' : 'default' }}
               />
-
-              {/* Promotional overlays removed */}
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
-      {/* Grid Summary Info */}
-      <div className="grid-summary">
-        <div className="summary-stats">
-          <div className="stat-item">
-            <span className="stat-number">{parkingSpots.length}</span>
-            <span className="stat-label">Total Locations</span>
+      {/* Single Marketing Card */}
+      <div className="single-card-container">
+        <div 
+          className={`marketing-card-wrapper single-card ${
+            isAnimating ? 'animating' : ''
+          } ${
+            selectedSpot?.id === currentSpot.id ? 'selected' : ''
+          }`}
+        >
+          <ParkingMarketingCard
+            parkingLocation={currentSpot}
+            onBookNow={onBookNow}
+            onViewDetails={onViewDetails}
+            isCompact={false}
+          />
+        </div>
+      </div>
+
+      {/* Navigation Instructions */}
+      <div className="single-card-instructions">
+        <div className="instruction-group">
+          <span className="instruction-item">
+            <span className="instruction-icon">↕️</span>
+            <span className="instruction-text">Scroll to navigate</span>
+          </span>
+          <span className="instruction-item">
+            <span className="instruction-icon">⌨️</span>
+            <span className="instruction-text">Use arrow keys</span>
+          </span>
+          <span className="instruction-item">
+            <span className="instruction-icon">📱</span>
+            <span className="instruction-text">Swipe up/down</span>
+          </span>
+        </div>
+      </div>
+
+      {/* Compact Summary Info */}
+      <div className="single-card-summary">
+        <div className="summary-compact">
+          <div className="summary-item">
+            <span className="summary-icon">🅿️</span>
+            <span className="summary-text">{parkingSpots.length} total</span>
           </div>
-          <div className="stat-item">
-            <span className="stat-number">{parkingSpots.filter(s => s.availableSpaces > 0).length}</span>
-            <span className="stat-label">Available Now</span>
+          <div className="summary-item">
+            <span className="summary-icon">✅</span>
+            <span className="summary-text">{parkingSpots.filter(s => s.availableSpaces > 0).length} available</span>
           </div>
-          <div className="stat-item">
-            <span className="stat-number">
-              {parkingSpots.reduce((sum, spot) => sum + (spot.availableSpaces || 0), 0)}
-            </span>
-            <span className="stat-label">Available Spaces</span>
+          <div className="summary-item">
+            <span className="summary-icon">🚗</span>
+            <span className="summary-text">{parkingSpots.reduce((sum, spot) => sum + (spot.availableSpaces || 0), 0)} spaces</span>
           </div>
         </div>
       </div>

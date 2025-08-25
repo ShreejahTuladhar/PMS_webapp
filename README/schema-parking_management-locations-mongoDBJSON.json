@@ -1,0 +1,410 @@
+{
+  "$jsonSchema": {
+    "bsonType": "object",
+    "required": [
+      "_id",
+      "address",
+      "amenities",
+      "availableSpaces",
+      "contactNumber",
+      "coordinates",
+      "createdAt",
+      "currentStatus",
+      "description",
+      "hourlyRate",
+      "images",
+      "isActive",
+      "name",
+      "operatingHours",
+      "rate",
+      "totalSpaces",
+      "updatedAt"
+    ],
+    "properties": {
+      "_id": {
+        "bsonType": "objectId"
+      },
+      "__v": {
+        "bsonType": "int"
+      },
+      "address": {
+        "bsonType": "string"
+      },
+      "amenities": {
+        "bsonType": "array",
+        "items": {
+          "bsonType": "string"
+        }
+      },
+      "availableSpaces": {
+        "bsonType": "int"
+      },
+      "category": {
+        "bsonType": "string"
+      },
+      "contactNumber": {
+        "bsonType": "string"
+      },
+      "coordinates": {
+        "bsonType": "object",
+        "properties": {
+          "coordinates": {
+            "bsonType": "array",
+            "items": {
+              "bsonType": "double"
+            }
+          },
+          "latitude": {
+            "bsonType": "double"
+          },
+          "longitude": {
+            "bsonType": "double"
+          },
+          "type": {
+            "bsonType": "string"
+          }
+        }
+      },
+      "createdAt": {
+        "bsonType": "date"
+      },
+      "currentStatus": {
+        "bsonType": "string"
+      },
+      "dailyRate": {
+        "bsonType": "int"
+      },
+      "dataQuality": {
+        "bsonType": "object",
+        "properties": {
+          "landmarkVerified": {
+            "bsonType": "bool"
+          },
+          "level": {
+            "bsonType": "string"
+          },
+          "needsVerification": {
+            "bsonType": "bool"
+          },
+          "score": {
+            "bsonType": "int"
+          }
+        },
+        "required": [
+          "level",
+          "needsVerification",
+          "score"
+        ]
+      },
+      "description": {
+        "bsonType": "string"
+      },
+      "district": {
+        "bsonType": "string"
+      },
+      "expansionData": {
+        "bsonType": "object",
+        "properties": {
+          "expansionVersion": {
+            "bsonType": "string"
+          },
+          "landmarkId": {
+            "bsonType": "string"
+          },
+          "marketingEnabled": {
+            "bsonType": "bool"
+          },
+          "premiumListing": {
+            "bsonType": "bool"
+          },
+          "source": {
+            "bsonType": "string"
+          }
+        },
+        "required": [
+          "expansionVersion",
+          "landmarkId",
+          "marketingEnabled",
+          "premiumListing",
+          "source"
+        ]
+      },
+      "hourlyRate": {
+        "bsonType": "int"
+      },
+      "id": {
+        "bsonType": "string"
+      },
+      "images": {
+        "bsonType": "array",
+        "items": {
+          "bsonType": "string"
+        }
+      },
+      "importMetadata": {
+        "bsonType": "object",
+        "properties": {
+          "batchId": {
+            "bsonType": "string"
+          },
+          "importedAt": {
+            "bsonType": "date"
+          },
+          "importSource": {
+            "bsonType": "string"
+          },
+          "version": {
+            "bsonType": "string"
+          }
+        },
+        "required": [
+          "batchId",
+          "importedAt",
+          "importSource",
+          "version"
+        ]
+      },
+      "isActive": {
+        "bsonType": "bool"
+      },
+      "isCurrentlyOpen": {
+        "bsonType": "bool"
+      },
+      "landmarkName": {
+        "bsonType": "string"
+      },
+      "landmarkType": {
+        "bsonType": "string"
+      },
+      "latitude": {
+        "bsonType": "double"
+      },
+      "longitude": {
+        "bsonType": "double"
+      },
+      "marketing": {
+        "bsonType": "object",
+        "properties": {
+          "bannerImage": {
+            "bsonType": "string"
+          },
+          "category": {
+            "bsonType": "string"
+          },
+          "district": {
+            "bsonType": "string"
+          },
+          "features": {
+            "bsonType": "array",
+            "items": {
+              "bsonType": "string"
+            }
+          },
+          "landmarkType": {
+            "bsonType": "string"
+          },
+          "marketingTags": {
+            "bsonType": "array",
+            "items": {
+              "bsonType": "string"
+            }
+          },
+          "subtitle": {
+            "bsonType": "string"
+          },
+          "targetAudience": {
+            "bsonType": "string"
+          },
+          "thumbnailImage": {
+            "bsonType": "string"
+          },
+          "title": {
+            "bsonType": "string"
+          }
+        },
+        "required": [
+          "bannerImage",
+          "category",
+          "district",
+          "features",
+          "landmarkType",
+          "marketingTags",
+          "subtitle",
+          "targetAudience",
+          "thumbnailImage",
+          "title"
+        ]
+      },
+      "monthlyRate": {
+        "bsonType": "int"
+      },
+      "name": {
+        "bsonType": "string"
+      },
+      "occupancyPercentage": {
+        "bsonType": "int"
+      },
+      "operatingHours": {
+        "bsonType": "object",
+        "properties": {
+          "end": {
+            "bsonType": "string"
+          },
+          "is24Hours": {
+            "bsonType": "bool"
+          },
+          "start": {
+            "bsonType": "string"
+          }
+        },
+        "required": [
+          "end",
+          "start"
+        ]
+      },
+      "originalScrapedData": {
+        "bsonType": "object",
+        "properties": {
+          "confidence": {
+            "bsonType": "double"
+          },
+          "needsVerification": {
+            "bsonType": "bool"
+          },
+          "scrapedAt": {
+            "bsonType": "string"
+          },
+          "searchCenter": {
+            "bsonType": "string"
+          },
+          "searchKeyword": {
+            "bsonType": "string"
+          },
+          "source": {
+            "bsonType": "string"
+          }
+        },
+        "required": [
+          "confidence",
+          "needsVerification",
+          "source"
+        ]
+      },
+      "peakHours": {
+        "bsonType": "array",
+        "items": {
+          "bsonType": "string"
+        }
+      },
+      "premiumRate": {
+        "bsonType": "int"
+      },
+      "rate": {
+        "bsonType": "object",
+        "properties": {
+          "base": {
+            "bsonType": "int"
+          },
+          "discount": {
+            "bsonType": "int"
+          }
+        },
+        "required": [
+          "base",
+          "discount"
+        ]
+      },
+      "rates": {
+        "bsonType": "array"
+      },
+      "regularSpaces": {
+        "bsonType": "int"
+      },
+      "shortName": {
+        "bsonType": "string"
+      },
+      "source": {
+        "bsonType": "string"
+      },
+      "spaces": {
+        "bsonType": "array"
+      },
+      "stats": {
+        "bsonType": "object",
+        "properties": {
+          "averageOccupancy": {
+            "bsonType": "int"
+          },
+          "lastUpdated": {
+            "bsonType": "date"
+          },
+          "totalBookings": {
+            "bsonType": "int"
+          },
+          "totalRevenue": {
+            "bsonType": "int"
+          }
+        },
+        "required": [
+          "averageOccupancy",
+          "lastUpdated",
+          "totalBookings",
+          "totalRevenue"
+        ]
+      },
+      "studentDiscount": {
+        "bsonType": [
+          "int",
+          "double"
+        ]
+      },
+      "totalSpaces": {
+        "bsonType": "int"
+      },
+      "touristPackage": {
+        "bsonType": [
+          "null",
+          "int"
+        ]
+      },
+      "updatedAt": {
+        "bsonType": "date"
+      },
+      "vehicleTypes": {
+        "bsonType": "object",
+        "properties": {
+          "bicycle": {
+            "bsonType": "bool"
+          },
+          "bus": {
+            "bsonType": "bool"
+          },
+          "car": {
+            "bsonType": "bool"
+          },
+          "motorcycle": {
+            "bsonType": "bool"
+          },
+          "truck": {
+            "bsonType": "bool"
+          }
+        },
+        "required": [
+          "bicycle",
+          "car",
+          "motorcycle",
+          "truck"
+        ]
+      },
+      "verificationStatus": {
+        "bsonType": "string"
+      },
+      "vipSpaces": {
+        "bsonType": "int"
+      },
+      "weeklyRate": {
+        "bsonType": "int"
+      }
+    }
+  }
+}

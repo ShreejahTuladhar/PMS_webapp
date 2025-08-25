@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import ParkingMarketingGrid from './ParkingMarketingGrid';
+import NavigateButton from './navigation/NavigateButton';
 // import specialOffersService from '../services/specialOffersService'; // Removed promotional offers
 
 const ParkingList = ({ parkingSpots, onBooking, selectedSpot, onLoginRequired, onSpotSelect }) => {
@@ -314,17 +315,28 @@ const ParkingList = ({ parkingSpots, onBooking, selectedSpot, onLoginRequired, o
                 ))}
               </div>
 
-              <button
-                onClick={() => handleBookingClick(enhancedSpot)}
-                disabled={(enhancedSpot.availableSpaces || enhancedSpot.availability) === 0}
-                className={`px-4 py-2 rounded font-medium text-sm transition ${
-                  (enhancedSpot.availableSpaces || enhancedSpot.availability) > 0
-                    ? 'bg-blue-600 text-white hover:bg-blue-700'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
-              >
-                {(enhancedSpot.availableSpaces || enhancedSpot.availability) > 0 ? (isAuthenticated ? 'Book Now' : 'Sign in to Book') : 'Full'}
-              </button>
+              <div className="flex items-center space-x-2">
+                <NavigateButton
+                  selectedSpot={selectedSpot?.id === enhancedSpot.id ? enhancedSpot : null}
+                  isActive={selectedSpot?.id === enhancedSpot.id}
+                  size="small"
+                  className="flex-1"
+                  onNavigationStart={(spot) => {
+                    console.log('🧭 ParkingList: Navigation started for', spot.name);
+                  }}
+                />
+                <button
+                  onClick={() => handleBookingClick(enhancedSpot)}
+                  disabled={(enhancedSpot.availableSpaces || enhancedSpot.availability) === 0}
+                  className={`px-4 py-2 rounded font-medium text-sm transition flex-1 ${
+                    (enhancedSpot.availableSpaces || enhancedSpot.availability) > 0
+                      ? 'bg-blue-600 text-white hover:bg-blue-700'
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  }`}
+                >
+                  {(enhancedSpot.availableSpaces || enhancedSpot.availability) > 0 ? (isAuthenticated ? 'Book Now' : 'Sign in to Book') : 'Full'}
+                </button>
+              </div>
             </div>
 
             {/* Special offers display removed */}

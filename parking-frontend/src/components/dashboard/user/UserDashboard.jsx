@@ -58,13 +58,14 @@ const UserDashboard = () => {
     setDashboardData(prev => ({ ...prev, loading: true }));
     
     const [bookingsResponse, statsResponse] = await Promise.all([
-      bookingService.getBookings({ limit: 5, status: 'all' }),
+      userService.getUserBookings({ limit: 5, status: 'all' }),
       userService.getUserStats()
     ]);
 
-    // 🛡️ Use professional API safety utilities
-    const bookings = filterValidBookings(safeArray(bookingsResponse, 'bookings'));
-    const stats = safeObject(statsResponse, 'data');
+    // 🛡️ Use professional API safety utilities - direct access since we know the structure
+    const bookings = bookingsResponse?.bookings || [];
+    const stats = statsResponse || {};
+    
 
     // 📊 Calculate derived data safely
     const now = new Date();
@@ -74,7 +75,7 @@ const UserDashboard = () => {
       new Date(b.startTime) > now
     );
 
-    setDashboardData({
+    const dashboardUpdate = {
       recentBookings: bookings.slice(0, 5),
       totalBookings: stats.totalBookings || bookings.length,
       totalSpent: stats.totalSpent || 0,
@@ -82,9 +83,11 @@ const UserDashboard = () => {
       upcomingBookings,
       loading: false,
       lastUpdated: now.toISOString()
-    });
+    };
+    
+    setDashboardData(prev => ({ ...prev, ...dashboardUpdate }));
   }, (setDashboardData) => {
-    // 🔥 Graceful fallback on complete failure
+    // 🔥 Graceful fallback on complete failure  
     setDashboardData(prev => ({ ...prev, loading: false, error: 'Failed to load dashboard data' }));
   });
 
@@ -193,19 +196,16 @@ const UserDashboard = () => {
                 {/* Recent Bookings */}
                 <div className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
                   <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-lg font-semibold text-gray-900">Recent Bookings</h3>
-                    <button className="text-blue-600 hover:text-blue-700 text-sm font-medium transition-colors">
-                      View all →
-                    </button>
+                    <h3 className="text-lg font-semibold text-gray-900">Latest Booking</h3>
                   </div>
                   {dashboardData.loading ? (
                     <div className="text-center py-8">
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
                       <p className="text-gray-600 mt-3">Loading your bookings...</p>
                     </div>
-                  ) : dashboardData.recentBookings.length > 0 ? (
+                  ) : (dashboardData.recentBookings && dashboardData.recentBookings.length > 0) ? (
                     <div className="space-y-3">
-                      {dashboardData.recentBookings.slice(0, 4).map((booking) => (
+                      {dashboardData.recentBookings.slice(0, 1).map((booking) => (
                         <div key={booking.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                           <div className="flex items-center space-x-4">
                             <div className="w-10 h-10 bg-gradient-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center">
@@ -215,9 +215,9 @@ const UserDashboard = () => {
                               </svg>
                             </div>
                             <div>
-                              <p className="font-semibold text-gray-900">{booking.locationName}</p>
+                              <p className="font-semibold text-gray-900">{booking.locationId?.name || 'Unknown Location'}</p>
                               <p className="text-sm text-gray-600">
-                                {new Date(booking.startTime).toLocaleDateString()} • {booking.duration || 2}h
+                                {new Date(booking.startTime).toLocaleDateString()} • {booking.durationHours || 1}h
                               </p>
                             </div>
                           </div>
@@ -242,8 +242,8 @@ const UserDashboard = () => {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                       </div>
-                      <p className="text-gray-500 font-medium">No recent bookings found</p>
-                      <p className="text-sm text-gray-400 mt-1">Your booking history will appear here</p>
+                      <p className="text-gray-500 font-medium">No bookings found</p>
+                      <p className="text-sm text-gray-400 mt-1">Your latest booking will appear here</p>
                     </div>
                   )}
                 </div>

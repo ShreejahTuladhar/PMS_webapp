@@ -357,9 +357,13 @@ const getUserBookings = async (req, res) => {
     const skip = (page - 1) * limit;
     let filter = { userId: req.user.id };
 
-    // Filter by status
-    if (status) {
-      filter.status = status;
+    // Filter by status (supports comma-separated values)
+    if (status && status !== 'all') {
+      if (status.includes(',')) {
+        filter.status = { $in: status.split(',').map(s => s.trim()) };
+      } else {
+        filter.status = status;
+      }
     }
 
     // Filter by date range

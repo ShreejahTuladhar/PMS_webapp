@@ -133,6 +133,11 @@ export function BookingProvider({ children }) {
   };
 
   const confirmBooking = (paymentDetails, bookingData = {}) => {
+    if (!state.currentBooking) {
+      console.error('❌ BookingContext: Cannot confirm booking - no current booking exists');
+      return;
+    }
+    
     dispatch({
       type: 'CONFIRM_BOOKING',
       payload: {

@@ -10,7 +10,7 @@ function Login({ onSwitchToRegister, onClose }) {
   const [formData, setFormData] = useState({
     username: '',
     password: '',
-    role: 'user', // Default to user
+    role: 'customer', // Default to customer (matches backend schema)
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);

@@ -11,9 +11,10 @@ import UserDashboard from './components/dashboard/user/UserDashboard';
 import ClientDashboard from './components/dashboard/client/ClientDashboard';
 import SuperAdminDashboard from './components/dashboard/superadmin/SuperAdminDashboard';
 import FullScreenMapPage from './components/FullScreenMapPage';
-import FullScreenNavigation from './components/navigation/FullScreenNavigation';
+import UnifiedNavigationSystem from './components/navigation/UnifiedNavigationSystem';
 import ProtectedRoute from './components/ProtectedRoute';
 import NotFound from './components/common/NotFound';
+import SingleCardDemo from './components/ui/SingleCardDemo';
 
 function App() {
   return (
@@ -28,7 +29,7 @@ function App() {
                 <Route path="/about" element={<About />} />
                 <Route path="/parking" element={<CustomerJourney />} />
                 <Route path="/search/fullscreen" element={<FullScreenMapPage />} />
-                <Route path="/navigation/fullscreen" element={<FullScreenNavigation />} />
+                <Route path="/navigation" element={<UnifiedNavigationSystem mode="fullscreen" />} />
                 <Route 
                   path="/dashboard" 
                   element={
@@ -53,6 +54,7 @@ function App() {
                     </ProtectedRoute>
                   } 
                 />
+                <Route path="/demo/single-card" element={<SingleCardDemo />} />
                 <Route path="*" element={<NotFound />} /> 
               </Routes>
             </div>

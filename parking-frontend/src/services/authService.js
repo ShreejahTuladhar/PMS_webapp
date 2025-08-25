@@ -1,6 +1,10 @@
 const API_BASE_URL = 'http://localhost:8080/api';
 
 class AuthService {
+  getToken() {
+    return localStorage.getItem('token');
+  }
+
   async login(credentials) {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/login`, {
@@ -61,6 +65,7 @@ class AuthService {
 
   async getProfile() {
     try {
+      const token = this.getToken();
       const response = await fetch(`${API_BASE_URL}/auth/me`, {
         method: 'GET',
         headers: {
@@ -89,6 +94,7 @@ class AuthService {
 
   async logout() {
     try {
+      const token = this.getToken();
       const response = await fetch(`${API_BASE_URL}/auth/logout`, {
         method: 'POST',
         headers: {

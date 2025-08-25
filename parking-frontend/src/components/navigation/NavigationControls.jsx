@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import NavigationInterface from './NavigationInterface';
+import { openGoogleMapsNavigation } from '../../utils/navigationUtils';
 
 const NavigationControls = ({ 
   destination, 
@@ -137,37 +138,10 @@ const NavigationControls = ({
             onClick={() => {
               if (destination) {
                 try {
-                  // Extract numeric lat/lng values for external navigation
-                  let lat, lng;
-                  
-                  // Handle various coordinate formats
-                  if (typeof destination.lat === 'object' && destination.lat !== null) {
-                    lat = destination.lat.coordinates?.lat || destination.lat.lat || destination.lat[1] || destination.lat.value;
-                  } else {
-                    lat = destination.lat || destination.coordinates?.lat;
-                  }
-                  
-                  if (typeof destination.lng === 'object' && destination.lng !== null) {
-                    lng = destination.lng.coordinates?.lng || destination.lng.lng || destination.lng[0] || destination.lng.value;
-                  } else {
-                    lng = destination.lng || destination.coordinates?.lng;
-                  }
-                  
-                  const numericLat = typeof lat === 'number' ? lat : parseFloat(lat);
-                  const numericLng = typeof lng === 'number' ? lng : parseFloat(lng);
-                  
-                  if (!isNaN(numericLat) && !isNaN(numericLng) && 
-                      numericLat >= -90 && numericLat <= 90 && 
-                      numericLng >= -180 && numericLng <= 180) {
-                    const url = `https://www.google.com/maps/dir/?api=1&destination=${numericLat},${numericLng}`;
-                    window.open(url, '_blank');
-                  } else {
-                    console.error('❌ Invalid coordinates for Google Maps:', { lat: numericLat, lng: numericLng });
-                    alert('Unable to open navigation - invalid coordinates');
-                  }
+                  openGoogleMapsNavigation(destination);
                 } catch (error) {
-                  console.error('❌ Error opening Google Maps:', error);
-                  alert('Unable to open navigation');
+                  console.error('❌ Google Maps navigation failed:', error);
+                  alert(`Unable to open navigation: ${error.message}`);
                 }
               }
             }}
@@ -179,49 +153,6 @@ const NavigationControls = ({
             </svg>
           </button>
           
-          <button
-            onClick={() => {
-              if (destination) {
-                try {
-                  // Extract numeric lat/lng values for external navigation
-                  let lat, lng;
-                  
-                  // Handle various coordinate formats
-                  if (typeof destination.lat === 'object' && destination.lat !== null) {
-                    lat = destination.lat.coordinates?.lat || destination.lat.lat || destination.lat[1] || destination.lat.value;
-                  } else {
-                    lat = destination.lat || destination.coordinates?.lat;
-                  }
-                  
-                  if (typeof destination.lng === 'object' && destination.lng !== null) {
-                    lng = destination.lng.coordinates?.lng || destination.lng.lng || destination.lng[0] || destination.lng.value;
-                  } else {
-                    lng = destination.lng || destination.coordinates?.lng;
-                  }
-                  
-                  const numericLat = typeof lat === 'number' ? lat : parseFloat(lat);
-                  const numericLng = typeof lng === 'number' ? lng : parseFloat(lng);
-                  
-                  if (!isNaN(numericLat) && !isNaN(numericLng) && 
-                      numericLat >= -90 && numericLat <= 90 && 
-                      numericLng >= -180 && numericLng <= 180) {
-                    const url = `https://waze.com/ul?ll=${numericLat},${numericLng}&navigate=yes`;
-                    window.open(url, '_blank');
-                  } else {
-                    console.error('❌ Invalid coordinates for Waze:', { lat: numericLat, lng: numericLng });
-                    alert('Unable to open navigation - invalid coordinates');
-                  }
-                } catch (error) {
-                  console.error('❌ Error opening Waze:', error);
-                  alert('Unable to open navigation');
-                }
-              }
-            }}
-            className="bg-white hover:bg-gray-50 text-gray-700 p-3 rounded-full shadow-lg transition-all flex items-center justify-center"
-            title="Open in Waze"
-          >
-            <span className="text-lg">🚗</span>
-          </button>
         </div>
       )}
     </div>

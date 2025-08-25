@@ -38,10 +38,10 @@ const BookingManager = () => {
         params.status = 'completed,cancelled,expired';
       }
 
-      const response = await api.get('/bookings', { params });
+      const response = await api.get('/users/bookings', { params });
       
       if (response.data.success) {
-        setBookings(response.data.bookings || []);
+        setBookings(response.data.data || []);
         setPagination(prev => ({
           ...prev,
           total: response.data.pagination?.total || 0

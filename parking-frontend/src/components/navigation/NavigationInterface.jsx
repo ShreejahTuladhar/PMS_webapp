@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import navigationService from '../../services/navigationService';
+import { openGoogleMapsNavigation, extractCoordinates } from '../../utils/navigationUtils';
 import toast from 'react-hot-toast';
 
 const NavigationInterface = ({ 
@@ -110,7 +111,24 @@ const NavigationInterface = ({
     setError(null);
 
     try {
-      const navigationResult = await navigationService.startNavigation(destination, {
+      // First validate coordinates using our robust utils
+      console.log('🧭 NavigationInterface: Validating destination coordinates:', destination);
+      const coords = extractCoordinates(destination);
+      
+      if (!coords.valid) {
+        throw new Error(`Invalid destination coordinates: ${coords.error}`);
+      }
+      
+      console.log('✅ NavigationInterface: Coordinates validated:', coords);
+      
+      // Create normalized destination for navigationService
+      const normalizedDestination = {
+        ...destination,
+        lat: coords.lat,
+        lng: coords.lng
+      };
+
+      const navigationResult = await navigationService.startNavigation(normalizedDestination, {
         profile: 'driving',
         alternatives: false,
         steps: true
@@ -136,13 +154,29 @@ const NavigationInterface = ({
         onRouteCalculated(navigationResult.route);
       }
 
-      toast.success('Navigation started!');
-      console.log('✅ Navigation started successfully');
+      // Show success message with provider info
+      const providerMessage = navigationResult.route.provider === 'mock' 
+        ? 'Navigation started in offline mode!'
+        : 'Navigation started with live routing!';
+      
+      toast.success(providerMessage);
+      console.log('✅ Navigation started successfully with provider:', navigationResult.route.provider);
 
     } catch (error) {
       console.error('❌ Failed to start navigation:', error);
-      setError(error.message);
-      toast.error(`Navigation failed: ${error.message}`);
+      
+      // Provide user-friendly error messages
+      let userMessage = 'Navigation failed to start';
+      if (error.message.includes('Failed to fetch') || error.message.includes('network')) {
+        userMessage = 'No internet connection. Navigation will use offline mode.';
+      } else if (error.message.includes('coordinates')) {
+        userMessage = 'Invalid location data. Please try again.';
+      } else if (error.message.includes('timeout')) {
+        userMessage = 'Connection timeout. Using offline navigation.';
+      }
+      
+      setError(userMessage);
+      toast.error(userMessage);
     } finally {
       setIsCalculatingRoute(false);
     }
@@ -166,8 +200,24 @@ const NavigationInterface = ({
     if (!destination) return;
     
     console.log('🧭 NavigationInterface: Opening external navigation with destination:', destination);
-    navigationService.openExternalNavigation(destination, app);
-    toast.success(`Opening in ${app === 'auto' ? 'external' : app} navigation`);
+    
+    try {
+      // Test coordinate extraction first
+      const coords = extractCoordinates(destination);
+      console.log('🗺️ Extracted coordinates:', coords);
+      
+      if (!coords.valid) {
+        throw new Error(coords.error || 'Invalid coordinates');
+      }
+      
+      // Always use Google Maps
+      openGoogleMapsNavigation(destination);
+      
+      toast.success('Opening in Google Maps navigation');
+    } catch (error) {
+      console.error('❌ External navigation failed:', error);
+      toast.error(`Navigation failed: ${error.message}`);
+    }
   };
 
   // Format instruction for display
@@ -362,22 +412,13 @@ const NavigationInterface = ({
           {/* External Navigation Options */}
           <div className="border-t pt-3">
             <p className="text-xs text-gray-500 mb-2">Or open in external app:</p>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                onClick={() => openExternalNavigation('google')}
-                className="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-3 rounded-lg text-sm font-medium transition-colors flex items-center justify-center space-x-2"
-              >
-                <span>🗺️</span>
-                <span>Google Maps</span>
-              </button>
-              <button
-                onClick={() => openExternalNavigation('waze')}
-                className="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-3 rounded-lg text-sm font-medium transition-colors flex items-center justify-center space-x-2"
-              >
-                <span>🚗</span>
-                <span>Waze</span>
-              </button>
-            </div>
+            <button
+              onClick={() => openExternalNavigation('google')}
+              className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-3 rounded-lg text-sm font-medium transition-colors flex items-center justify-center space-x-2"
+            >
+              <span>🗺️</span>
+              <span>Google Maps</span>
+            </button>
           </div>
         </div>
       </div>

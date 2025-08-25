@@ -142,7 +142,7 @@ class UserService {
       
       return {
         success: true,
-        bookings: response.data.bookings || [],
+        bookings: response.data.data || [],
         pagination: response.data.pagination || {}
       };
     } catch (error) {
